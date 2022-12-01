@@ -5,8 +5,16 @@
 #     link:
 #       relink: true
 
+# TODO
+# - install brew
+# - install brewfile
+# - install xcode select tools
+
 # remove broken symlinks from home directory
-- clean: ['~']
+- clean: ["~"]
+
+- shell:
+    - [sh brew/install.sh, Install brew if it doesn't exist]
 
 - create:
     # location for local .cls/.sty files
@@ -16,6 +24,9 @@
     - ~/Library/Application Support/Code/User/
 
 - link:
+    # brew
+    ~/.Brewfile: brew/Brewfile
+
     # fish
     ~/.config/fish: fish
 
@@ -27,7 +38,7 @@
     # latex
     ~/Library/texmf/tex/latex/local: latex/local
     ~/.latexmkrc: latex/.latexmkrc
+    
 # - shell:
 # TODO
-# install brew (with a curl command?)
 # install latexmk and latexindent with cpan
