@@ -1,0 +1,33 @@
+# dotbot documentation:
+# https://github.com/anishathalye/dotbot#directives
+
+# - defaults:
+#     link:
+#       relink: true
+
+# remove broken symlinks from home directory
+- clean: ['~']
+
+- create:
+    # location for local .cls/.sty files
+    - ~/Library/texmf/tex/latex/
+
+    # location for user settings
+    - ~/Library/Application Support/Code/User/
+
+- link:
+    # fish
+    ~/.config/fish: fish
+
+    # vscode
+    ~/Library/Application Support/Code/User/settings.json: .vscode/settings.json
+    ~/Library/Application Support/Code/User/keybindings.json: .vscode/keybindings.json
+    ~/Library/Application Support/Code/User/snippets: .vscode/snippets
+
+    # latex
+    ~/Library/texmf/tex/latex/local: latex/local
+    ~/.latexmkrc: latex/.latexmkrc
+# - shell:
+# TODO
+# install brew (with a curl command?)
+# install latexmk and latexindent with cpan

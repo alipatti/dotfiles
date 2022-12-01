@@ -1,0 +1,160 @@
+// TODO find better latex spell checker
+{
+  "[dockercompose]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+  "[html][css][javascript][typescript][javascriptreact][typescriptreact][handlebars][jinja-html][json][jsonc][yaml][markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python",
+  },
+  "cSpell.enableFiletypes": ["jinja-html", "latex"],
+  "cSpell.enabled": true,
+  // TODO audit this
+  "cSpell.userWords": [
+    "abelian",
+    "alipatti",
+    "ciphertext",
+    "consts",
+    "coprime",
+    "creds",
+    "excludable",
+    "geopy",
+    "igraph",
+    "injective",
+    "JFRRS",
+    "Kruskal",
+    "Mathematica",
+    "MIAC",
+    "monomino",
+    "monominoes",
+    "ndarray",
+    "Neumann",
+    "Northfield",
+    "numpy",
+    "outerplanar",
+    "overpartitions",
+    "Pattison",
+    "pseudocode",
+    "qbit",
+    "qubit",
+    "recursed",
+    "renewcommand",
+    "spacy",
+    "superstring",
+    "TFRRS",
+    "usepackage",
+    "vals",
+    "Vazirani",
+    "Zuse"
+  ],
+  "debug.onTaskErrors": "abort",
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+  "editor.unicodeHighlight.invisibleCharacters": false,
+  "editor.wordWrap": "on",
+  "emmet.includeLanguages": {
+    "django-html": "html",
+    "jinja-html": "html"
+  },
+  "explorer.confirmDragAndDrop": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.sortOrder": "default",
+  "files.associations": {
+    "**/requirements{/**,*}.{txt,in}": "pip-requirements",
+    "*.cls": "latex",
+    "*.css": "css",
+    "*.hbs": "handlebars",
+    "*.html": "html",
+    "*.j2": "jinja-html",
+    "*.jhtml": "jinja-html",
+    "*.pyx": "python",
+    "*.sage": "python",
+    "*.sty": "latex",
+    "*.txt": "plaintext",
+    ".env": "properties",
+    ".env.local": "env",
+    ".latexmkrc": "shellscript"
+  },
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk",
+      "tools": ["latexmk"]
+    },
+    {
+      "name": "pdflatex",
+      "tools": ["pdflatex", "pdflatex"]
+    },
+    {
+      "name": "lualatex",
+      "tools": ["lualatex"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-pdf",
+        "--shell-escape",
+        "%DOC%"
+      ],
+      // "env": { "PATH": "/Library/TeX/texbin" }
+      "command": "latexmk",
+      "name": "latexmk"
+    },
+    {
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-pdf",
+        "--shell-escape",
+        "%DOC%"
+      ],
+      // "env": { "PATH": "/Library/TeX/texbin" }
+      "command": "lualatex",
+      "name": "lualatex"
+    }
+  ],
+  "latex-workshop.latexindent.args": ["-c", "%DIR%/", "%TMPFILE%", "-m"],
+  "latex-workshop.view.pdf.viewer": "tab",
+  "liveServer.settings.donotShowInfoMsg": true,
+  "python.defaultInterpreterPath": "/usr/local/bin/python3",
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "rainbowTags.supportedLanguages": ["jinja-html", "html", "handlebars"],
+  "redhat.telemetry.enabled": false,
+  "rust-analyzer.inlayHints.typeHints.enable": false,
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.includeLanguages": {
+    "Handlebars": "html",
+    "jinja-html": "html"
+  },
+  "terminal.integrated.defaultProfile.osx": "fish",
+  "terminal.integrated.enableBell": true,
+  "todo-tree.general.enableFileWatcher": true,
+  "todo-tree.general.statusBar": "top three",
+  "todo-tree.general.tags": [
+    "BUG",
+    "HACK",
+    "TODO",
+    "[ ]",
+    "FIX",
+    "IMPROVEMENT"
+  ],
+  "todo-tree.tree.groupedByTag": true,
+  "todo-tree.tree.hideTreeWhenEmpty": true,
+  "todo-tree.tree.scanMode": "workspace",
+  "todo-tree.tree.showCountsInTree": true,
+  "vsicons.dontShowNewVersionMessage": true,
+  "window.commandCenter": true,
+  "window.zoomLevel": 1,
+  "workbench.startupEditor": "none",
+  "workbench.editor.enablePreview": true,
+  // "workbench.editor.untitled.hint": "hidden",
+  "workbench.iconTheme": "vs-seti",
+}

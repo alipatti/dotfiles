@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# this is written in bash so it can run on a computer before fish is installed
+
+CONFIG_FILE="setup.yaml"
+
+
+# install brew
+# install brewfile
+# install 
+
+# -------------------- BELOW IS FROM DOTBOT SCRIPT --------------------
+
+set -e
+
+DOTBOT_DIR="dotbot"
+DOTBOT_BIN="bin/dotbot"
+BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+cd "${BASEDIR}"
+
+# pull in dependencies
+(cd "${DOTBOT_DIR}" && git submodule update --init --recursive)
+
+# 
+"${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" -c "${CONFIG_FILE}" "${@}"
