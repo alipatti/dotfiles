@@ -1,42 +1,49 @@
 # alipatti's dotfiles
 
-TODO
+`sh it`
 
-- [ ] migrate to dotbot
-
-## Homebrew
-
-TODO
+## TODO
 
 - [x] create Brewfile (with mac app store apps included)
-- [ ] migrate apps to brew installation
-    - [x] docker
-    - [ ] vscode
+- migrate apps to brew installation
 
-## VSCode
+  - [x] docker
+  - [ ] vscode
+  - [x] LaTeX (replace MacTeX with a lighter-weight distribution)
 
-TODO
+- [ ] finish build script (`doit.sh`)
 
-- [ ] figure out where vscode stores config/extensions
-- [ ] remove unused/unnecessary extensions
+- create symlinks
 
-## LaTeX
+  - [ ] vscode config/extensions
+        (to `~/Library/Application Support/Code/User`)
+  - [ ] `fish` config
+        (to `~/.config/fish`)
+  - [ ] LaTeX class files
+        (to `~/Library/texmf/tex/latex`)
+  - [ ] `.latexmkrc` file
+        (to `~/`)
 
-TODO
+- macOS setup
+  - [ ] configure preferences ([possibilities](https://ss64.com/osx/syntax-defaults.html))
+  - [ ] add shortcuts
+- [ ] add cmd/opt + arrows/delete to terminal (or move to iterm/hyper)
 
-- [x] replace huge MacTeX distribution with a lighter-weight brew distribution
-- [ ] symlink class files
-- [ ] refactor class files
+- [ ] set fish as default shell in `dotbot` config file
+      (use `chsh`)
 
-## macOS
+- latex setup
+  - [ ] update tlmgr (`sudo tlmgr update --self`)
+  - [ ] install `latexmk` - [ ] install its necessary lua packages
+        (`cpan -i YAML::Tiny File::HomeDir Unicode::GCString`)
+  - [ ] `latexindent` with tlmgr
 
-TODO
+- [ ] install xcode command line tools
 
-- [ ] uninstall default apple apps
-- [ ] set preferences ([all possible options](https://ss64.com/osx/syntax-defaults.html))
+### Long term
 
-# fish
-
-TODO
-
-- [ ] symlink `~/.config/fish/`
+- [ ] make it easier to use docker development containers
+- [ ] create system for taking notes in latex/markdown
+  - some sort of easy diagram library... write my own??
+  - i really only need support for graphs with arbirary latex inside
+- [ ] audit ~/School and ~/Projects + create repos for things that I want to save

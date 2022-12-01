@@ -4,12 +4,13 @@ tap "homebrew/core"
 tap "homebrew/services"
 
 ##############################
-#         ESSENTIALS         # 
+#           TOOLS            # 
 ##############################
 
 brew "fish"
 brew "git"
-cask "basictex"
+cask "docker"
+brew "scc"  # lines of code counter
 
 ##############################
 #         LANGUAGES          # 
@@ -21,13 +22,12 @@ brew "rustup-init"
 # python
 brew "python@3.10"
 
-# c/c++
-brew "gcc"
-brew "llvm"
-
 # node
 brew "nvm"
 brew "yarn"
+
+# latex
+cask "basictex"
 
 ##############################
 #            APPS            # 
@@ -53,13 +53,12 @@ mas "Numbers", id: 409203825
 mas "Pages", id: 409201541
 mas "Slack", id: 803453959
 mas "Spark", id: 1176895641
-cask "qlstephen"  # allowes quick look of more filetypes
-cask "docker"
 
 # mac utilities
 mas "The Unarchiver", id: 425424353
 mas "CleanMyMac X", id: 1339170533
-cask "wkhtmltopdf"
+cask "wkhtmltopdf"  # html -> pdf
+cask "glance-chamburr"  # adds quicklook for more filetypes
 
 ##############################
 #            MISC            # 
@@ -70,11 +69,8 @@ cask "wkhtmltopdf"
 
 brew "glib"
 brew "pkg-config"
-brew "sqlite"  # needed by python
 brew "cairo"
-brew "cpanminus"
 brew "libdap"
 brew "gdal"
 brew "gnuplot"
-brew "perl"
 brew "poppler-qt5"
