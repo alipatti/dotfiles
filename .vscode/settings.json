@@ -7,7 +7,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
+    "editor.defaultFormatter": "ms-python.python"
   },
   "cSpell.enableFiletypes": ["jinja-html", "latex"],
   "cSpell.enabled": true,
@@ -72,56 +72,30 @@
     "*.sage": "python",
     "*.sty": "latex",
     "*.txt": "plaintext",
-    ".env": "properties",
     ".env.local": "env",
-    ".latexmkrc": "shellscript"
+    ".latexmkrc": "perl"
   },
+  "latex-workshop.hover.preview.enabled": false,
   "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.autoClean.run": "onBuilt",
   "latex-workshop.latex.recipes": [
     {
       "name": "latexmk",
       "tools": ["latexmk"]
-    },
-    {
-      "name": "pdflatex",
-      "tools": ["pdflatex", "pdflatex"]
-    },
-    {
-      "name": "lualatex",
-      "tools": ["lualatex"]
     }
   ],
   "latex-workshop.latex.tools": [
     {
-      "args": [
-        "-synctex=1",
-        "-interaction=nonstopmode",
-        "-file-line-error",
-        "-pdf",
-        "--shell-escape",
-        "%DOC%"
-      ],
-      // "env": { "PATH": "/Library/TeX/texbin" }
+      "args": ["%DOC%"],
       "command": "latexmk",
       "name": "latexmk"
-    },
-    {
-      "args": [
-        "-synctex=1",
-        "-interaction=nonstopmode",
-        "-file-line-error",
-        "-pdf",
-        "--shell-escape",
-        "%DOC%"
-      ],
-      // "env": { "PATH": "/Library/TeX/texbin" }
-      "command": "lualatex",
-      "name": "lualatex"
     }
   ],
   "latex-workshop.latexindent.args": ["-c", "%DIR%/", "%TMPFILE%", "-m"],
+  "latex-workshop.message.error.show": false,
   "latex-workshop.view.pdf.viewer": "tab",
   "liveServer.settings.donotShowInfoMsg": true,
+  "python.analysis.typeCheckingMode": "basic", // TODO turn up to strict?
   "python.defaultInterpreterPath": "/usr/local/bin/python3",
   "python.formatting.provider": "black",
   "python.linting.enabled": true,
@@ -143,7 +117,7 @@
     "HACK",
     "TODO",
     "[ ]",
-    "FIX",
+    "FIX",  
     "IMPROVEMENT"
   ],
   "todo-tree.tree.groupedByTag": true,
@@ -152,9 +126,11 @@
   "todo-tree.tree.showCountsInTree": true,
   "vsicons.dontShowNewVersionMessage": true,
   "window.commandCenter": true,
+  "window.autoDetectColorScheme": true,
+  "window.closeWhenEmpty": true,
+  "window.title": "${activeEditorShort}${separator}${rootName}",
   "window.zoomLevel": 1,
-  "workbench.startupEditor": "none",
   "workbench.editor.enablePreview": true,
-  // "workbench.editor.untitled.hint": "hidden",
   "workbench.iconTheme": "vs-seti",
+  "workbench.startupEditor": "none"
 }

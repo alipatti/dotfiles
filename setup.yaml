@@ -1,20 +1,16 @@
-# dotbot documentation:
-# https://github.com/anishathalye/dotbot#directives
-
-# - defaults:
-#     link:
-#       relink: true
-
-# TODO
-# - install brew
-# - install brewfile
-# - install xcode select tools
-
-# remove broken symlinks from home directory
-- clean: ["~"]
+# see: https://github.com/anishathalye/dotbot#directives
 
 - shell:
-    - [sh brew/install.sh, Install brew if it doesn't exist]
+    - command: sh brew/setup.sh
+      description: Install brew if it doesn't exist
+    - command: brew bundle --file brew/Brewfile
+      description: Install brew packages
+    - command: sudo tlmgr update --self && sudo tlmgr install $(cat latex/packages.txt)
+      description: Install latex packages
+    # - command: sudo tlmgr option docfiles 1 && sudo tlmgr install --reinstall $(tlmgr list --only-installed | sed -e 's/^i //' -e 's/:.*$//')
+    #   description: Build LaTeX documentation (this will take a while)
+    - command: sudo cpan -i YAML::Tiny File::HomeDir Unicode::GCString
+      description: Install perl packages (needed for latexindent)
 
 - create:
     # location for local .cls/.sty files
@@ -31,14 +27,14 @@
     ~/.config/fish: fish
 
     # vscode
-    ~/Library/Application Support/Code/User/settings.json: .vscode/settings.json
-    ~/Library/Application Support/Code/User/keybindings.json: .vscode/keybindings.json
-    ~/Library/Application Support/Code/User/snippets: .vscode/snippets
+    ~/Library/Application Support/Code/User: .vscode
 
     # latex
     ~/Library/texmf/tex/latex/local: latex/local
     ~/.latexmkrc: latex/.latexmkrc
-    
-# - shell:
-# TODO
-# install latexmk and latexindent with cpan
+
+# remove broken symlinks
+- clean:
+    - "~"
+    - ~/Library/Application Support/Code/User/
+    - ~/Library/texmf/tex/latex/

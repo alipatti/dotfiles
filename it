@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-set -e # exit on any error
+echo "Enter password to grant sudo access during installation:"
+sudo -v
 
 # pull in dotbot dependencies
-(cd "${DOTBOT_DIR}" && git submodule update --init --recursive --quiet)
+(cd dotbot && git submodule update --init --recursive --quiet)
 
 # run dotbot
 dotbot/bin/dotbot -c "setup.yaml" "${@}"

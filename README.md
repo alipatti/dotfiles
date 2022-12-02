@@ -11,17 +11,17 @@
   - [ ] vscode
   - [x] LaTeX (replace MacTeX with a lighter-weight distribution)
 
-- [ ] finish build script (`doit.sh`)
+- [x] finish build script (`doit.sh`)
 
 - create symlinks
 
-  - [ ] vscode config/extensions
+  - [x] vscode config/extensions
         (to `~/Library/Application Support/Code/User`)
-  - [ ] `fish` config
+  - [x] `fish` config
         (to `~/.config/fish`)
-  - [ ] LaTeX class files
+  - [x] LaTeX class files
         (to `~/Library/texmf/tex/latex`)
-  - [ ] `.latexmkrc` file
+  - [x] `.latexmkrc` file
         (to `~/`)
 
 - macOS setup
@@ -29,16 +29,22 @@
   - [ ] add shortcuts
 - [ ] add cmd/opt + arrows/delete to terminal (or move to iterm/hyper)
 
-- [ ] set fish as default shell in `dotbot` config file
-      (use `chsh`)
+- [ ] set fish as default shell
+      (use `chsh`, will probably need to add it to list of valid shells first)
+
+- [ ] either rebuild docs for latex or switch to mactex (basictex doesn't include them)
+      (see: https://gist.github.com/kadrach/6228314)
 
 - latex setup
-  - [ ] update tlmgr (`sudo tlmgr update --self`)
-  - [ ] install `latexmk` - [ ] install its necessary lua packages
-        (`cpan -i YAML::Tiny File::HomeDir Unicode::GCString`)
-  - [ ] `latexindent` with tlmgr
 
-- [ ] install xcode command line tools
+  - [x] update tlmgr (`sudo tlmgr update --self`)
+  - [x] install `latexmk`
+  - [x] install its necessary lua packages
+        (`cpan -i YAML::Tiny File::HomeDir Unicode::GCString`)
+  - [x] install `latexindent`
+
+- [x] install xcode command line tools
+      (UPDATE: this should be done during the brew install)
 
 ### Long term
 

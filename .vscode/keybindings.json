@@ -1,9 +1,4 @@
-// TODO audit
 [
-    {
-        "key": "alt+cmd+a",
-        "command": "wwm.aligncode"
-    },
     {
         "key": "alt+cmd+r",
         "command": "python.execInTerminal"
@@ -84,9 +79,8 @@
         "when": "editorTextFocus && editorLangId == 'latex'"
     },
     {
-        "key": "k",
-        "command": "workbench.files.action.collapseExplorerFolders",
-        "when": "filesExplorerFocus && !inputFocus"
+        "key": "ctrl+c",
+        "command": "workbench.files.action.collapseExplorerFolders"
     },
     {
         "key": "alt+n",
@@ -130,8 +124,17 @@
         "when": "textInputFocus && !editorReadonly"
     },
     {
-        "key": "ctrl+o",
-        "command": "-lineBreakInsert",
-        "when": "textInputFocus && !editorReadonly"
+        "key": "ctrl+z",
+        "command": "workbench.action.toggleZenMode"
+    },
+    {
+        "key": "alt+/",
+        "command": "editor.action.blockComment",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "shift+alt+a",
+        "command": "-editor.action.blockComment",
+        "when": "editorTextFocus && !editorReadonly"
     }
 ]

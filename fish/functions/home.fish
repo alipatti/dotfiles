@@ -1,3 +1,3 @@
 function home --wraps='cd ~' --description 'alias home=cd ~'
-  cd ~ $argv; 
+    cd ~ $argv
 end

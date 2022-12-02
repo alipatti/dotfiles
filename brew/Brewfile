@@ -29,6 +29,7 @@ brew "yarn"
 
 # latex
 cask "basictex"
+brew "perl"  # overwrite default mac version that doesn't work with latexindent
 
 ##############################
 #            APPS            # 
@@ -49,9 +50,7 @@ mas "AdGuard for Safari", id: 1440147259
 mas "Hush", id: 1544743900  # hides cookie popups
 
 # general mac apps
-mas "iMovie", id: 408981434
-mas "Numbers", id: 409203825
-mas "Pages", id: 409201541
+# TODO install vscode here
 mas "Slack", id: 803453959
 mas "Spark", id: 1176895641
 
