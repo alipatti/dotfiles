@@ -1,6 +1,7 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
 SETUVAR EDITOR:/usr/local/bin/code
+SETUVAR HOMEBREW_NO_ENV_HINTS:1
 SETUVAR __fish_initialized:3400
 SETUVAR fish_color_autosuggestion:8e908c
 SETUVAR fish_color_cancel:\x2d\x2dreverse

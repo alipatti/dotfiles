@@ -33,7 +33,7 @@
       (use `chsh`, will probably need to add it to list of valid shells first)
 
 - [ ] either rebuild docs for latex or switch to mactex (basictex doesn't include them)
-      (see: https://gist.github.com/kadrach/6228314)
+      (see: <https://gist.github.com/kadrach/6228314>)
 
 - latex setup
 

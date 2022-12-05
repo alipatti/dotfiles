@@ -1,55 +1,20 @@
-// TODO find better latex spell checker
+// TODO find (write?) better latex spell checker
 {
-  "[dockercompose]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
-  },
   "[html][css][javascript][typescript][javascriptreact][typescriptreact][handlebars][jinja-html][json][jsonc][yaml][markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
   },
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.python"
-  },
-  "cSpell.enableFiletypes": ["jinja-html", "latex"],
   "cSpell.enabled": true,
-  // TODO audit this
   "cSpell.userWords": [
-    "abelian",
     "alipatti",
-    "ciphertext",
-    "consts",
-    "coprime",
-    "creds",
-    "excludable",
-    "geopy",
-    "igraph",
-    "injective",
-    "JFRRS",
-    "Kruskal",
-    "Mathematica",
-    "MIAC",
-    "monomino",
-    "monominoes",
-    "ndarray",
-    "Neumann",
-    "Northfield",
-    "numpy",
-    "outerplanar",
-    "overpartitions",
-    "Pattison",
-    "pseudocode",
-    "qbit",
-    "qubit",
-    "recursed",
-    "renewcommand",
-    "spacy",
-    "superstring",
-    "TFRRS",
-    "usepackage",
-    "vals",
-    "Vazirani",
-    "Zuse"
+    "Alistair",
+    "Pattison"
   ],
   "debug.onTaskErrors": "abort",
+  "editor.detectIndentation": false,
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "editor.inlayHints.fontSize": 11,
+  "editor.inlayHints.padding": true,
   "editor.unicodeHighlight.ambiguousCharacters": false,
   "editor.unicodeHighlight.invisibleCharacters": false,
   "editor.wordWrap": "on",
@@ -57,6 +22,12 @@
     "django-html": "html",
     "jinja-html": "html"
   },
+  "errorLens.enabledDiagnosticLevels": [
+    "error",
+    "warning"
+    // "info"
+  ],
+  "errorLens.scrollbarHackEnabled": true,
   "explorer.confirmDragAndDrop": false,
   "explorer.fileNesting.enabled": true,
   "explorer.sortOrder": "default",
@@ -81,17 +52,26 @@
   "latex-workshop.latex.recipes": [
     {
       "name": "latexmk",
-      "tools": ["latexmk"]
+      "tools": [
+        "latexmk"
+      ]
     }
   ],
   "latex-workshop.latex.tools": [
     {
-      "args": ["%DOC%"],
+      "args": [
+        "%DOC%"
+      ],
       "command": "latexmk",
       "name": "latexmk"
     }
   ],
-  "latex-workshop.latexindent.args": ["-c", "%DIR%/", "%TMPFILE%", "-m"],
+  "latex-workshop.latexindent.args": [
+    "-c",
+    "%DIR%/",
+    "%TMPFILE%",
+    "-m"
+  ],
   "latex-workshop.message.error.show": false,
   "latex-workshop.view.pdf.viewer": "tab",
   "liveServer.settings.donotShowInfoMsg": true,
@@ -100,9 +80,13 @@
   "python.formatting.provider": "black",
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
-  "rainbowTags.supportedLanguages": ["jinja-html", "html", "handlebars"],
+  "rainbowTags.supportedLanguages": [
+    "jinja-html",
+    "html",
+    "handlebars"
+  ],
   "redhat.telemetry.enabled": false,
-  "rust-analyzer.inlayHints.typeHints.enable": false,
+  "rust-analyzer.checkOnSave.command": "clippy",
   "tailwindCSS.emmetCompletions": true,
   "tailwindCSS.includeLanguages": {
     "Handlebars": "html",
@@ -110,27 +94,62 @@
   },
   "terminal.integrated.defaultProfile.osx": "fish",
   "terminal.integrated.enableBell": true,
-  "todo-tree.general.enableFileWatcher": true,
-  "todo-tree.general.statusBar": "top three",
-  "todo-tree.general.tags": [
-    "BUG",
-    "HACK",
-    "TODO",
-    "[ ]",
-    "FIX",  
-    "IMPROVEMENT"
+  "terminal.integrated.tabs.enabled": false,
+  "todohighlight.defaultStyle": {
+    "borderRadius": "3px",
+    "fontWeight": "bold",
+    "opacity": ".9"
+  },
+  "todohighlight.include": [
+    // web
+    "**/*.js",
+    "**/*.jsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.html",
+    "**/*.css",
+    // rust
+    "**/*.rs",
+    // latex
+    "**/*.tex",
+    "**/*.sty",
+    "**/*.cls",
+    // python
+    "**/*.py",
+    // markdown
+    "**/*.md"
   ],
-  "todo-tree.tree.groupedByTag": true,
-  "todo-tree.tree.hideTreeWhenEmpty": true,
-  "todo-tree.tree.scanMode": "workspace",
-  "todo-tree.tree.showCountsInTree": true,
-  "vsicons.dontShowNewVersionMessage": true,
-  "window.commandCenter": true,
-  "window.autoDetectColorScheme": true,
+  "todohighlight.keywords": [
+    "TODO",
+    "FIXME",
+    "HACK",
+    {
+      "backgroundColor": "white",
+      "text": "unimplemented!"
+    }, // rust
+    {
+      "backgroundColor": "white",
+      "text": "NotImplemented"
+    }, // python
+    {
+      "backgroundColor": "green",
+      "color": "white",
+      "text": "IDEA"
+    }
+  ],
+  "typescript.inlayHints.parameterNames.enabled": "all",
+  "typescript.inlayHints.variableTypes.enabled": true,
   "window.closeWhenEmpty": true,
-  "window.title": "${activeEditorShort}${separator}${rootName}",
+  "window.commandCenter": true,
   "window.zoomLevel": 1,
+  "workbench.colorCustomizations": {
+    "[Default Dark+]": {
+      "editorInlayHint.background": "#3d3d3d00",
+      "editorInlayHint.foreground": "#868686f0"
+    }
+  },
   "workbench.editor.enablePreview": true,
   "workbench.iconTheme": "vs-seti",
-  "workbench.startupEditor": "none"
+  "workbench.startupEditor": "none",
+  "git.confirmSync": false
 }
