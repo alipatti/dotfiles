@@ -1,17 +1,21 @@
 // TODO find (write?) better latex spell checker
 {
+  "[dockercompose]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
   "[html][css][javascript][typescript][javascriptreact][typescriptreact][handlebars][jinja-html][json][jsonc][yaml][markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.tabSize": 2
   },
+  "cSpell.enableFiletypes": ["dockerfile", "toml"],
   "cSpell.enabled": true,
-  "cSpell.userWords": [
-    "alipatti",
-    "Alistair",
-    "Pattison"
-  ],
+  "cSpell.userWords": ["alipatti", "Alistair", "Pattison"],
   "debug.onTaskErrors": "abort",
   "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
   "editor.inlayHints.enabled": "offUnlessPressed",
   "editor.inlayHints.fontSize": 11,
   "editor.inlayHints.padding": true,
@@ -46,32 +50,24 @@
     ".env.local": "env",
     ".latexmkrc": "perl"
   },
+  "git.confirmSync": false,
   "latex-workshop.hover.preview.enabled": false,
   "latex-workshop.latex.autoBuild.run": "onSave",
-  "latex-workshop.latex.autoClean.run": "onBuilt",
   "latex-workshop.latex.recipes": [
     {
       "name": "latexmk",
-      "tools": [
-        "latexmk"
-      ]
+      "tools": ["latexmk"]
     }
   ],
   "latex-workshop.latex.tools": [
     {
-      "args": [
-        "%DOC%"
-      ],
+      "args": ["%DOC%"],
       "command": "latexmk",
       "name": "latexmk"
     }
   ],
-  "latex-workshop.latexindent.args": [
-    "-c",
-    "%DIR%/",
-    "%TMPFILE%",
-    "-m"
-  ],
+  "latex-workshop.latexindent.args": ["-c", "%DIR%/", "%TMPFILE%", "-m"],
+  "latex-workshop.linting.chktex.enabled": true,
   "latex-workshop.message.error.show": false,
   "latex-workshop.view.pdf.viewer": "tab",
   "liveServer.settings.donotShowInfoMsg": true,
@@ -80,11 +76,7 @@
   "python.formatting.provider": "black",
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
-  "rainbowTags.supportedLanguages": [
-    "jinja-html",
-    "html",
-    "handlebars"
-  ],
+  "rainbowTags.supportedLanguages": ["jinja-html", "html", "handlebars"],
   "redhat.telemetry.enabled": false,
   "rust-analyzer.checkOnSave.command": "clippy",
   "tailwindCSS.emmetCompletions": true,
@@ -121,7 +113,9 @@
   ],
   "todohighlight.keywords": [
     "TODO",
-    "FIXME",
+    "todo!", // rust macro
+    "FIX",
+    "CHECK",
     "HACK",
     {
       "backgroundColor": "white",
@@ -141,7 +135,6 @@
   "typescript.inlayHints.variableTypes.enabled": true,
   "window.closeWhenEmpty": true,
   "window.commandCenter": true,
-  "window.zoomLevel": 1,
   "workbench.colorCustomizations": {
     "[Default Dark+]": {
       "editorInlayHint.background": "#3d3d3d00",
@@ -151,5 +144,7 @@
   "workbench.editor.enablePreview": true,
   "workbench.iconTheme": "vs-seti",
   "workbench.startupEditor": "none",
-  "git.confirmSync": false
+  "window.zoomLevel": 1,
+  "latex-workshop.latex.clean.method": "cleanCommand",
+  "latex-workshop.latex.clean.subfolder.enabled": true
 }

@@ -35,6 +35,9 @@
     ~/Library/texmf/tex/latex/local: latex/local
     ~/.latexmkrc: latex/.latexmkrc
 
+    # rust
+    ~/.rustfmt.toml: rust/.rustfmt.toml
+
 # remove broken symlinks
 - clean:
     - "~"
