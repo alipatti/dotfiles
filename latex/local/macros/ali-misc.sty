@@ -1,0 +1,44 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-macros}
+
+\RequirePackage{amssymb,amsmath,amsthm}
+\RequirePackage{xfrac}  % inline slanted fractions (\sfrac)
+
+% fixing greek letters
+\newcommand{\oldphi}{\phi}
+\newcommand{\oldepsilon}{\epsilon}
+\renewcommand{\phi}{\varphi}
+\renewcommand{\epsilon}{\varepsilon}
+
+% bracket pairs
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\tuple}[1]{\left\langle #1 \right\rangle}
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\abs}[1]{\left\| #1 \right\|}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\inner}[2]{\left\langle #1 \,|\, #2 \right\rangle}
+
+% misc operations
+\DeclareMathOperator{\img}{Im}  % function image
+\DeclareMathOperator*{\argmin}{arg\,min}  % argmin
+\DeclareMathOperator*{\med}{median}  % median
+\DeclareMathOperator*{\sign}{sign}  % sign
+\DeclareMathOperator*{\lcm}{lcm}  % lcm
+\DeclareMathOperator*{\gcd}{gcd}  % gcd
+\newcommand{\P}[1]{\mathbb P [\,#1\,]}  % probability
+\newcommand{\E}[1]{\mathbb E [\,#1\,]}  % expectation
+\newcommand{\given}{\ | \ }
+\newcommand{\divides}{\given}
+\newcommand{\inv}{^{-1}}  % inversion
+% TODO  \newcommand{\comp}{??}  % set complement
+\newcommand{\tensor}{\otimes}  % tensor product
+\newcommand{\tensorpower}[1]{^{\tensor #1}}  % tensor power
+\newcommand{\conj}{\overline}  % complex conjugate
+\newcommand{\cross}{\times}  % cross product
+\newcommand{\of}{\circ}  % function composition
+
+% :=
+\RequirePackage{mathtools} % := et al.
+\newcommand{\ceq}{\coloneqq}

@@ -2,7 +2,6 @@
 % - https://github.com/hamid-m/UofMN-Beamer-Template/
 % - https://www.cpt.univ-mrs.fr/~masson/latex/Beamer-appearance-cheat-sheet.pdf
 
-
 %%%%%%%%%
 % SETUP %
 %%%%%%%%%
@@ -10,8 +9,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{presentation}
 \LoadClass{beamer}
-\RequirePackage{macros}  % custom macros and frequently-used packages
-
+\RequirePackage{ali-macros}
 
 %%%%%%%%%%
 % COLORS %
@@ -33,11 +31,11 @@
 \xdefinecolor{umn-gold-light}{HTML}{FFDE7A}
 
 \DeclareOption{umn}{
-    \def\colorOne{umn-maroon}
-    \def\colorTwo{umn-maroon-dark}
-    \def\colorThree{umn-gold-light}
-    \def\logoPath{logos/umn_logo.png}
-    \def\logoWidth{.2}
+	\def\colorOne{umn-maroon}
+	\def\colorTwo{umn-maroon-dark}
+	\def\colorThree{umn-gold-light}
+	\def\logoPath{logos/umn_logo.png}
+	\def\logoWidth{.2}
 }
 
 % CARLETON COLORS
@@ -48,13 +46,12 @@
 \xdefinecolor{carleton-maize-light}{HTML}{FFEFC8}
 
 \DeclareOption{carleton}{
-    \def\colorOne{carleton-blue}
-    \def\colorTwo{carleton-blue}
-    \def\colorThree{carleton-maize}
-    \def\logoPath{logos/carleton_logo.png}
-    \def\logoWidth{.25}
+	\def\colorOne{carleton-blue}
+	\def\colorTwo{carleton-blue}
+	\def\colorThree{carleton-maize}
+	\def\logoPath{logos/carleton_logo.png}
+	\def\logoWidth{.25}
 }
-
 
 %%%%%%%%%%
 % BEAMER %
@@ -72,16 +69,16 @@
 \setbeamerfont{date}{size=\small}
 
 \setbeamerfont{frametitle}{}
-\setbeamercolor{frametitle}{fg=\colorOne} 
+\setbeamercolor{frametitle}{fg=\colorOne}
 
 % LISTS
 \setbeamerfont*{enumerate item}{series=\bfseries}
 \setbeamercolor{item}{fg=\colorOne}
 
 % FRAME COLORS
-\setbeamercolor{lower separation line head}{bg=\colorOne} 
-\setbeamercolor{palette tertiary}{fg=\colorTwo,bg=\colorThree} 
-\setbeamercolor{palette quaternary}{fg=\colorTwo,bg=\colorThree} 
+\setbeamercolor{lower separation line head}{bg=\colorOne}
+\setbeamercolor{palette tertiary}{fg=\colorTwo,bg=\colorThree}
+\setbeamercolor{palette quaternary}{fg=\colorTwo,bg=\colorThree}
 
 \usefonttheme[onlymath]{serif}
 \setbeamertemplate{headline}[none]
@@ -96,17 +93,17 @@
 
 % FOOTER 
 \setbeamertemplate{footline}{\parbox{\textwidth}{
-  \hspace{1em}
-  \vspace{1em}
-  \includegraphics[width=\logoWidth\paperwidth]{\logoPath} 
-  \hfill 
-  \color{gray}\tiny 
-  \insertframenumber\,/\,\inserttotalframenumber
-  \hspace{1em}
-}}
+		\hspace{1em}
+		\vspace{1em}
+		\includegraphics[width=\logoWidth\paperwidth]{\logoPath}
+		\hfill
+		\color{gray}\tiny
+		\insertframenumber\,/\,\inserttotalframenumber
+		\hspace{1em}
+	}}
 
 % SPACING
 \setbeamersize{
-    text margin right=3em,
-    text margin left=3em,
+	text margin right=3em,
+	text margin left=3em,
 }

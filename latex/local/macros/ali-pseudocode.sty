@@ -1,0 +1,31 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{macros}
+
+% ALGORITHM/CODE PACKAGES
+\RequirePackage[
+	noEnd,
+	endLComment={},
+]{algpseudocodex}
+
+\newcommand{\algorithm}[1]{
+	\medskip
+	\begin{algorithmic}[1]
+		#1
+	\end{algorithmic}
+}
+
+\newcommand{\function}[3]{
+	\Function {#1} {#2}
+	#3
+	\EndFunction
+	\smallskip
+}
+
+% for approximation algorithms
+\RequirePackage{xspace}  % proper spacing after macros
+\def\opt{\texttt{OPT}\xspace}
+\def\greedy{\texttt{GREEDY}\xspace}
+\def\round{\texttt{ROUND}\xspace}
+
+\DeclareMathOperator*{\pred}{predecessor}
+\DeclareMathOperator*{\scsr}{successor}
