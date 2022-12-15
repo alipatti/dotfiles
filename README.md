@@ -32,7 +32,7 @@
 - [ ] set fish as default shell
       (use `chsh`, will probably need to add it to list of valid shells first)
 
-- [ ] either rebuild docs for latex or switch to mactex (basictex doesn't include them)
+- [x] either rebuild docs for latex or switch to mactex (basictex doesn't include them)
       (see: <https://gist.github.com/kadrach/6228314>)
 
 - latex setup
@@ -51,5 +51,5 @@
 - [ ] make it easier to use docker development containers
 - [ ] create system for taking notes in latex/markdown
   - some sort of easy diagram library... write my own??
-  - i really only need support for graphs with arbirary latex inside
+  - i really only need support for graphs with arbitrary latex inside
 - [ ] audit ~/School and ~/Projects + create repos for things that I want to save

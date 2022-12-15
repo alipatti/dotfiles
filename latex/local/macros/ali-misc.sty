@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{ali-macros}
+\ProvidesPackage{ali-misc}
 
 \RequirePackage{amssymb,amsmath,amsthm}
 \RequirePackage{xfrac}  % inline slanted fractions (\sfrac)
@@ -16,8 +16,8 @@
 \newcommand{\paren}[1]{\left( #1 \right)}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
-\newcommand{\abs}[1]{\left\| #1 \right\|}
 \newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
 \newcommand{\inner}[2]{\left\langle #1 \,|\, #2 \right\rangle}
 
 % misc operations
@@ -40,5 +40,5 @@
 \newcommand{\of}{\circ}  % function composition
 
 % :=
-\RequirePackage{mathtools} % := et al.
+\RequirePackage{mathtools}
 \newcommand{\ceq}{\coloneqq}

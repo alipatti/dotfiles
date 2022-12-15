@@ -1,3 +1,6 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-algebra}
+
 % group opperations
 \let\iso\cong
 \let\dual\widetilde
@@ -12,5 +15,5 @@
 \DeclareMathOperator*{\tr}{tr}
 
 % % acts-on hack
-% \RequirePackage{mathabx}
-% \def\actson{\mathrel{\reflectbox{$\righttoleftarrow$}}}
+\RequirePackage{mathabx}
+\def\actson{\mathrel{\reflectbox{$\righttoleftarrow$}}}
