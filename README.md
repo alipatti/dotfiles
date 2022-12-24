@@ -1,6 +1,6 @@
 # alipatti's dotfiles
 
-`sh it`
+`bash it`
 
 ## TODO
 
