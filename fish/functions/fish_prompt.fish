@@ -1,26 +1,12 @@
+# a called to `_pure_prompt_new_line` is triggered by an event
 function fish_prompt
-    if not set -q VIRTUAL_ENV_DISABLE_PROMPT
-        set -g VIRTUAL_ENV_DISABLE_PROMPT true
-    end
-    set_color yellow
-    printf '%s' $USER
-    set_color normal
-    printf ' at '
+    set --local exit_code $status  # save previous exit code
 
-    set_color magenta
-    echo -n (prompt_hostname)
-    set_color normal
-    printf ' in '
+    echo -e -n (_pure_prompt_beginning)  # init prompt context (clear current line, etc.)
+    _pure_print_prompt_rows # manage default vs. compact prompt
+    _pure_place_iterm2_prompt_mark # place iTerm shell integration mark
+    echo -e -n (_pure_prompt $exit_code)  # print prompt
+    echo -e (_pure_prompt_ending)  # reset colors and end prompt
 
-    set_color $fish_color_cwd
-    printf '%s' (prompt_pwd)
-    set_color normal
-
-    # Line 2
-    echo
-    if test -n "$VIRTUAL_ENV"
-        printf "(%s) " (set_color blue)(basename $VIRTUAL_ENV)(set_color normal)
-    end
-    printf '↪ '
-    set_color normal
+    set _pure_fresh_session false
 end
