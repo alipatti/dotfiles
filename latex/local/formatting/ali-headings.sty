@@ -1,3 +1,6 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-headings}
+
 % TITLE FORMATTING
 \makeatletter
 \renewcommand{\maketitle}{
@@ -22,3 +25,11 @@
 {.7em}
 {}
 [\vspace{.25em}\titlerule]
+
+% left margin subsection
+% ----------------------
+% \titleformat{\subsection}[leftmargin]
+% {\vspace{10pt}\bfseries\filleft}
+% {\thesubsection}{.5em}
+% {}
+% \titlespacing{\subsection}{4pc}{1.5ex plus .1ex minus .2ex}{1pc}

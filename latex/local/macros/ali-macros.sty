@@ -1,8 +1,10 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{ali-misc}
+\ProvidesPackage{ali-macros}
 
 \RequirePackage{amssymb,amsmath,amsthm}
 \RequirePackage{xfrac}  % inline slanted fractions (\sfrac)
+% \RequirePackage{bbm} % \mathbb for numbers
+% \RequirePackage{mathtools}
 
 % fixing greek letters
 \newcommand{\oldphi}{\phi}
@@ -18,19 +20,26 @@
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
 \newcommand{\abs}[1]{\left| #1 \right|}
 \newcommand{\norm}[1]{\left\| #1 \right\|}
-\newcommand{\inner}[2]{\left\langle #1 \,|\, #2 \right\rangle}
+\newcommand{\inner}[2]{\left\langle #1 , #2 \right\rangle}
+
+% common sets
+\def\Z{\mathbb Z}  % integers
+\def\R{\mathbb R}  % reals
+\def\Q{\mathbb Q}  % rationals
+\def\C{\mathbb C}  % complexes
+\def\N{\mathbb N}  % naturals
+\def\T{\mathbb T}  % circle group
+\def\bit{\set{0,1}}  % bits
 
 % misc operations
-\DeclareMathOperator{\img}{Im}  % function image
 \DeclareMathOperator*{\argmin}{arg\,min}  % argmin
 \DeclareMathOperator*{\med}{median}  % median
 \DeclareMathOperator*{\sign}{sign}  % sign
 \DeclareMathOperator*{\lcm}{lcm}  % lcm
-\DeclareMathOperator*{\gcd}{gcd}  % gcd
-\newcommand{\P}[1]{\mathbb P [\,#1\,]}  % probability
-\newcommand{\E}[1]{\mathbb E [\,#1\,]}  % expectation
+% \newcommand{\P}[1]{\mathbb P [\,#1\,]}  % probability (conflicts)
+% \newcommand{\E}[1]{\mathbb E [\,#1\,]}  % expectation
 \newcommand{\given}{\ | \ }
-\newcommand{\divides}{\given}
+% \newcommand{\divides}{\given} (conflicts)
 \newcommand{\inv}{^{-1}}  % inversion
 % TODO  \newcommand{\comp}{??}  % set complement
 \newcommand{\tensor}{\otimes}  % tensor product
@@ -39,6 +48,25 @@
 \newcommand{\cross}{\times}  % cross product
 \newcommand{\of}{\circ}  % function composition
 
+\newcommand{\transpose}{^T}
+\renewcommand{\perp}{^\bot}
+\renewcommand{\star}{^*}
+\renewcommand{\prime}{^'}
+
 % :=
 \RequirePackage{mathtools}
 \newcommand{\ceq}{\coloneqq}
+
+% % GRAPHICS PACKAGES
+% \RequirePackage{graphicx}
+
+% % TIKZ
+% \RequirePackage{tikz}
+% \usetikzlibrary{
+% 	positioning,
+% 	graphs, graphs.standard,
+% 	arrows,
+% 	calc,
+% 	trees, braids,
+% 	quantikz
+% }

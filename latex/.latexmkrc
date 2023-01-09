@@ -8,3 +8,5 @@ $warning_cmd = "";
 
 $pdf_previewer = "open -a 'VS Code'";
 $pdflatex = "pdflatex -synctex=1 -file-line-error -interaction=nonstopmode --shell-escape %O %S";
+
+$clean_ext = "log synctex.gz";

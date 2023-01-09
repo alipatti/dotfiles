@@ -129,6 +129,11 @@
       "backgroundColor": "green",
       "color": "white",
       "text": "IDEA"
+    },
+    {
+      "backgroundColor": "green",
+      "color": "white",
+      "text": "ASK"
     }
   ],
   "typescript.inlayHints.parameterNames.enabled": "all",
@@ -146,5 +151,13 @@
   "workbench.startupEditor": "none",
   "window.zoomLevel": 1,
   "latex-workshop.latex.clean.method": "cleanCommand",
-  "latex-workshop.latex.clean.subfolder.enabled": true
+  "latex-workshop.latex.clean.subfolder.enabled": true,
+  "latex-workshop.linting.chktex.exec.args": [
+    "-wall",
+    "-n22",
+    "-n30",
+    "-e16",
+    "-q",
+    "-n46"
+  ]
 }

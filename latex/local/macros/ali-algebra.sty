@@ -1,19 +1,36 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{ali-algebra}
 
+% quotient groups
+\newcommand{\quotient}[2]{#1 \big/ \, #2}
+
+% identity
+\newcommand{\id}{{\mathrm{id}}}
+
 % group opperations
-\let\iso\cong
-\let\dual\widetilde
+\newcommand{\iso}{\cong}
+\newcommand{\dual}{\widetilde}
 \newcommand\units{^ \times}
-\let\normal\lhd
+\newcommand{\normal}{\lhd}
 \DeclareMathOperator*{\cl}{c\ell}
 \DeclareMathOperator{\stab}{Stab}
 \DeclareMathOperator{\Hom}{Hom}
 
-% matrix operations
+\DeclareMathOperator{\im}{Im}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\spn}{span}  % \span is a built-in latex command
+\DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator*{\adj}{adj}
-\DeclareMathOperator*{\tr}{tr}
 
 % % acts-on hack
-\RequirePackage{mathabx}
-\def\actson{\mathrel{\reflectbox{$\righttoleftarrow$}}}
+% \RequirePackage{mathabx}
+% \def\actson{\mathrel{\reflectbox{$\righttoleftarrow$}}}
+
+% matrix groups
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator{\M}{M}
+
+% groups
+\def\B{\mathcal{B}} % braid group
+\def\S{\mathcal{S}} % symetric group

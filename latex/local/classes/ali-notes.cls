@@ -1,12 +1,13 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{notes}
+\ProvidesClass{ali-notes}
 
 \LoadClass{article}
 
-\RequirePackage{macros}
-\RequirePackage{styles}
-
-\RequirePackage[hidelinks]{hyperref}
+\RequirePackage[colorlinks]{hyperref}
+\RequirePackage{ali-lists}
+\RequirePackage{ali-spacing}
+\RequirePackage{ali-headings}
+\RequirePackage{ali-theorems}
 
 % \titleformat{\section}[block]
 %     {\normalfont}
