@@ -11,7 +11,6 @@ brew "fish"
 brew "git"
 cask "docker"
 brew "scc"  # lines of code counter
-brew "aspell"  # spell checker
 
 ##############################
 #         LANGUAGES          # 
@@ -28,7 +27,7 @@ brew "nvm"
 brew "yarn"
 
 # latex
-cask "basictex"
+cask "mactex-no-gui"
 brew "perl"  # overwrite default mac version that doesn't work with latexindent
 
 ##############################
@@ -57,7 +56,6 @@ mas "Spark", id: 1176895641
 # mac utilities
 mas "The Unarchiver", id: 425424353
 mas "CleanMyMac X", id: 1339170533
-cask "wkhtmltopdf"  # html -> pdf
 cask "glance-chamburr"  # adds quick look for more file types
 
 ##############################
