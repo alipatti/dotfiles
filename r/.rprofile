@@ -1,0 +1,17 @@
+knitr::opts_knit$set(
+    concordance = TRUE,
+    self.contained = FALSE
+)
+
+knitr::opts_chunk$set(
+    fig.align = "center",
+    fig.width = 4,
+    fig.height = 3,
+    fig.pos = "htbp",
+    cache = TRUE,
+    cache.path = "knitr/cache/",
+    fig.path = "knitr/figure/",
+    message = F # don't show messages/warnings in output
+)
+
+ggplot2::theme_set(ggplot2::theme_bw())
