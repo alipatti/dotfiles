@@ -1,8 +1,0 @@
-algpseudocodex
-latexindent
-latexmk
-algorithmicx
-fifo-stack
-varwidth
-tabto-ltx
-tikzmark
