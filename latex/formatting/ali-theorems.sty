@@ -1,0 +1,28 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-theorems}
+
+\RequirePackage{amsthm}
+\RequirePackage{thmtools}
+
+% --- primary environments ---
+\declaretheorem[within=section]{theorem}
+\declaretheorem[within=section, sibling=theorem]{definition}
+\declaretheorem[within=section, sibling=theorem]{conjecture}
+
+% --- secondary environments --- 
+\declaretheoremstyle[
+	headfont=\itshape\bfseries,
+	notefont=\itshape\mdseries,
+	notebraces={(}{)},
+	bodyfont=\normalfont,
+]{secondary}
+
+\declaretheorem[
+	style=secondary,
+	within=theorem,
+]{lemma, corollary, example, remark}
+
+% required for \autoref to work
+% \newcommand{\theoremautorefname}{Theorem}
+% \newcommand{\definitionautorefname}{Definition}
+% \newcommand{\lemmaautorefname}{Lemma}

@@ -1,0 +1,35 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-headings}
+
+% TITLE FORMATTING
+\makeatletter
+\renewcommand{\maketitle}{
+	\begin{center}
+		{\LARGE \scshape \@title}
+
+		\vspace{-.5em}
+		\rule{.4 \textwidth}{0.5pt}
+
+		{\@author \hspace{.4em} $|$ \hspace{.4em} \@date}
+	\end{center}
+
+}
+\makeatother
+
+% SECTION FORMATTING
+\RequirePackage{titlesec}
+
+\titleformat{\section}
+{\Large\bfseries}
+{\thesection}
+{.7em}
+{}
+[\vspace{.25em}\titlerule]
+
+% left margin subsection
+% ----------------------
+% \titleformat{\subsection}[leftmargin]
+% {\vspace{10pt}\bfseries\filleft}
+% {\thesubsection}{.5em}
+% {}
+% \titlespacing{\subsection}{4pc}{1.5ex plus .1ex minus .2ex}{1pc}

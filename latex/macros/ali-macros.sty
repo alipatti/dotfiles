@@ -1,0 +1,78 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-macros}
+
+\RequirePackage{amssymb,amsmath,amsthm}
+\RequirePackage{xfrac}  % inline slanted fractions (\sfrac)
+% \RequirePackage{bbm} % \mathbb for numbers
+% \RequirePackage{mathtools}
+
+% TODO extract to ali-fonts
+\usepackage{eucal}  % nicer-looking \mathcal
+\usepackage{mathrsfs}  % add mathscr
+
+% fixing greek letters
+\renewcommand{\phi}{\varphi}
+\renewcommand{\epsilon}{\varepsilon}
+% \def{\chi}{\mbox{\Large$\chi$}}  % make \chi bigger
+
+% bracket pairs
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\newcommand{\tuple}[1]{\left\langle #1 \right\rangle}
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\inner}[2]{\left\langle #1 , #2 \right\rangle}
+
+% common sets
+\newcommand{\Z}{\mathbb Z}  % integers
+\newcommand{\R}{\mathbb R}  % reals
+\newcommand{\Q}{\mathbb Q}  % rationals
+\newcommand{\C}{\mathbb C}  % complexes
+\newcommand{\N}{\mathbb N}  % naturals
+\newcommand{\T}{\mathbb T}  % circle group
+\newcommand{\bit}{\set{0,1}}  % bits
+
+% misc operations
+\DeclareMathOperator*{\argmin}{arg\,min}  % argmin
+\DeclareMathOperator*{\argmax}{arg\,max}  % argmax
+\DeclareMathOperator*{\med}{median}  % median
+\DeclareMathOperator*{\sign}{sign}  % sign
+\DeclareMathOperator*{\lcm}{lcm}  % lcm
+\DeclareMathOperator*{\supp}{supp}  % support
+\DeclareMathOperator*{\Li}{Li}
+\newcommand{\given}{\mid}
+\newcommand{\divides}{\mid}
+\newcommand{\inv}{^{-1}}  % inversion
+% TODO  \newcommand{\comp}{??}  % set complement
+\newcommand{\tensor}{\otimes}  % tensor product
+\newcommand{\tensorpower}[1]{^{\tensor #1}}  % tensor power
+\newcommand{\conj}{\overline}  % complex conjugate
+\newcommand{\cross}{\times}  % cross product
+\newcommand{\of}{\circ}  % function composition
+\newcommand{\squarefree}{\ \text{$\square$-free}}
+
+\newcommand{\transpose}{^T}
+\renewcommand{\perp}{^\bot}
+\renewcommand{\star}{^*}
+% \renewcommand{\prime}{'}
+
+% :=
+\RequirePackage{mathtools}
+\newcommand{\ceq}{\coloneqq}
+\newcommand{\qeq}{\overset ? =}
+
+% % GRAPHICS PACKAGES
+% \RequirePackage{graphicx}
+
+% % TIKZ
+% \RequirePackage{tikz}
+% \usetikzlibrary{
+% 	positioning,
+% 	graphs, graphs.standard,
+% 	arrows,
+% 	calc,
+% 	trees, braids,
+% 	quantikz
+% }

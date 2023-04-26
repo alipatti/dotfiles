@@ -1,0 +1,19 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ali-spacing}
+
+\RequirePackage[margin=1in]{geometry}  % remove huge default margins
+\RequirePackage{parskip} % no indentation + extra spacing between paragraphs
+
+% ARRAY/TABLE FORMATTING
+\RequirePackage{array}
+\def\arraystretch{1.3}
+
+% redefine \hrule
+% https://tex.stackexchange.com/questions/128636/center-hrule-in-the-middle-of-the-page
+\newcommand{\divider}{
+	\medskip
+
+	\hfil\rule{0.5\textwidth}{.4pt}\hfil
+
+	\medskip
+}
