@@ -1,18 +1,14 @@
 # see: https://github.com/anishathalye/dotbot#directives
 
 - shell:
-    - command: sh brew/setup.sh
-      description: Install brew if it doesn't exist
-    - command: brew bundle --file brew/Brewfile
-      description: Install brew packages
-    - command: sudo tlmgr update --self && sudo tlmgr install $(cat latex/packages.txt)
-      description: Install latex packages
-    # - command: sudo tlmgr option docfiles 1 && sudo tlmgr install --reinstall $(tlmgr list --only-installed | sed -e 's/^i //' -e 's/:.*$//')
-    #   description: Build LaTeX documentation (this will take a while)
-    - command: sudo cpan -i YAML::Tiny File::HomeDir Unicode::GCString
-      description: Install perl packages (needed for latexindent)
-    - command: rustup-init && rustup component add rustfmt
-      description: Install rust.
+    - description: Install brew if it doesn't exist
+      command: sh brew/setup.sh
+    - description: Install brew packages
+      command: brew bundle --file brew/Brewfile
+    - description: Install perl packages needed for latexindent
+      command: sudo cpan -i YAML::Tiny File::HomeDir Unicode::GCString
+    - description: Install rust.
+      command: rustup-init && rustup component add rustfmt
 
 - create:
     # location for local .cls/.sty files
@@ -27,12 +23,13 @@
 
     # fish
     ~/.config/fish: fish
+    ~/.rprofile: r/.rprofile
 
     # vscode
     ~/Library/Application Support/Code/User: .vscode
 
     # latex
-    ~/Library/texmf/tex/latex/local: latex/local
+    ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
 
     # rust
