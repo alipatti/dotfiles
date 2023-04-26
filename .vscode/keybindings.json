@@ -146,5 +146,66 @@
     "key": "ctrl+shift+left",
     "command": "-editor.action.smartSelect.shrink",
     "when": "editorTextFocus"
+  },
+  {
+    "key": "alt+cmd+c",
+    "command": "-latex-workshop.clean",
+    "when": "!config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^latex$|^latex-expl3$|^rsweave$|^jlweave$|^pweave$/"
+  },
+  {
+    "key": "cmd+l b",
+    "command": "latex-workshop.build",
+    "when": "config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^latex$|^latex-expl3$|^rsweave$|^jlweave$|^pweave$/"
+  },
+  {
+    "key": "cmd+l alt+b",
+    "command": "-latex-workshop.build",
+    "when": "config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^latex$|^latex-expl3$|^rsweave$|^jlweave$|^pweave$/"
+  },
+  {
+    "key": "alt+cmd+b",
+    "command": "-latex-workshop.build",
+    "when": "!config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId =~ /^latex$|^latex-expl3$|^rsweave$|^jlweave$|^pweave$/"
+  },
+  {
+    "key": "ctrl+t",
+    "command": "-editor.action.transposeLetters",
+    "when": "textInputFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+t",
+    "command": "workbench.action.toggleLightDarkThemes"
+  },
+  {
+    "key": "ctrl+s",
+    "command": "latex-workshop.synctex",
+    "when": "editorTextFocus && !config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId == 'latex'"
+  },
+  {
+    "key": "alt+cmd+j",
+    "command": "-latex-workshop.synctex",
+    "when": "editorTextFocus && !config.latex-workshop.bind.altKeymap.enabled && !virtualWorkspace && editorLangId == 'latex'"
+  },
+  {
+    "key": "cmd+r",
+    "command": "workbench.action.reloadWindow"
+  },
+  {
+    "key": "cmd+r",
+    "command": "-workbench.action.reloadWindow",
+    "when": "isDevelopment"
+  },
+  {
+    "key": "shift+cmd+right",
+    "command": "workbench.action.moveEditorToRightGroup"
+  },
+  {
+    "key": "shift+cmd+left",
+    "command": "workbench.action.moveEditorToLeftGroup"
+  },
+  {
+    "key": "cmd+enter",
+    "command": "r.runSelection",
+    "when": "editorTextFocus && editorLangId == 'rsweave'"
   }
 ]
