@@ -39,7 +39,6 @@
   "editor.detectIndentation": false,
   "editor.formatOnSave": true,
   "editor.inlayHints.enabled": "offUnlessPressed",
-  "editor.inlayHints.fontSize": 11,
   "editor.inlayHints.padding": true,
   "editor.stickyTabStops": true,
   "editor.unicodeHighlight.ambiguousCharacters": false,
@@ -239,7 +238,7 @@
   "jupyter.debugJustMyCode": false,
   "notebook.formatOnSave.enabled": true,
   "editor.guides.bracketPairs": "active",
-  "latex-workshop.latex.clean.method": "cleanCommand",
+  "latex-workshop.latex.clean.method": "command",
   "window.zoomLevel": 1,
-  "workbench.colorTheme": "Default Light+"
+  "errorLens.excludeBySource": ["ts(2345)"]
 }
