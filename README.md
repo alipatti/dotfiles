@@ -13,3 +13,4 @@ This repo contain the $\LaTeX$ macros and class files, quality-of-life scripts, 
 - add macOS configure preferences ([possibilities](https://ss64.com/osx/syntax-defaults.html))
 - add iTerm configuration
 - update Brewfile
+- migrate vim configuration
