@@ -191,6 +191,9 @@ vim.o.smartcase = true
 -- keep signcolumn on by default
 vim.wo.signcolumn = "yes"
 
+-- use global status line
+vim.o.laststatus = 3
+
 -- decrease update time
 vim.o.updatetime = 250
 vim.o.timeout = true
