@@ -35,6 +35,9 @@
     # rust
     ~/.rustfmt.toml: rust/.rustfmt.toml
 
+    # vim
+    ~/.config/nvim/init.lua: nvim/init.lua
+
 # remove broken symlinks
 - clean:
     - "~"
