@@ -1,5 +1,4 @@
 -- alipatti's nvim configuration
--- bootstrapped from kickstart.nvim
 
 -- use lazy.nvim as the package manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -28,7 +27,7 @@ require("lazy").setup({
     dependencies = { "nvim-lua/plenary.nvim" }
   }, -- highlight todo comments
 
-  -- file tree plugin
+  -- file tree
   {
     "nvim-tree/nvim-tree.lua",
     dependencies = {
@@ -49,7 +48,21 @@ require("lazy").setup({
             col = 1,
           }
         }
-      }
+      },
+      on_attach = function(bufnr)
+        -- use default on_attach function
+        local api = require('nvim-tree.api')
+        api.config.mappings.default_on_attach(bufnr)
+
+        -- set colors
+        vim.cmd("highlight NvimTreeNormal guibg=Normal")
+        vim.cmd("highlight NvimTreeEndOfBuffer guibg=Normal")
+        vim.cmd("highlight FloatBorder guibg=Normal")
+
+        -- set key bindings
+        vim.keymap.set("n", "<esc>", api.tree.close)
+        vim.keymap.set("n", "<C-c>", api.tree.close)
+      end
     },
   },
 
@@ -116,6 +129,7 @@ require("lazy").setup({
         icons_enabled = false,
         component_separators = "|",
         section_separators = "",
+        globalstatus = true,
       },
     },
   },
@@ -191,9 +205,6 @@ vim.o.smartcase = true
 -- keep signcolumn on by default
 vim.wo.signcolumn = "yes"
 
--- use global status line
-vim.o.laststatus = 3
-
 -- decrease update time
 vim.o.updatetime = 250
 vim.o.timeout = true
@@ -217,10 +228,14 @@ vim.wo.wrap = "linebreak"
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+
 -- disable space bar so we can use it as the leader
 vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", {
   silent = true,
 })
+
+-- toggle file tree
+vim.keymap.set("n", "f", require("nvim-tree.api").tree.toggle)
 
 -- Remap for dealing with word wrap
 vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", {
@@ -236,6 +251,7 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", {
 local highlight_group = vim.api.nvim_create_augroup("YankHighlight", {
   clear = true,
 })
+
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
     vim.highlight.on_yank()
@@ -259,58 +275,65 @@ require("telescope").setup({
   },
 })
 
--- file system keymap
-vim.keymap.set(
-  "n",
-  "<leader>fs",
-  require("telescope").extensions.file_browser.file_browser,
-  { desc = "Open [f]ile [s]ystem browser" }
-)
-
 -- enable fuzzy finding if installed
 pcall(require("telescope").load_extension, "fzf")
 
--- configure keymaps
-vim.keymap.set("n", "<leader>?", require("telescope.builtin").oldfiles, {
-  desc = "[?] Find recently opened files",
-})
+-- configure telescope keymaps
 
-vim.keymap.set("n", "<leader><space>", require("telescope.builtin").buffers, {
-  desc = "[ ] Find existing buffers",
-})
-
+-- search inside file
 vim.keymap.set("n", "<leader>/", function()
-  -- You can pass additional configuration to telescope to change theme, layout, etc.
   require("telescope.builtin").current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
     winblend = 10,
     previewer = false,
   }))
 end, {
-  desc = "[/] Fuzzily search in current buffer",
+  desc = "[/] Search in current buffer",
 })
 
-vim.keymap.set("n", "<leader>gf", require("telescope.builtin").git_files, {
-  desc = "Search [G]it [F]iles",
+-- search recent files
+vim.keymap.set("n", "<leader>sr", require("telescope.builtin").oldfiles, {
+  desc = "[S]earch [r]ecently opened files",
 })
+
+-- search open files
+vim.keymap.set("n", "<leader>so", require("telescope.builtin").buffers, {
+  desc = "[S]earch [o]pen buffers",
+})
+
+-- search all files
 vim.keymap.set("n", "<leader>sf", require("telescope.builtin").find_files, {
-  desc = "[S]earch [F]iles",
+  desc = "[S]earch [f]iles",
 })
+
+-- search help
 vim.keymap.set("n", "<leader>sh", require("telescope.builtin").help_tags, {
-  desc = "[S]earch [H]elp",
+  desc = "[S]earch [h]elp",
 })
-vim.keymap.set("n", "<leader>sw", require("telescope.builtin").grep_string, {
-  desc = "[S]earch current [W]ord",
-})
+
+-- search via grep
 vim.keymap.set("n", "<leader>sg", require("telescope.builtin").live_grep, {
-  desc = "[S]earch by [G]rep",
+  desc = "[S]earch by [g]rep",
 })
+
+-- search diagnostics
 vim.keymap.set("n", "<leader>sd", require("telescope.builtin").diagnostics, {
-  desc = "[S]earch [D]iagnostics",
+  desc = "[S]earch [d]iagnostics",
 })
 
 require("nvim-treesitter.configs").setup({
   -- languages to be installed
-  ensure_installed = { "lua", "python", "rust", "javascript", "latex", "tsx", "typescript", "vimdoc", "vim" },
+  ensure_installed = {
+    "lua",
+    "python",
+    "rust",
+    "javascript",
+    "latex",
+    "tsx",
+    "typescript",
+    "vimdoc",
+    "vim",
+    "r",
+  },
 
   -- add uninstalled languages automatically
   auto_install = true,
@@ -397,7 +420,7 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, {
 
 --  this function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
-  -- we create a function that lets us more easily define mappings specific
+  -- a function that lets us more easily define mappings specific
   -- for LSP related items
   local lspmap = function(keys, func, desc)
     if desc then
@@ -410,42 +433,54 @@ local on_attach = function(_, bufnr)
     })
   end
 
-  lspmap("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
-  lspmap("<leader>ca", vim.lsp.buf.code_action, "[C]ode [A]ction")
+  -- refactoring shortcuts
+  lspmap("<leader>ca", vim.lsp.buf.code_action, "[C]ode [a]ction")
 
-  lspmap("gd", vim.lsp.buf.definition, "[G]oto [D]efinition")
-  lspmap("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-  lspmap("gI", vim.lsp.buf.implementation, "[G]oto [I]mplementation")
-  lspmap("<leader>D", vim.lsp.buf.type_definition, "Type [D]efinition")
-  lspmap("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
-  lspmap("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
+  -- going to definitions, references, etc
+  lspmap("<leader>gd", vim.lsp.buf.definition, "[G]oto [d]efinition")
+  lspmap("<leader>gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+  lspmap("<leader>gr", require("telescope.builtin").lsp_references, "[G]oto [r]eferences")
+  lspmap("<leader>gi", vim.lsp.buf.implementation, "[G]oto [i]mplementation")
+  lspmap("<leader>gt", vim.lsp.buf.type_definition, "[G]oto [t]ype definition")
 
-  -- See `:help K` for why this keymap
-  lspmap("K", vim.lsp.buf.hover, "Hover Documentation")
+  -- symbols
+  lspmap("<leader>Sr", vim.lsp.buf.rename, "[R]ename [s]ymbol")
+  lspmap("<leader>Sd", require("telescope.builtin").lsp_document_symbols, "[S]ymbols (document)")
+  lspmap("<leader>Sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[S]ymbols (workspace)")
+
+  -- documentation
+
   lspmap("<C-k>", vim.lsp.buf.signature_help, "Signature Documentation")
 
-  -- Lesser used LSP functionality
-  lspmap("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+  -- formatting
+  lspmap("<leader>f", vim.lsp.buf.format, "[F]ormat buffer")
+
+  -- workspace folders
   lspmap("<leader>wa", vim.lsp.buf.add_workspace_folder, "[W]orkspace [A]dd Folder")
   lspmap("<leader>wr", vim.lsp.buf.remove_workspace_folder, "[W]orkspace [R]emove Folder")
   lspmap("<leader>wl", function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, "[W]orkspace [L]ist Folders")
-
-  -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, "Format", function(_)
-    vim.lsp.buf.format()
-  end, {
-    desc = "Format current buffer with LSP",
-  })
 end
 
 -- LSPs to be installed
 local servers = {
-  pyright = {},
+  -- python
+  -- pyright = {},
+  --
+  -- -- rust
+  -- rust_analyzer = {},
+  -- -- rustfmt = {},
+  --
+  -- -- latex
+  -- texlab = {},
+  --
+  -- -- web development
+  -- html = {},
+  -- cssls = {},
+  -- emmet_ls = {},
 
-  rust_analyzer = {},
-
+  -- lua
   lua_ls = {
     Lua = {
       workspace = {
@@ -531,7 +566,7 @@ cmp.setup({
 })
 
 -- auto format on save
-vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]])
+vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.format()")
 
 -- set color scheme
 -- TODO: set color scheme to change with system settings?
