@@ -12,6 +12,12 @@ knitr::opts_chunk$set(
     cache.path = "knitr/cache/",
     fig.path = "knitr/figure/",
     message = F # don't show messages/warnings in output
+    tidy = T, # format code in output
+)
+
+options(
+    width = 60,
+    knitr.digits.signif,
 )
 
 ggplot2::theme_set(ggplot2::theme_bw())
