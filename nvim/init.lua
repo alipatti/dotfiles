@@ -228,7 +228,6 @@ vim.wo.wrap = "linebreak"
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-
 -- disable space bar so we can use it as the leader
 vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", {
   silent = true,
@@ -247,7 +246,17 @@ vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", {
   silent = true,
 })
 
--- highlight on yank
+-- redo
+vim.keymap.set("n", "U", ":redo<CR>")
+
+-- moving left/right while in insert mode
+vim.keymap.set("i", "<C-l>", "<Right>")
+vim.keymap.set("i", "<C-h>", "<Left>")
+
+-----------------------
+-- HIGHLIGHT ON YANK --
+-----------------------
+
 local highlight_group = vim.api.nvim_create_augroup("YankHighlight", {
   clear = true,
 })
@@ -277,8 +286,6 @@ require("telescope").setup({
 
 -- enable fuzzy finding if installed
 pcall(require("telescope").load_extension, "fzf")
-
--- configure telescope keymaps
 
 -- search inside file
 vim.keymap.set("n", "<leader>/", function()
@@ -350,10 +357,10 @@ require("nvim-treesitter.configs").setup({
   incremental_selection = {
     enable = true,
     keymaps = {
-      init_selection = "<c-k>",
-      node_incremental = "<c-j>", -- TODO:
-      scope_incremental = "<c-s>",
-      node_decremental = "<M-space>",
+      init_selection = "<C-k>",
+      node_incremental = "<C-k>",
+      -- scope_incremental = "<C-s>",
+      node_decremental = "<C-j>",
     },
   },
 
@@ -449,11 +456,12 @@ local on_attach = function(_, bufnr)
   lspmap("<leader>Sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[S]ymbols (workspace)")
 
   -- documentation
-
-  lspmap("<C-k>", vim.lsp.buf.signature_help, "Signature Documentation")
+  -- TODO: figure out a better keymap for this
+  vim.keymap.set({"i", "n"}, "<C-i>", vim.lsp.buf.signature_help, { buffer = bufnr })
 
   -- formatting
   lspmap("<leader>f", vim.lsp.buf.format, "[F]ormat buffer")
+  vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*", callback = vim.lsp.buf.format }) -- format on save
 
   -- workspace folders
   lspmap("<leader>wa", vim.lsp.buf.add_workspace_folder, "[W]orkspace [A]dd Folder")
@@ -564,9 +572,6 @@ cmp.setup({
     name = "luasnip",
   } },
 })
-
--- auto format on save
-vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.format()")
 
 -- set color scheme
 -- TODO: set color scheme to change with system settings?
