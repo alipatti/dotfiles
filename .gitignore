@@ -5,3 +5,5 @@ brew/Brewfile.*
 .vscode/History
 .vscode/globalStorage
 .vscode/workspaceStorage
+
+nvim/lazy-lock.json
