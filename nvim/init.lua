@@ -20,6 +20,8 @@ require("lazy").setup({
 
   "tpope/vim-fugitive", -- git support
   "tpope/vim-sleuth",   -- automatically detect indentation
+  "tpope/vim-surround", -- surround with quotes, parens, tags, etc.
+  "lervag/vimtex",      -- latex plugin
 
   {
     "folke/todo-comments.nvim",
@@ -88,7 +90,12 @@ require("lazy").setup({
   -- autocomplete
   {
     "hrsh7th/nvim-cmp",
-    dependencies = { "hrsh7th/cmp-nvim-lsp", "L3MON4D3/LuaSnip", "saadparwaiz1/cmp_luasnip" },
+    dependencies = {
+      "hrsh7th/cmp-nvim-lsp",
+      "L3MON4D3/LuaSnip",
+      "saadparwaiz1/cmp_luasnip",
+      "hrsh7th/cmp-omni",
+    },
   },
 
   -- shows pending keybinds
@@ -218,6 +225,7 @@ vim.o.termguicolors = true
 
 -- use natural line wrapping
 vim.wo.wrap = "linebreak"
+vim.opt.linebreak = true
 
 -------------
 -- KEYMAPS --
@@ -334,11 +342,11 @@ require("nvim-treesitter.configs").setup({
     "python",
     "rust",
     "javascript",
-    "latex",
     "tsx",
     "typescript",
     "vimdoc",
     "vim",
+    "latex",
     "r",
   },
 
@@ -347,6 +355,7 @@ require("nvim-treesitter.configs").setup({
 
   highlight = {
     enable = true,
+    disable = { "latex" }
   },
 
   indent = {
@@ -457,11 +466,11 @@ local on_attach = function(_, bufnr)
 
   -- documentation
   -- TODO: figure out a better keymap for this
-  vim.keymap.set({"i", "n"}, "<C-i>", vim.lsp.buf.signature_help, { buffer = bufnr })
+  vim.keymap.set({ "i", "n" }, "<C-i>", vim.lsp.buf.signature_help, { buffer = bufnr })
 
   -- formatting
   lspmap("<leader>f", vim.lsp.buf.format, "[F]ormat buffer")
-  vim.api.nvim_create_autocmd("BufWritePre", { pattern = "*", callback = vim.lsp.buf.format }) -- format on save
+  vim.api.nvim_create_autocmd("BufWrite", { pattern = "*", callback = vim.lsp.buf.format }) -- format on save
 
   -- workspace folders
   lspmap("<leader>wa", vim.lsp.buf.add_workspace_folder, "[W]orkspace [A]dd Folder")
@@ -473,15 +482,13 @@ end
 
 -- LSPs to be installed
 local servers = {
+  -- TODO: figure out why this isn't working
   -- python
   -- pyright = {},
   --
   -- -- rust
   -- rust_analyzer = {},
   -- -- rustfmt = {},
-  --
-  -- -- latex
-  -- texlab = {},
   --
   -- -- web development
   -- html = {},
@@ -529,7 +536,9 @@ mason_lspconfig.setup_handlers({
 local cmp = require("cmp")
 local luasnip = require("luasnip")
 
-luasnip.config.setup({})
+luasnip.config.setup({
+  enable_autosnippets = true,
+})
 
 cmp.setup({
   snippet = {
@@ -566,12 +575,15 @@ cmp.setup({
       end
     end, { "i", "s" }),
   }),
-  sources = { {
-    name = "nvim_lsp",
-  }, {
-    name = "luasnip",
-  } },
+  sources = {
+    { name = "nvim_lsp" },
+    { name = "luasnip" },
+    { name = "omni" },
+  },
 })
+
+-- load snippets from external file
+require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
 
 -- set color scheme
 -- TODO: set color scheme to change with system settings?
