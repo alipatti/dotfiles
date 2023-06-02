@@ -20,19 +20,6 @@
 - add command-click jump to definition for latex
   - doesn't have well defined syntax tree. is this even possible?
 
-## Comps
+## TeX
 
-### stats
-
-- doc embeddings of politicians statements. who talks about similar things? use twitter data, cspan statements
-- trees vs income (inspired by mona chalabi vis)
-
-- find income data for zip codes in minnesota
-  - take average greenness of satellite imagery
-  - https://www.earthdefine.com/treemap/
-
-### math
-
-- math of GR, quantum
-- use Claudio’s book?
-- do I have the math background for this?
+- quarto extension for creating resume

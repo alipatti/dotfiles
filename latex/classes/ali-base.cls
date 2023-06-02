@@ -2,4 +2,4 @@
 \ProvidesClass{ali-base}
 
 \LoadClass{article}
-\RequirePackage{ali-macros, ali-lists, ali-spacing, ali-theorems, ali-links, ali-headings}
+\RequirePackage{ali-lists, ali-spacing, ali-links, ali-headings}

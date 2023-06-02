@@ -9,6 +9,9 @@
 \RequirePackage{parskip}
 \RequirePackage[colorlinks]{hyperref}
 \RequirePackage{fontawesome}
+\RequirePackage{courier}  % more attractive mono font
+\RequirePackage[T1]{fontenc}
+\RequirePackage{biblatex}  % for publications
 
 % -- MARGINS --
 

@@ -1,3 +1,6 @@
+library(tidyverse)
+library(tidymodels)
+
 knitr::opts_knit$set(
     concordance = TRUE,
     self.contained = FALSE
@@ -11,9 +14,12 @@ knitr::opts_chunk$set(
     cache = TRUE,
     cache.path = "knitr/cache/",
     fig.path = "knitr/figure/",
-    message = F, # don't show messages/warnings in output
-    tidy = T # format code in output
+    message = F # don't show messages/warnings in output
 )
+
+if (knitr::opts_knit$get("rmarkdown.pandoc.to") %>% is.null()) {
+    options(digits = 3)
+}
 
 options(
     width = 60,
@@ -21,3 +27,11 @@ options(
 )
 
 ggplot2::theme_set(ggplot2::theme_bw())
+
+# --- USEFUL FUNCTIONS ---
+plot_residuals <- function(model) {
+    model %>%
+        augment() %>%
+        ggplot(aes(.fitted, .std.resid)) +
+        geom_point()
+}

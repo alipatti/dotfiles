@@ -4,7 +4,7 @@
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
   },
   "[dockerfile]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.defaultFormatter": "foxundermoon.shell-format"
   },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -24,7 +24,7 @@
     "editor.formatOnType": true
   },
   "cSpell.enabled": true,
-  "cSpell.enableFiletypes": ["dockerfile", "rmd", "toml", "rsweave"],
+  "cSpell.enableFiletypes": ["dockerfile", "quarto", "rmd", "rsweave", "toml"],
   "cSpell.userWords": [
     "alipatti",
     "Alistair",
@@ -137,14 +137,12 @@
   "notebook.cellToolbarVisibility": "hover",
   "python.analysis.extraPaths": [
     "/Applications/SageMath-9-7.app/Contents/Frameworks/Sage.framework/Versions/9.7/local/var/lib/sage/venv-python3.10.5/lib/python3.10/site-packages"
-  ],
-  "python.analysis.typeCheckingMode": "basic", // TODO turn up to strict?
+  ], // TODO turn up to strict?
   "python.defaultInterpreterPath": "/usr/local/bin/python3",
   "python.formatting.provider": "black",
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
   "r.bracketedPaste": true,
-  "r.rmarkdown.knit.openOutputFile": true,
   "r.rterm.mac": "/usr/local/bin/radian",
   "rainbowTags.supportedLanguages": [
     "jinja-html",
@@ -189,8 +187,7 @@
   "todohighlight.keywords": [
     "TODO",
     "todo!", // rust macro
-    "FIX",
-    "CHECK",
+    "FIXME",
     "HACK",
     // {
     //   "backgroundColor": "white",
@@ -239,6 +236,15 @@
   "notebook.formatOnSave.enabled": true,
   "editor.guides.bracketPairs": "active",
   "latex-workshop.latex.clean.method": "command",
+  "errorLens.excludeBySource": ["ts(2345)"],
+  "python.analysis.typeCheckingMode": "basic",
+  "r.plot.defaults.plotPreviewLayout": "scroll",
+  "r.rmarkdown.chunkBackgroundColor": "rgba(128, 128, 128, 0.07)",
+  "r.rmarkdown.knit.focusOutputChannel": false,
+  "quarto.render.renderOnSave": true,
+  "[quarto]": {
+    "editor.defaultFormatter": "quarto.quarto"
+  },
   "window.zoomLevel": 1,
-  "errorLens.excludeBySource": ["ts(2345)"]
+  "workbench.colorTheme": "Default Light Modern"
 }
