@@ -17,6 +17,7 @@
     # .config folder
     - ~/.config/nvim
     - ~/.config/fish
+    - ~/.config/kitty
 
     # location for user settings
     - ~/Library/Application Support/Code/User/
@@ -30,6 +31,12 @@
 
     # vim
     ~/.config/nvim: nvim
+
+    # kitty
+    ~/.config/kitty: kitty
+
+    # hammerspoon
+    ~/.hammerspoon: hammerspoon
 
     # r
     ~/.rprofile: r/.rprofile
