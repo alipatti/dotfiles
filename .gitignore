@@ -7,3 +7,4 @@ brew/Brewfile.*
 .vscode/workspaceStorage
 
 nvim/lazy-lock.json
+
