@@ -29,6 +29,7 @@
     "alipatti",
     "Alistair",
     "Asymptotics",
+    "interpretability",
     "Pattison",
     "pointwise",
     "pseudocode",
@@ -243,8 +244,15 @@
   "r.rmarkdown.knit.focusOutputChannel": false,
   "quarto.render.renderOnSave": true,
   "[quarto]": {
-    "editor.defaultFormatter": "quarto.quarto"
+    "editor.defaultFormatter": "quarto.quarto",
+    "editor.formatOnSave": false
   },
   "window.zoomLevel": 1,
+  "Lua.diagnostics.globals": ["vim"],
+  "diffEditor.ignoreTrimWhitespace": true,
+  "editor.fontFamily": "Cousine Nerd Font Mono, Menlo, Monaco, 'Courier New', monospace",
+  "[lua]": {
+    "editor.defaultFormatter": "JohnnyMorganz.stylua"
+  },
   "workbench.colorTheme": "Default Light Modern"
 }
