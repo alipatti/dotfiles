@@ -55,24 +55,55 @@ for key, region in pairs(windowBindings) do
   end)
 end
 
+hammerMode:bind("ctrl", "c", function()
+  hs.window.focusedWindow():centerOnScreen()
+end)
+
 -----------------------
 -- FLOATING TERMINAL --
 -----------------------
 
+-- get hammerspoon application object for the kitty background
+-- process if it exists, nil otherwise
+local getKitty = function()
+  local pid = hs.execute("pgrep -f 'kitty --instance-group floating'")
+  pid = tonumber(pid)
+  return hs.application(pid)
+end
+
+-- launch the kitty background process
+local startKitty = function()
+  io.popen("/Applications/kitty.app/Contents/MacOS/kitty " ..
+    "--instance-group floating " ..
+    "--directory ~ " ..
+    "-o hide_window_decorations=titlebar-only " ..
+    -- "-o macos_window_resizable=no " ..
+    "-o macos_hide_from_tasks=yes"
+  )
+end
+
+local createWindow = function(app)
+  hs.eventtap.keyStroke("cmd", "n", nil, app)
+end
+
 hammerMode:bind("ctrl", "t", function()
-  -- if kitty is showing, hide it
-  if not kitty:isHidden() then
+  -- get the kitty application object
+  local kitty = getKitty()
+  if not kitty then
+    startKitty()
+    kitty = getKitty()
+  end
+
+  -- if is showing, hide it
+  if kitty:isFrontmost() then
     kitty:hide()
     return
   end
 
-  kitty:activate()
-
-  if not kitty:mainWindow() then
-    hs.eventtap.keystroke({ "cmd" }, "n", kitty)
-  end
-
-  kitty:mainWindow():centerOnScreen()
+  -- if it's not showing, activate it
+  if not kitty:mainWindow() then createWindow(kitty) end
+  local w = kitty:mainWindow()
+  w:centerOnScreen(nil, 0)
+  hs.spaces.moveWindowToSpace(w, hs.spaces.focusedSpace())
+  w:focus()
 end)
-
--- hs.hotkey.new("ctrl", "space", function() hs.alert("hello world") end)

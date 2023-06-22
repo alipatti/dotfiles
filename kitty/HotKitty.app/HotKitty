@@ -1,4 +1,0 @@
-#!/bin/sh
-
-# kitty --instance-group hotkey --config ~/.dotfiles/kitty/hotkey-window.conf
-tput bel
