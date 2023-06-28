@@ -51,6 +51,9 @@
     # rust
     ~/.rustfmt.toml: rust/.rustfmt.toml
 
+    # prettier
+    ~/.prettierrc.yml: prettier/.prettierrc.yml
+
 # remove broken symlinks
 - clean:
     - "~"
