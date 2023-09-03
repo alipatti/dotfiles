@@ -1,5 +1,9 @@
 # see: https://github.com/anishathalye/dotbot#directives
 
+- defaults:
+    link:
+      relink: true
+
 - shell:
     - description: Install brew if it doesn't exist
       command: sh brew/setup.sh
@@ -11,47 +15,26 @@
       command: rustup-init && rustup component add rustfmt
 
 - create:
-    # location for local .cls/.sty files
-    - ~/Library/texmf/tex/latex/
+    - ~/Library/texmf/tex/latex/ # local TeX tree
 
-    # .config folder
     - ~/.config/nvim
     - ~/.config/fish
     - ~/.config/kitty
 
-    # location for user settings
-    - ~/Library/Application Support/Code/User/
+    - ~/Library/Application Support/Code/User/ # vscode
 
 - link:
-    # brew
     ~/.Brewfile: brew/Brewfile
-
-    # fish
     ~/.config/fish: fish
-
-    # vim
     ~/.config/nvim: nvim
-
-    # kitty
-    ~/.config/kitty: kitty
-
-    # hammerspoon
+    ~/.config/gh: github
     ~/.hammerspoon: hammerspoon
-
-    # r
+    ~/.pandoc: pandoc
     ~/.rprofile: r/.rprofile
-
-    # vscode
     ~/Library/Application Support/Code/User: .vscode
-
-    # latex
     ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
-
-    # rust
     ~/.rustfmt.toml: rust/.rustfmt.toml
-
-    # prettier
     ~/.prettierrc.yml: prettier/.prettierrc.yml
 
 # remove broken symlinks
@@ -59,5 +42,4 @@
     - "~"
     - ~/Library/Application Support/Code/User/
     - ~/Library/texmf/tex/latex/
-    - ~/.config/nvim
-    - ~/.config/fish
+    - ~/.config/*
