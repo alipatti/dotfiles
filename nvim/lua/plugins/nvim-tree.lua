@@ -44,10 +44,6 @@ return {
 				vim.keymap.set("n", "<C-c>", api.tree.close)
 			end,
 		},
-		keys = {
-			{ "<esc>", "<cmd>NvimTreeClose<cr>" },
-			{ "<C-c>", "<cmd>NvimTreeClose<cr>" },
-			{ "f",     "<cmd>NvimTreeToggle<cr>", desc = "Toggle [f]ile tree" },
-		}
+		lazy = false,
 	},
 }

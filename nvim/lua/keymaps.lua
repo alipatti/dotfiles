@@ -4,13 +4,13 @@ local wk = require("which-key")
 wk.register({
 	s = {
 		name = "Search...",
-		s = { "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown previewer=false winblend=10<cr>",
+		s = { "<cmd>Telescope live_grep theme=dropdown<cr>", "grep current folder" },
+		c = { "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown previewer=false winblend=10<cr>",
 			"within current buffer" },
-		o = { "<cmd>Telescope bufers theme=dropdown previewer=false<cr>", "open buffers" },
+		o = { "<cmd>Telescope buffers theme=dropdown previewer=false<cr>", "open buffers" },
 		r = { "<cmd>Telescope recent theme=dropdown<cr>", "recent buffers" },
 		g = { "<cmd>Telescope git_status<cr>", "git changes" },
 		h = { "<cmd>Telescope help_tags<cr>", "help" },
-		c = { "<cmd>Telescope commands<cr>", "commands" },
 	},
 	l = {
 		name = "LSP...",
@@ -49,6 +49,12 @@ wk.register({
 		name = "Terminal...",
 		t = { "<cmd>ToggleTerm direction=float<cr>", "Toggle floating terminal" },
 	},
+	b = {
+		name = "Buffer...",
+		n = { "<cmd>bn<cr>", "Next" },
+		p = { "<cmd>bp<cr>", "Previous" },
+		d = { "<cmd>bd<cr>", "Delete" },
+	}
 }, { mode = 'n', prefix = '<leader>' })
 
 -- insert mode keymaps

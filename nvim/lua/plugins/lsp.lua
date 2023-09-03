@@ -10,6 +10,8 @@ local lsp_servers = {
 	cssls = {},
 	emmet_ls = {},
 
+	sourcekit = {},
+
 	-- latex
 	texlab = {
 		texlab = {
@@ -41,7 +43,7 @@ return {
 				end
 			},
 			{ "williamboman/mason.nvim", opts = {} },
-			{ "j-hui/fidget.nvim",       opts = {} },
+			{ "j-hui/fidget.nvim",       opts = {}, tag = "legacy" },
 			{ "folke/neodev.nvim",       opts = {} },
 			{ "hrsh7th/cmp-nvim-lsp",    opts = {} },
 
@@ -52,7 +54,8 @@ return {
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 			require("mason-lspconfig").setup({
-				ensure_installed = vim.tbl_keys(lsp_servers),
+				-- ensure_installed = vim.tbl_keys(lsp_servers),
+				automatic_installation = true,
 			})
 
 			require("mason-lspconfig").setup_handlers({
@@ -63,6 +66,8 @@ return {
 					})
 				end,
 			})
+
+			require("lspconfig").sourcekit.setup({})
 		end
 	},
 
@@ -73,6 +78,11 @@ return {
 				sources = {
 					require("null-ls").builtins.formatting.prettierd,
 					require("null-ls").builtins.diagnostics.markdownlint,
+					require("null-ls").builtins.code_actions.proselint,
+					require("null-ls").builtins.diagnostics.proselint,
+					require("null-ls").builtins.diagnostics.swiftlint,
+					require("null-ls").builtins.formatting.swiftlint,
+					require("null-ls").builtins.formatting.swiftformat,
 				}
 			})
 		end
