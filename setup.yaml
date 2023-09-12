@@ -31,6 +31,7 @@
     ~/.hammerspoon: hammerspoon
     ~/.pandoc: pandoc
     ~/.rprofile: r/.rprofile
+    ~/.lintr: r/.lintr
     ~/Library/Application Support/Code/User: .vscode
     ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
