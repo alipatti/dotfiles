@@ -31,6 +31,8 @@
 %  -- TITLE --
 \makeatletter
 \renewcommand{\maketitle}{
+	\setlength{\leftskip}{-1em}
+
 	{\huge \scshape \@author}
 
 	\vspace{-.5em}
@@ -38,6 +40,7 @@
 
 	{\@title}
 
+	\setlength{\leftskip}{0em}
 }
 \makeatother
 
@@ -65,7 +68,7 @@
 {}
 {}
 {0em}  % number-header spacing 
-{\textbf{#1}}
+{\bfseries #1}
 
 \newcommand{\resumeitem}[3]{\subsection{%
 		#1, \normalfont
