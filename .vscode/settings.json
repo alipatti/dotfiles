@@ -20,7 +20,7 @@
     "editor.tabSize": 4
   },
   "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
+    "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnType": true
   },
   "cSpell.enabled": true,
@@ -221,11 +221,9 @@
     }
   },
   "workbench.editor.enablePreview": true,
-  "workbench.editor.untitled.hint": "hidden",
   "workbench.iconTheme": "vs-seti",
   "workbench.startupEditor": "none",
   "zenMode.hideLineNumbers": false,
-  "zenMode.hideTabs": false,
   "terminal.integrated.enableMultiLinePasteWarning": false,
   "r.plot.devArgs": {
     "width": 500,
@@ -247,12 +245,12 @@
     "editor.defaultFormatter": "quarto.quarto",
     "editor.formatOnSave": false
   },
-  "window.zoomLevel": 1,
   "Lua.diagnostics.globals": ["vim"],
   "diffEditor.ignoreTrimWhitespace": true,
   "editor.fontFamily": "Cousine Nerd Font Mono, Menlo, Monaco, 'Courier New', monospace",
   "[lua]": {
     "editor.defaultFormatter": "JohnnyMorganz.stylua"
   },
-  "workbench.colorTheme": "Default Light Modern"
+  "workbench.editor.empty.hint": "hidden",
+  "window.zoomLevel": 1
 }

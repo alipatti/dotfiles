@@ -31,8 +31,11 @@
     ~/.config/gh: github
     ~/.hammerspoon: hammerspoon
     ~/.pandoc: pandoc
+
     ~/.rprofile: r/.rprofile
     ~/.lintr: r/.lintr
+    ~/.radian_profile: r/.radian_profile
+
     ~/Library/Application Support/Code/User: .vscode
     ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc

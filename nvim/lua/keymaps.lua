@@ -47,7 +47,10 @@ wk.register({
 	},
 	t = {
 		name = "Terminal...",
-		t = { "<cmd>ToggleTerm direction=float<cr>", "Toggle floating terminal" },
+		t = { '<cmd>ToggleTerm name="main" size=25 direction="horizontal"<cr>', "Toggle terminal" },
+		-- TODO: make r and python terminals toggle if they've already been created
+		r = { '<cmd>TermExec name="r" cmd="radian"<cr>', "Toggle R terminal" },
+		p = { '<cmd>TermExec name="python" cmd="ipython"<cr>', "Toggle Python terminal" },
 	},
 	b = {
 		name = "Buffer...",
@@ -70,6 +73,10 @@ wk.register({
 	["]d"] = { vim.diagnostic.goto_next, "Go to next diagnostic message" },
 	U = { "<cmd>redo<cr>", "Redo" },
 }, { mode = "n" })
+
+wk.register({
+	{ ["<esc>"] = { [[<C-\><C-n>]], "Leave terminal mode" } },
+}, { mode = "t" })
 
 -- Remap for dealing with word wrap
 vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", {

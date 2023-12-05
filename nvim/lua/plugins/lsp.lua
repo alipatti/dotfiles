@@ -10,7 +10,13 @@ local lsp_servers = {
 	cssls = {},
 	emmet_ls = {},
 
-	sourcekit = {},
+	-- r
+	r_language_server = {},
+
+	-- quarto/markdown
+	marksman = {
+		filetypes = { "markdown", "quarto" },
+	},
 
 	-- latex
 	texlab = {
@@ -21,6 +27,7 @@ local lsp_servers = {
 			},
 			build = {
 				onSave = true,
+				args = {"%f"}
 			},
 			latexindent = {
 				modifyLineBreaks = true
@@ -54,7 +61,7 @@ return {
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 			require("mason-lspconfig").setup({
-				-- ensure_installed = vim.tbl_keys(lsp_servers),
+				ensure_installed = vim.tbl_keys(lsp_servers),
 				automatic_installation = true,
 			})
 
@@ -83,6 +90,7 @@ return {
 					require("null-ls").builtins.diagnostics.swiftlint,
 					require("null-ls").builtins.formatting.swiftlint,
 					require("null-ls").builtins.formatting.swiftformat,
+					require("null-ls").builtins.formatting.black,
 				}
 			})
 		end
@@ -95,6 +103,7 @@ return {
 			"hrsh7th/cmp-nvim-lsp",
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
+			"jmbuhr/otter.nvim",
 			"hrsh7th/cmp-omni",
 		},
 		config = function()
@@ -145,6 +154,7 @@ return {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "omni" },
+					{ name = "otter" }, -- for quarto
 				},
 			})
 		end

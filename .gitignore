@@ -9,3 +9,8 @@ brew/Brewfile.*
 nvim/lazy-lock.json
 github/hosts.yml
 
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+

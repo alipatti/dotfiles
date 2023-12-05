@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{ali-resume}
 
-\LoadClass{article}
+\LoadClass[10pt]{article}
 
 \RequirePackage{geometry}
 \RequirePackage[explicit]{titlesec}
@@ -9,13 +9,12 @@
 \RequirePackage{parskip}
 \RequirePackage[colorlinks]{hyperref}
 \RequirePackage{fontawesome}
-\RequirePackage{courier}  % more attractive mono font
 \RequirePackage[T1]{fontenc}
-\RequirePackage{biblatex}  % for publications
+% \RequirePackage{biblatex}  % for publications
 
 % -- MARGINS --
 
-\geometry{margin=.5in}
+\geometry{margin=4em}
 \pagestyle{empty}  % remove page numbering
 
 % -- LISTS --
@@ -32,14 +31,12 @@
 %  -- TITLE --
 \makeatletter
 \renewcommand{\maketitle}{
-	\begin{center}
-		{\Huge \scshape \@author}
+	{\huge \scshape \@author}
 
-		\vspace{-.5em}
-		\rule{.4 \textwidth}{0.5pt}
+	\vspace{-.5em}
+	\rule{.4 \textwidth}{0.5pt}
 
-		{\@title}
-	\end{center}
+	{\@title}
 
 }
 \makeatother
@@ -55,7 +52,7 @@
 {}
 {}
 {0em}  % number-header spacing 
-{\Large \bfseries  #1 \ \xrfill[.2em]{.5pt}}
+{\Large \scshape  #1 \ \xrfill[.2em]{.5pt}}
 
 % -- RESUME ITEM --
 
@@ -68,7 +65,7 @@
 {}
 {}
 {0em}  % number-header spacing 
-{\textbf{\large #1}}
+{\textbf{#1}}
 
 \newcommand{\resumeitem}[3]{\subsection{%
 		#1, \normalfont

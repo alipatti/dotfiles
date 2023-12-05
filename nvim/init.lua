@@ -81,9 +81,15 @@ vim.opt.linebreak = true
 
 
 -- load snippets from external file
-require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
+-- require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
 
 -- set color scheme
 -- TODO: set color scheme to change with system settings?
 -- TODO: add keyboard shortcut to toggle color scheme
 vim.cmd.colorscheme("catppuccin")
+
+vim.filetype.add({
+	extension = {
+		sage = "python",
+	}
+})
