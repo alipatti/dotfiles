@@ -29,6 +29,7 @@
     ~/.config/nvim: nvim
     ~/.config/marksman: marksman
     ~/.config/gh: github
+    ~/.gitconfig: git/.gitconfig
     ~/.hammerspoon: hammerspoon
     ~/.pandoc: pandoc
 

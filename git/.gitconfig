@@ -1,0 +1,7 @@
+[user]
+	email = alistairpattison@gmail.com
+	name = Alistair Pattison
+[credential]
+	helper = osxkeychain
+[init]
+	defaultBranch = main
