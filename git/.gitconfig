@@ -5,3 +5,8 @@
 	helper = osxkeychain
 [init]
 	defaultBranch = main
+
+[push]
+	autoSetupRemote = true
+	followTags = true
+

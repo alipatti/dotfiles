@@ -42,6 +42,11 @@ return {
 		opts = {},
 	},
 
+	-- changes matching html tag on edit
+	{
+		"AndrewRadev/tagalong.vim",
+	},
+
 	-- Add indentation guides even on blank lines
 	{
 		"lukas-reineke/indent-blankline.nvim",

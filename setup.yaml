@@ -15,7 +15,7 @@
       command: rustup-init && rustup component add rustfmt
 
 - create:
-    - ~/Library/texmf/tex/latex/ # local TeX tree
+    - ~/texmf/tex/latex # local TeX tree
 
     - ~/.config/nvim
     - ~/.config/fish
@@ -38,7 +38,7 @@
     ~/.radian_profile: r/.radian_profile
 
     ~/Library/Application Support/Code/User: .vscode
-    ~/Library/texmf/tex/latex/local: latex
+    ~/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
     ~/.rustfmt.toml: rust/.rustfmt.toml
     ~/.prettierrc.yml: prettier/.prettierrc.yml
@@ -47,5 +47,5 @@
 - clean:
     - "~"
     - ~/Library/Application Support/Code/User/
-    - ~/Library/texmf/tex/latex/
+    - ~/texmf/
     - ~/.config/*

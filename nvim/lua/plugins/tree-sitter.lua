@@ -76,4 +76,6 @@ return {
 				}
 			})
 		end
-	} }
+	},
+	{ "hiphish/rainbow-delimiters.nvim" }
+}

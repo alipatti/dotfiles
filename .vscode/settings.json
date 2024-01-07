@@ -252,5 +252,6 @@
     "editor.defaultFormatter": "JohnnyMorganz.stylua"
   },
   "workbench.editor.empty.hint": "hidden",
-  "window.zoomLevel": 1
+  "window.zoomLevel": 1,
+  "workbench.colorTheme": "Default Light Modern"
 }

@@ -27,7 +27,7 @@ local lsp_servers = {
 			},
 			build = {
 				onSave = true,
-				args = {"%f"}
+				args = { "%f" }
 			},
 			latexindent = {
 				modifyLineBreaks = true
@@ -79,14 +79,16 @@ return {
 	},
 
 	{
-		"jose-elias-alvarez/null-ls.nvim",
+		"nvimtools/none-ls.nvim",
 		config = function()
 			require("null-ls").setup({
 				sources = {
 					require("null-ls").builtins.formatting.prettierd,
 					require("null-ls").builtins.diagnostics.markdownlint,
 					require("null-ls").builtins.code_actions.proselint,
-					require("null-ls").builtins.diagnostics.proselint,
+					require("null-ls").builtins.diagnostics.proselint.with({
+						extra_filetypes = { "toml", "yaml" },
+					}),
 					require("null-ls").builtins.diagnostics.swiftlint,
 					require("null-ls").builtins.formatting.swiftlint,
 					require("null-ls").builtins.formatting.swiftformat,
