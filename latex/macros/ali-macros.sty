@@ -4,8 +4,7 @@
 \RequirePackage{amssymb,amsmath,amsthm,mathtools}
 \RequirePackage{xfrac}  % inline slanted fractions (\sfrac)
 
-% TODO extract to ali-fonts
-\usepackage{eucal}  % nicer-looking \mathcal
+\usepackage{eucal} % nicer-looking \mathcal
 \usepackage{mathrsfs}  % add mathscr
 
 % fixing greek letters
@@ -30,7 +29,24 @@
 \newcommand{\N}{\mathbb N}  % naturals
 \newcommand{\T}{\mathbb T}  % circle group
 \newcommand{\A}{\mathbb A}  % algebraic integers
+\newcommand{\S}{\mathcal{S}} % symetric group
+\newcommand{\H}{\mathbb H} % quaternions
 \newcommand{\bit}{\set{0,1}}  % bits
+
+% function groups, etc.
+\DeclareMathOperator{\Hom}{Hom} % homomorphisms
+\DeclareMathOperator{\Aut}{Aut} % automorphisms
+\DeclareMathOperator{\End}{End} % endomorphism
+\DeclareMathOperator{\Sym}{Sym} 
+\DeclareMathOperator{\Frac}{Frac} % fraction field
+\DeclareMathOperator{\Stab}{Stab} % stabilizer
+
+% groups
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator{\M}{M}
+\DeclareMathOperator{\SO}{SO}
+\DeclareMathOperator{\SU}{SU}
 
 % misc operations
 \DeclareMathOperator*{\argmin}{arg\,min}  % argmin
@@ -39,29 +55,72 @@
 \DeclareMathOperator*{\sign}{sign}  % sign
 \DeclareMathOperator*{\lcm}{lcm}  % lcm
 \DeclareMathOperator*{\supp}{supp}  % support
+\DeclareMathOperator*{\pred}{pred} % predecessor
+\DeclareMathOperator*{\succ}{succ} % successor
 \DeclareMathOperator*{\Li}{Li}
 \newcommand{\given}{\mid}
 \newcommand{\divides}{\mid}
-\newcommand{\inv}{^{-1}}  % inversion
+\newcommand{\concat}{\mid}
 % TODO  \newcommand{\comp}{??}  % set complement
 \newcommand{\tensor}{\otimes}  % tensor product
 \newcommand{\tensorpower}[1]{^{\tensor #1}}  % tensor power
 \newcommand{\conj}{\overline}  % complex conjugate
 \newcommand{\cross}{\times}  % cross product
 \newcommand{\of}{\circ}  % function composition
+\newcommand{\quotient}[1]{\, \big/ \, #1} % quotient groups
+\newcommand{\iso}{\cong} % isomorphic
+\newcommand{\normal}{\lhd} % normal subgroup
+
+\newcommand{\dual}{\widetilde}
+\DeclareMathOperator*{\cl}{c\ell}
+
+% frequent text
+\newcommand{\id}{{\mathrm{id}}} % identity
 \newcommand{\squarefree}{\ \text{$\square$-free}}
 \newcommand{\otherwise}{\text{otherwise}}
+\newcommand{\and}{\text{and}}
 
-\newcommand{\transpose}{^T}
-\renewcommand{\perp}{^\bot}
-\renewcommand{\star}{^*}
+% common exponents
+\newcommand{\inv}{^{-1}}  % inversion
+\newcommand{\trans}{^T} % transpose
+\renewcommand{\perp}{^\bot} % perp
+\renewcommand{\star}{^*} % star
+\newcommand{\units}{^ \times}
 
-% :=
+% image, rank, span, trace, etc.
+\DeclareMathOperator{\im}{im}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\spn}{span}  % \span is a built-in latex command
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\adj}{adj}
+
+% different equals signs
 \RequirePackage{mathtools}
-\newcommand{\ceq}{\coloneqq}
-\newcommand{\qeq}{\overset ? =}
+\newcommand{\ceq}{\coloneqq} % definition
+\newcommand{\qeq}{\overset ? =} % maybe equal
 
 % fixing \Re, \Im
 \DeclareMathOperator{\Real}{Re}
 \DeclareMathOperator{\Imag}{Im}
+
+% stats/probability stuff
+\newcommand{\P}[1]{{\mathrm P}\paren{#1}}
+\newcommand{\E}[1]{{\mathrm E}\paren{#1}}
+\DeclareMathOperator*{\var}{var}
+\DeclareMathOperator*{\E}{E}
+\DeclareMathOperator*{\Bias}{Bias}
+\DeclareMathOperator*{\MSE}{MSE}
+\DeclareMathOperator{\Norm}{Norm}
+\DeclareMathOperator{\Gam}{Gamma}
+\DeclareMathOperator{\Binom}{Binom}
+
+% crypto stuff
+\newcommand{\Enc}{\Call{Enc}{}}
+\newcommand{\Dec}{\Call{Dec}{}}
+\newcommand{\Sign}{\Call{Sign}{}}
+\newcommand{\KeyGen}{\Call{KeyGen}{}}
+\newcommand{\Eav}{\Call{Eav}{}}
+\newcommand{\concat}{\ \| \ }
+\newcommand{\linkedwith}{\: \vcenter{\hbox{\text{\footnotesize$\diamondsuit$}}}\: }
+\renewcommand{\L}{\mathcal L}
 
