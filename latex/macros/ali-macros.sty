@@ -29,8 +29,8 @@
 \newcommand{\N}{\mathbb N}  % naturals
 \newcommand{\T}{\mathbb T}  % circle group
 \newcommand{\A}{\mathbb A}  % algebraic integers
-\newcommand{\S}{\mathcal{S}} % symetric group
-\newcommand{\H}{\mathbb H} % quaternions
+% \newcommand{\S}{\mathcal{S}} % symetric group
+% \newcommand{\H}{\mathbb H} % quaternions
 \newcommand{\bit}{\set{0,1}}  % bits
 
 % function groups, etc.
@@ -56,7 +56,7 @@
 \DeclareMathOperator*{\lcm}{lcm}  % lcm
 \DeclareMathOperator*{\supp}{supp}  % support
 \DeclareMathOperator*{\pred}{pred} % predecessor
-\DeclareMathOperator*{\succ}{succ} % successor
+% \DeclareMathOperator*{\succ}{succ} % successor
 \DeclareMathOperator*{\Li}{Li}
 \newcommand{\given}{\mid}
 \newcommand{\divides}{\mid}
@@ -78,7 +78,7 @@
 \newcommand{\id}{{\mathrm{id}}} % identity
 \newcommand{\squarefree}{\ \text{$\square$-free}}
 \newcommand{\otherwise}{\text{otherwise}}
-\newcommand{\and}{\text{and}}
+\renewcommand{\and}{\text{and}}
 
 % common exponents
 \newcommand{\inv}{^{-1}}  % inversion
@@ -104,10 +104,9 @@
 \DeclareMathOperator{\Imag}{Im}
 
 % stats/probability stuff
-\newcommand{\P}[1]{{\mathrm P}\paren{#1}}
-\newcommand{\E}[1]{{\mathrm E}\paren{#1}}
+\newcommand{\prob}[1]{{\mathrm P}\paren{#1}}
+\newcommand{\expec}[1]{{\mathrm E}\paren{#1}}
 \DeclareMathOperator*{\var}{var}
-\DeclareMathOperator*{\E}{E}
 \DeclareMathOperator*{\Bias}{Bias}
 \DeclareMathOperator*{\MSE}{MSE}
 \DeclareMathOperator{\Norm}{Norm}
@@ -120,7 +119,6 @@
 \newcommand{\Sign}{\Call{Sign}{}}
 \newcommand{\KeyGen}{\Call{KeyGen}{}}
 \newcommand{\Eav}{\Call{Eav}{}}
-\newcommand{\concat}{\ \| \ }
 \newcommand{\linkedwith}{\: \vcenter{\hbox{\text{\footnotesize$\diamondsuit$}}}\: }
 \renewcommand{\L}{\mathcal L}
 
