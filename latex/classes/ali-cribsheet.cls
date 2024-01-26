@@ -59,6 +59,7 @@
 
 % THEOREM ENVS
 \RequirePackage{amsthm}
-\newtheorem*{definition}{Df}
+\newtheorem*{definition}{Def}
 \newtheorem*{example}{Ex}
-\newtheorem*{theorem}{Th}
+\newtheorem*{theorem}{Thm}
+
