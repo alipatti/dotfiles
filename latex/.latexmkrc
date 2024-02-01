@@ -6,7 +6,7 @@ $rc_report = 0; # don't show list of read RC files
 
 $lualatex = "lualatex --interaction=nonstopmode --synctex=1 --shell-escape %O %S";
 
-$clean_ext = 'fls log synctex.gz sagetex.* run.xml';
+$clean_ext = 'fls log synctex.gz sagetex.* run.xml loe';
 
 @default_files = ("main.tex"); # compile main tex file if no arguments given
 
