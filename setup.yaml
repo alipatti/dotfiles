@@ -17,8 +17,6 @@
 - create:
     - ~/texmf/tex/latex # local TeX tree
 
-    - ~/.config/nvim
-    - ~/.config/fish
     - ~/.config/kitty
 
     - ~/Library/Application Support/Code/User/ # vscode
