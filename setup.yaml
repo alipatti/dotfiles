@@ -17,13 +17,12 @@
 - create:
     - ~/texmf/tex/latex # local TeX tree
 
-    - ~/.config/kitty
-
     - ~/Library/Application Support/Code/
 
 - link:
     ~/.Brewfile: brew/Brewfile
     ~/.config/fish: fish
+    ~/.config/kitty: kitty
     ~/.config/nvim: nvim
     ~/.config/marksman: marksman
     ~/.config/gh: github
