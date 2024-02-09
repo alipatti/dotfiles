@@ -19,7 +19,7 @@
 
     - ~/.config/kitty
 
-    - ~/Library/Application Support/Code/User/ # vscode
+    - ~/Library/Application Support/Code/
 
 - link:
     ~/.Brewfile: brew/Brewfile
