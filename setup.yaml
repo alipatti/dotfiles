@@ -1,23 +1,39 @@
 # see: https://github.com/anishathalye/dotbot#directives
+#
+# TODO:
+# - set up brew integration (https://github.com/wren/dotbot-brew)
 
 - defaults:
     link:
       relink: true
 
 - shell:
-    - description: Install brew if it doesn't exist
-      command: sh brew/setup.sh
-    - description: Install brew packages
-      command: brew bundle --file brew/Brewfile
-    - description: Install perl packages needed for latexindent
-      command: sudo cpan -i YAML::Tiny File::HomeDir Unicode::GCString
-    - description: Install rust.
-      command: rustup-init && rustup component add rustfmt
+    - description: Install mise (https://github.com/jdx/mise)
+      command: curl https://mise.run | sh
+
+    - description: Install zoxide (https://github.com/ajeetdsouza/zoxide)
+      command:
+        curl -sS
+        https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh |
+        bash
+
+    - description: Install starship (https://github.com/starship/starship)
+      command:
+        curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
+
+    # - description: Install brew if it doesn't exist
+    #   command: sh brew/setup.sh
+    #
+    # - description: Install brew packages
+    #   command: brew bundle --file brew/Brewfile
+    #
+    # - description: Install rust.
+    #   command: rustup-init && rustup component add rustfmt
 
 - create:
     - ~/texmf/tex/latex # local TeX tree
 
-    - ~/Library/Application Support/Code/
+    # - ~/Library/Application Support/Code/
 
 - link:
     ~/.Brewfile: brew/Brewfile
