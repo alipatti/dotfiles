@@ -8,6 +8,7 @@ brew/Brewfile.*
 
 nvim/lazy-lock.json
 github/hosts.yml
+fish/fish_variables
 
 *.aux
 *.fdb_latexmk
