@@ -23,10 +23,10 @@ local lsp_servers = {
 		texlab = {
 			forwardSearch = {
 				executable = '/Applications/Skim.app/Contents/SharedSupport/displayline',
-				args = { "-background", "-readingbar", '%l', '%p', },
+				args = { "-background", '%l', '%p', },
 			},
 			build = {
-				onSave = true,
+				onSave = false,
 				args = { "%f" }
 			},
 			latexindent = {
