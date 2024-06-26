@@ -2,12 +2,16 @@
 #
 # TODO:
 # - set up brew integration (https://github.com/wren/dotbot-brew)
+# - install fish shell
 
 - defaults:
     link:
       relink: true
 
 - shell:
+    - description: Install kitty terminal (https://sw.kovidgoyal.net/kitty/)
+      command: curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+
     - description: Install mise (https://github.com/jdx/mise)
       command: curl https://mise.run | sh
 
