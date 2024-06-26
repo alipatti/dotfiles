@@ -10,7 +10,7 @@
 \RequirePackage[colorlinks]{hyperref}
 
 % don't show subsections in TOC
-\setcounter{tocdepth}{1}
+% \setcounter{tocdepth}{1}
 
 % add new page at each part
 \AddToHook{cmd/part/before}{\clearpage}

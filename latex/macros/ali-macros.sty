@@ -7,6 +7,8 @@
 \usepackage{eucal} % nicer-looking \mathcal
 \usepackage{mathrsfs}  % add mathscr
 
+\newcommand{\TODO}{\textbf{\textsf{\color{red} \large !! --- TODO --- !!}}}
+
 % fixing greek letters
 \renewcommand{\phi}{\varphi}
 \renewcommand{\epsilon}{\varepsilon}
@@ -21,6 +23,9 @@
 \newcommand{\norm}[1]{\left\| #1 \right\|}
 \newcommand{\inner}[2]{\left\langle #1 , #2 \right\rangle}
 
+% left maps to arrow 
+\newcommand{\mapsfrom}{\mathbin{\scalebox{-1}[1]{\mapsto}}}
+
 % common sets
 \newcommand{\Z}{\mathbb Z}  % integers
 \newcommand{\R}{\mathbb R}  % reals
@@ -29,6 +34,7 @@
 \newcommand{\N}{\mathbb N}  % naturals
 \newcommand{\T}{\mathbb T}  % circle group
 \newcommand{\A}{\mathbb A}  % algebraic integers
+\newcommand{\F}{\mathbb F}  % finite field
 % \newcommand{\S}{\mathcal{S}} % symetric group
 % \newcommand{\H}{\mathbb H} % quaternions
 \newcommand{\bit}{\set{0,1}}  % bits
@@ -36,8 +42,10 @@
 % function groups, etc.
 \DeclareMathOperator{\Hom}{Hom} % homomorphisms
 \DeclareMathOperator{\Aut}{Aut} % automorphisms
+\DeclareMathOperator{\Gal}{Gal} % Galois group
+\DeclareMathOperator{\Fix}{Fix} % Fixed field
 \DeclareMathOperator{\End}{End} % endomorphism
-\DeclareMathOperator{\Sym}{Sym} 
+\DeclareMathOperator{\Sym}{Sym}
 \DeclareMathOperator{\Frac}{Frac} % fraction field
 \DeclareMathOperator{\Stab}{Stab} % stabilizer
 
@@ -93,6 +101,7 @@
 \DeclareMathOperator{\spn}{span}  % \span is a built-in latex command
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\adj}{adj}
+\DeclareMathOperator{\chr}{char} % \char is built in
 
 % different equals signs
 \RequirePackage{mathtools}
@@ -112,6 +121,7 @@
 \DeclareMathOperator{\Norm}{Norm}
 \DeclareMathOperator{\Gam}{Gamma}
 \DeclareMathOperator{\Binom}{Binom}
+\DeclareMathOperator{\logit}{logit}
 
 % crypto stuff
 \newcommand{\Enc}{\Call{Enc}{}}

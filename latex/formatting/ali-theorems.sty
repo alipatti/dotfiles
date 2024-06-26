@@ -5,10 +5,10 @@
 \RequirePackage{thmtools}
 
 % --- primary environments ---
-\declaretheorem[within=section]{theorem}
-\declaretheorem[within=section, sibling=theorem]{definition}
-\declaretheorem[within=section, sibling=theorem]{conjecture}
-\declaretheorem[within=section, sibling=theorem]{corrolary}
+\declaretheorem{claim}
+
+\declaretheorem{theorem}
+\declaretheorem[sibling=theorem]{definition, conjecture}
 
 % --- secondary environments --- 
 \declaretheoremstyle[
@@ -20,7 +20,7 @@
 
 \declaretheorem[
 	style=secondary,
-	within=theorem,
+	sibling=theorem,
 ]{lemma, corollary, example, remark}
 
 % required for \autoref to work

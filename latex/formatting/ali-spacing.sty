@@ -3,6 +3,7 @@
 
 \RequirePackage[margin=1in]{geometry}  % remove huge default margins
 \RequirePackage{parskip} % no indentation + extra spacing between paragraphs
+\RequirePackage{graphicx}
 
 % ARRAY/TABLE FORMATTING
 \RequirePackage{array}
@@ -13,9 +14,10 @@
 % redefine \hrule
 % https://tex.stackexchange.com/questions/128636/center-hrule-in-the-middle-of-the-page
 \newcommand{\divider}{
-	\medskip
-
-	\hfil\rule{0.5\textwidth}{.4pt}\hfil
-
-	\medskip
+	\begin{center}
+		\bigskip
+		\rule{.2 \textwidth}{0.5pt}
+		% \scalebox{6}[1.2]{$\sim$}
+		\bigskip
+	\end{center}
 }

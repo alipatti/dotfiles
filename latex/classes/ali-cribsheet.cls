@@ -62,4 +62,5 @@
 \newtheorem*{definition}{Def}
 \newtheorem*{example}{Ex}
 \newtheorem*{theorem}{Thm}
+\newtheorem*{corolary}{Cor}
 
