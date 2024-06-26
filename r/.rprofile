@@ -1,2 +1,19 @@
-ggplot2::theme_set(ggplot2::theme_light())
+# vim: set filetype=r :
 
+ggplot2::theme_set(ggplot2::theme_light())
+options(
+    readr.show_col_types = FALSE,
+    repos = c(CRAN = "https://cloud.r-project.org/"),
+    max.print = 500
+)
+
+`-.gg` <- function(plot, layer) {
+    if (missing(layer)) {
+        stop("Cannot use `-.gg()` with a single argument.")
+    }
+    if (!is.ggplot(plot)) {
+        stop("Need a plot on the left side")
+    }
+    plot$layers <- c(layer, plot$layers)
+    plot
+}
