@@ -1,5 +1,14 @@
-- install-brew: true
+- shell:
+    - description: Installing brew if not installed...
+      command: |
+        if ! command -v brew &> /dev/null
+        then
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+      quiet: true
+      stdin: true
+      stdout: true
 
 - brew:
-  - fish
-  - neovim
+    - fish
+    - neovim
