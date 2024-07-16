@@ -14,9 +14,11 @@
 
 - shell:
     - description: Setting fish as default shell...
+      stdout: true
       command: | 
         if [[ $SHELL == *"fish"* ]]
         then
+          echo "Shell not fish. Setting now.
           FISH = $(readlink $(which fish))
           sudo add-shell $FISH
           chsh -s $FISH
