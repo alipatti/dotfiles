@@ -16,7 +16,7 @@
     - description: Setting fish as default shell...
       stdout: true
       command: | 
-        if [[ $SHELL == *"fish"* ]]
+        if [[ $SHELL != *"fish"* ]]
         then
           echo "Shell not fish. Setting now.
           FISH = $(readlink $(which fish))
