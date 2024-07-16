@@ -16,6 +16,7 @@
     - description: Setting fish as default shell...
       command: | 
         if [[ $SHELL == *"fish"* ]]
+        then
           FISH = $(readlink $(which fish))
           sudo add-shell $FISH
           chsh -s $FISH
