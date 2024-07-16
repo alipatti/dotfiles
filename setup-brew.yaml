@@ -19,7 +19,7 @@
         if [[ $SHELL != *"fish"* ]]
         then
           echo "Shell not fish. Setting now."
-          FISH = $(readlink $(which fish))
+          FISH=$(readlink -f $(which fish))
           sudo add-shell $FISH
           chsh -s $FISH
         fi
