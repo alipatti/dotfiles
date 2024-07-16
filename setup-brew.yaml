@@ -1,0 +1,5 @@
+- install-brew: true
+
+- brew:
+  - fish
+  - neovim
