@@ -1,46 +1,54 @@
 # see: https://github.com/anishathalye/dotbot#directives
-#
-# TODO:
-# - set up brew integration (https://github.com/wren/dotbot-brew)
-# - install fish shell
 
 - defaults:
     link:
       relink: true
+    shell:
+      quiet: true
 
 - shell:
-    - description: Install kitty terminal (https://sw.kovidgoyal.net/kitty/)
-      command: curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+    - description: Installing brew if not installed...
+      command: |
+        if ! command -v brew &> /dev/null
+        then
+          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
 
-    - description: Install mise (https://github.com/jdx/mise)
-      command: curl https://mise.run | sh
+    - description: Installing zoxide if not installed...
+      command: |
+        if ! command -v zoxide &> /dev/null
+        then
+          curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+        fi
 
-    - description: Install zoxide (https://github.com/ajeetdsouza/zoxide)
+    - description: Installing starship if not installed...
       command:
-        curl -sS
-        https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh |
-        bash
+        if ! command -v starship &> /dev/null
+        then
+          curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
+        fi
 
-    - description: Install starship (https://github.com/starship/starship)
-      command:
-        curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
+- brew:
+    - fish
+    - neovim
+    - R
 
-    # - description: Install brew if it doesn't exist
-    #   command: sh brew/setup.sh
-    #
-    # - description: Install brew packages
-    #   command: brew bundle --file brew/Brewfile
-    #
-    # - description: Install rust.
-    #   command: rustup-init && rustup component add rustfmt
+- shell:
+    - description: Setting fish as default shell...
+      stdout: true
+      command: |
+        if [[ $SHELL != *"fish"* ]]
+        then
+          echo "Shell not fish. Setting now."
+          FISH=$(readlink -f $(which fish))
+          sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
+        fi
 
 - create:
     - ~/texmf/tex/latex # local TeX tree
-
     # - ~/Library/Application Support/Code/
 
 - link:
-    ~/.Brewfile: brew/Brewfile
     ~/.config/fish: fish
     ~/.config/kitty: kitty
     ~/.config/nvim: nvim
@@ -54,7 +62,7 @@
     ~/.lintr: r/.lintr
     ~/.radian_profile: r/.radian_profile
 
-    ~/Library/Application Support/Code/User: .vscode
+    ~/Library/Application Support/Code/User: .vscode # make compatable with non-mac
     ~/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
     ~/.rustfmt.toml: rust/.rustfmt.toml
