@@ -32,6 +32,8 @@
     - fish
     - neovim
     - R
+    - bat
+    - ripgrep
 
 - shell:
     - description: Setting fish as default shell...
