@@ -15,12 +15,12 @@
 - shell:
     - description: Setting fish as default shell...
       stdout: true
+      stdin: true
       command: | 
         if [[ $SHELL != *"fish"* ]]
         then
           echo "Shell not fish. Setting now."
           FISH=$(readlink -f $(which fish))
-          sudo add-shell $FISH
-          chsh -s $FISH
+          sudo add-shell $FISH && chsh -s $FISH && echo "Shell set to $FISH"
         fi
 

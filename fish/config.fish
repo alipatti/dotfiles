@@ -1,3 +1,9 @@
+# set up brew paths on linux
+if [ "$(uname)" = "Linux" ]
+    and test -f /home/linuxbrew/.linuxbrew/bin/brew
+    /home/linuxbrew/.linuxbrew/bin/brew shellenv | source
+end
+
 # set editor
 set -gx EDITOR nvim
 
@@ -9,11 +15,6 @@ zoxide init fish | source
 starship init fish | source
 mise activate fish | source
 devpod completion fish | source
-
-if [ "$(uname)" = "Linux" ]
-    and test -f /home/linuxbrew/.linuxbrew/bin/brew
-    /home/linuxbrew/.linuxbrew/bin/brew shellenv | source
-end
 
 set -xg MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -xg BAT_THEME "Coldark-Dark"
