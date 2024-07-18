@@ -31,9 +31,10 @@
 - brew:
     - fish
     - neovim
-    - bat
-    - ripgrep
     - r
+    - eza # better ls
+    - ripgrep # better grep
+    - bat # better cat
 
 - shell:
     - description: Setting fish as default shell...
