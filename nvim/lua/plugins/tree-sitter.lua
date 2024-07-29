@@ -8,26 +8,24 @@ return {
 				-- languages to be installed
 				ensure_installed = {
 					"lua",
-					"python",
-					"rust",
-					"javascript",
-					"tsx",
-					"typescript",
 					"vimdoc",
+					"python",
 					"r",
+					"latex",
+					"javascript",
+					"typescript",
+					"tsx",
+					"html",
 				},
+
+				-- synchronous or async installation
+				sync_install = false,
+
+				modules = {},
+				ignore_install = {},
 
 				-- add uninstalled languages automatically
-				auto_install = true,
-
-				highlight = {
-					enable = true,
-				},
-
-				indent = {
-					enable = true,
-					disable = { "python" },
-				},
+				auto_install = false,
 
 				incremental_selection = {
 					enable = true,
@@ -42,13 +40,16 @@ return {
 				textobjects = {
 					select = {
 						enable = true,
-						lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+						-- Automatically jump forward to textobj, similar to targets.vim
+						lookahead = true,
 						keymaps = {
-							-- You can use the capture groups defined in textobjects.scm
+							-- function parameters
 							["aa"] = "@parameter.outer",
 							["ia"] = "@parameter.inner",
+							-- functions
 							["af"] = "@function.outer",
 							["if"] = "@function.inner",
+							-- classes
 							["ac"] = "@class.outer",
 							["ic"] = "@class.inner",
 						},
@@ -77,5 +78,21 @@ return {
 			})
 		end
 	},
-	{ "hiphish/rainbow-delimiters.nvim" }
+
+	{
+		-- auto close/rename html (and other) tags
+		"windwp/nvim-ts-autotag",
+	},
+
+	{
+		-- show context at top of screen when scrolling
+		"nvim-treesitter/nvim-treesitter-context",
+		config = function()
+			require("treesitter-context").setup({
+				separator = "—",
+			})
+			vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "LineNr" })
+			vim.api.nvim_set_hl(0, "TreesitterContext", { link = "Normal" })
+		end
+	}
 }

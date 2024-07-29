@@ -42,19 +42,16 @@ return {
 		opts = {},
 	},
 
-	-- changes matching html tag on edit
-	{
-		"AndrewRadev/tagalong.vim",
-	},
-
-	-- Add indentation guides even on blank lines
+	-- add indentation guides and highlighting of current scope
 	{
 		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
 		opts = {
-			show_trailing_blankline_indent = false,
-			show_current_context_start = true,
-		},
+			scope = { enabled = false },
+		}
 	},
+
+	{ "hiphish/rainbow-delimiters.nvim" },
 
 	-- "gc" to comment visual regions/lines
 	{

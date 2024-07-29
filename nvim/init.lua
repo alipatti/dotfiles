@@ -1,7 +1,6 @@
 -- alipatti's nvim configuration
 
 -- TODO:
--- - add akinsho/toggleterm.nvim
 -- - add keymaps for creating a new file, editing a specific file, etc.
 -- - add keymaps for git (blame, hunk-related, etc.)
 
@@ -47,6 +46,10 @@ vim.o.hlsearch = false
 -- make line numbers default
 vim.wo.number = true
 
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+vim.o.expandtab = true
+
 -- enable mouse mode
 vim.o.mouse = "a"
 
@@ -76,17 +79,14 @@ vim.o.completeopt = "menuone,noselect" -- use full terminal colors
 vim.o.termguicolors = true
 
 -- use natural line wrapping
-vim.wo.wrap = "linebreak"
+-- vim.wo.wrap = "linebreak"
 vim.opt.linebreak = true
-
 
 -- load snippets from external file
 -- require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
 
 -- set color scheme
--- TODO: set color scheme to change with system settings?
--- TODO: add keyboard shortcut to toggle color scheme
-vim.cmd.colorscheme("catppuccin")
+vim.cmd.colorscheme "catppuccin-frappe"
 
 vim.filetype.add({
 	extension = {
