@@ -70,7 +70,6 @@
 
 - create:
     - ~/texmf/tex/latex # local TeX tree
-    # - ~/Library/Application Support/Code/
 
 - link:
     ~/.config/fish: fish
@@ -87,7 +86,6 @@
     ~/.lintr: r/.lintr
     ~/.radian_profile: r/.radian_profile
 
-    ~/Library/Application Support/Code/User: .vscode # make compatable with non-mac
     ~/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
     ~/.rustfmt.toml: rust/.rustfmt.toml
