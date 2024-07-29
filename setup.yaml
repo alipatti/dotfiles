@@ -1,4 +1,4 @@
-# see: https://github.com/anishathalye/dotbot#directives
+#rustfmt see: https://github.com/anishathalye/dotbot#directives
 
 - defaults:
     link:
@@ -11,7 +11,8 @@
       command: |
         if ! command -v brew &> /dev/null
         then
-          NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          NONINTERACTIVE=1 /bin/bash -c \
+            "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         fi
 
     - description: Installing zoxide if not installed...
@@ -22,19 +23,39 @@
         fi
 
     - description: Installing starship if not installed...
-      command:
+      command: |
         if ! command -v starship &> /dev/null
         then
           curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
         fi
 
 - brew:
+    # essentials
     - fish
     - neovim
-    - r
+    - git
+    
+    # command line tools
+    - gh # github
     - eza # better ls
     - ripgrep # better grep
     - bat # better cat
+    - jq # json parser
+    - httpie # api client
+
+    # languages
+    - rustup-init
+    - r
+
+- cask:
+    - docker
+    - kitty
+    - miniconda
+    - skim
+    - stats
+    - zoom
+    - hiddenbar
+    - the-unarchiver
 
 - shell:
     - description: Setting fish as default shell...
@@ -57,6 +78,7 @@
     ~/.config/nvim: nvim
     ~/.config/marksman: marksman
     ~/.config/gh: github
+    ~/.config/starship.toml: starship/starship.toml
     ~/.gitconfig: git/.gitconfig
     ~/.hammerspoon: hammerspoon
     ~/.pandoc: pandoc

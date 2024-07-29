@@ -1,0 +1,51 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+$username\
+$hostname\
+$localip\
+$directory\
+$sudo\
+$fill\
+$git_branch\
+$git_commit\
+$git_state\
+$git_status\
+$git_metrics\
+$conda\
+$direnv\
+$env_var\
+$cmd_duration\
+$line_break\
+$jobs\
+$battery\
+$status\
+$container\
+$shell\
+$character"""
+
+[fill]
+symbol = " "
+
+[sudo]
+format = "[\\(as sudo\\)]($style)"
+disabled = false
+
+# --- #
+# GIT #
+# --- #
+
+[git_branch]
+format = "[$symbol $branch]($style) "
+symbol = ""
+style = "bright-yellow"
+
+[git_status]
+format = '[$ahead_behind$untracked$stashed$renamed$deleted$staged]($style) '
+style = "red"
+
+[git_metrics]
+added_style = "green"
+deleted_style = "red"
+disabled = false
