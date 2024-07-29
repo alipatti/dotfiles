@@ -7,16 +7,15 @@ $hostname\
 $localip\
 $directory\
 $sudo\
+$conda\
+$env_var\
+$cmd_duration\
 $fill\
 $git_branch\
 $git_commit\
 $git_state\
 $git_status\
 $git_metrics\
-$conda\
-$direnv\
-$env_var\
-$cmd_duration\
 $line_break\
 $jobs\
 $battery\
@@ -27,6 +26,14 @@ $character"""
 
 [fill]
 symbol = " "
+
+[cmd_duration]
+format = '[ $duration]($style) '
+style = "bright-black"
+
+[conda]
+format = "\\([$symbol $environment]($style)\\)"
+symbol = ""
 
 [sudo]
 format = "[\\(as sudo\\)]($style)"
