@@ -2,57 +2,49 @@
 -- FLOATING TERMINAL --
 -----------------------
 
--- get hammerspoon application object for the kitty background
--- process if it exists, nil otherwise
-getKitty = function()
-  local pid = hs.execute("pgrep -f 'kitty --instance-group floating'")
-  print(pid)
-  pid = tonumber(pid)
-  print(pid)
-  return hs.application(pid)
-end
+local getKitty = function()
+  local floatingKittyPid = hs.execute("pgrep -f FloatingKittyWindow")
+  local kittyApp = hs.application(tonumber(floatingKittyPid))
 
--- launch the kitty background process
-startKitty = function()
-  io.popen("/Applications/kitty.app/Contents/MacOS/kitty " ..
-    "--instance-group floating " ..
-    "--directory ~ " ..
-    "-o hide_window_decorations=titlebar-only " ..
-    "-o macos_window_resizable=no " ..
-    "-o macos_hide_from_tasks=yes " ..
-    "-o background_opacity=0.95 " ..
-    "-o background_blur=5 " ..
-    "-o tab_bar_style=hidden"
-  )
-end
-
-local createWindow = function(app)
-  hs.eventtap.keyStroke("cmd", "n", nil, app)
+  return kittyApp
 end
 
 hs.hotkey.bind("ctrl", "`", function()
-  -- get the kitty application object
-  local kitty = getKitty()
-  if not kitty then
-    startKitty()
+  -- get the  kitty application object
+  if kitty == nil then
+    kitty = getKitty()
+  end
 
-    -- wait until it activates
+  if kitty == nil then
+    -- open background process
+    io.popen("~/.hammerspoon/floating_kitty")
+
+    -- wait for it to open
     -- while kitty == nil do
     --   kitty = getKitty()
+    --   print("waiting for app")
     -- end
   end
 
-  -- if is showing, hide it
-  if kitty:isFrontmost() then
+  -- hide app if it's showing
+  if not kitty:isHidden() then
     kitty:hide()
+    print("Hiding floating terminal")
     return
   end
 
-  -- if it's not showing, activate it
-  if not kitty:mainWindow() then createWindow(kitty) end
-  local w = kitty:mainWindow()
-  w:moveToUnit '[80,40,20,10]'
-  getKitty():mainWindow():moveToScreen(hs.screen.mainScreen())
-  hs.spaces.moveWindowToSpace(w, hs.spaces.focusedSpace())
-  w:focus()
+  -- create a window if one doesn't exist
+  if not kitty:mainWindow() then
+    hs.eventtap.keyStroke("cmd", "n", nil, kitty)
+
+    print("Creating floating terminal")
+  end
+
+  print("Showing floating terminal")
+
+  hs.spaces.moveWindowToSpace(kitty:mainWindow(), hs.spaces.focusedSpace())
+  kitty:mainWindow():moveToUnit '[80,30,20,10]'
+  kitty:mainWindow():moveToScreen(hs.screen.mainScreen())
+
+  kitty:mainWindow():focus()
 end)

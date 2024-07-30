@@ -5,7 +5,7 @@ font_family Cousine Nerd Font Mono
 font_size 14
 
 # --- THEMING ---
-include Catppuccin-Frappe.conf
+include themes/catppuccin/frappe.conf
 
 # --- TAB BAR CUSTOMIZATION ---
 tab_bar_min_tabs 2
@@ -14,7 +14,7 @@ tab_powerline_style slanted
 tab_title_template "{title}{' :{}:'.format(num_windows) if num_windows > 1 else ''}"
 
 # --- WINDOW CONFIGURATION ---
-macos_titlebar_color background
+# macos_titlebar_color background
 window_padding_width 0 15
 remember_window_size no
 initial_window_width 120c
@@ -24,3 +24,8 @@ initial_window_height 40c
 allow_remote_control yes
 listen_on unix:/tmp/mykitty
 
+
+# BEGIN_KITTY_THEME
+# Catppuccin-Frappe
+include current-theme.conf
+# END_KITTY_THEME

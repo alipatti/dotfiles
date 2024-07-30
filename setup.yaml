@@ -34,7 +34,7 @@
     - fish
     - neovim
     - git
-    
+
     # command line tools
     - gh # github
     - eza # better ls
@@ -94,6 +94,5 @@
 # remove broken symlinks
 - clean:
     - "~"
-    - ~/Library/Application Support/Code/User/
     - ~/texmf/
     - ~/.config/*
