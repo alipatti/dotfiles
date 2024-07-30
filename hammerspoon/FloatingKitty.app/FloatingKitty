@@ -1,7 +1,6 @@
 #!/bin/bash
 
 /Applications/kitty.app/Contents/MacOS/kitty \
-    --instance-group FloatingKitty \
     --directory ~ \
     --title FloatingKittyWindow \
     -o hide_window_decorations=titlebar-only \
@@ -9,8 +8,5 @@
     -o background_opacity=0.95 \
     -o background_blur=5 \
     -o tab_bar_style=hidden \
-    -o initial_window_width=80c \
-    -o initial_window_height=20c
+    -o macos_hide_from_tasks=yes
 
-
-    # -o macos_hide_from_tasks=yes \
