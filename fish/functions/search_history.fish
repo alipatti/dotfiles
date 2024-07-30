@@ -1,5 +1,5 @@
 function search_history
-    set result (history | fzf)
+    set result (history | fzf --no-sort)
 
     if test $result
         commandline --function repaint
