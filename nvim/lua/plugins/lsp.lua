@@ -85,10 +85,11 @@ return {
 				sources = {
 					require("null-ls").builtins.formatting.prettierd,
 					require("null-ls").builtins.diagnostics.markdownlint,
-					require("null-ls").builtins.code_actions.proselint,
-					require("null-ls").builtins.diagnostics.proselint.with({
-						extra_filetypes = { "toml", "yaml" },
-					}),
+					-- FIX: this was causing crash... figure out why
+					-- require("null-ls").builtins.code_actions.proselint,
+					-- require("null-ls").builtins.diagnostics.proselint.with({
+					-- 	extra_filetypes = { "toml", "yaml" },
+					-- }),
 					require("null-ls").builtins.diagnostics.swiftlint,
 					require("null-ls").builtins.formatting.swiftlint,
 					require("null-ls").builtins.formatting.swiftformat,
