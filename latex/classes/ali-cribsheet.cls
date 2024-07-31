@@ -2,7 +2,7 @@
 \ProvidesClass{ali-cribsheet}
 
 \LoadClass{article}
-\usepackage{ali-macros}  % load user macros/base configuration
+\RequirePackage{ali-macros}  % load user macros/base configuration
 
 % PAGE SETUP
 \RequirePackage{parskip}
@@ -13,7 +13,7 @@
 
 % SECTION FORMATTING
 \RequirePackage[explicit]{titlesec}
-\usepackage{xhfill}
+\RequirePackage{xhfill}
 \titleformat{\subsection}  % subsection formatting 
 {\scshape \normalsize} % before
 {}
@@ -49,7 +49,7 @@
 }
 
 % HEADER/FOOTER
-\usepackage{fancyhdr}
+\RequirePackage{fancyhdr}
 \pagestyle{fancy}  % show header
 \fancyhfinit{\scriptsize \itshape}  % change font
 \renewcommand{\headrulewidth}{0pt}  % remove line
