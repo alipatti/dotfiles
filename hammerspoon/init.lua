@@ -20,7 +20,7 @@ toggleApp = function(appName, getApp, openApp)
     local window = getApp():mainWindow()
     hs.spaces.moveWindowToSpace(window, hs.spaces.focusedSpace())
     -- TODO: make this a parameter
-    window:moveToUnit '[80,30,20,10]'
+    window:moveToUnit '[80,70,20,10]'
     window:moveToScreen(hs.screen.mainScreen())
 
     window:focus()
@@ -92,9 +92,22 @@ hs.hotkey.bind("ctrl", "`",
       return kittyApp
     end,
     function()
-      hs.execute("pkill -f FloatingKittyWindow")               -- kill all previous instances
-      io.popen("open -a ~/.hammerspoon/FloatingKitty.app")     -- open a new instance
+      hs.execute("pkill -f FloatingKittyWindow")           -- kill all previous instances
+      io.popen("open -a ~/.hammerspoon/FloatingKitty.app") -- open a new instance
     end
   )
 )
 
+-- floating chatgpt window
+hs.hotkey.bind("ctrl", "tab",
+  toggleApp("ChatGPT",
+    function()
+      local window = hs.application.get("chatgpt")
+      if not window then return nil end
+      return window:application()
+    end,
+    function()
+      hs.application.open("/Applications/ChatGPT.app")
+    end
+  )
+)
