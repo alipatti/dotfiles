@@ -1,98 +1,100 @@
------------------------
--- FLOATING TERMINAL --
------------------------
+--------------------------
+-- HOTKEY FLOATING APPS --
+--------------------------
 
-local getFloatingKittyApplication = function()
-  local floatingKittyPid = hs.execute("pgrep -f FloatingKittyWindow")
-  local kittyApp = hs.application(tonumber(floatingKittyPid))
+-- factory that returns a function that toggles app when called
+toggleApp = function(appName, getApp, openApp)
+  -- function to check if app has a window
+  local windowExists = function()
+    local app = getApp()
 
-  return kittyApp
-end
+    if (app ~= nil) and (app:mainWindow() ~= nil) then
+      return true
+    else
+      return false
+    end
+  end
 
-local kittyWindowExists = function()
-  -- check if app exists
-  local kitty = getFloatingKittyApplication()
-  if kitty == nil then return false end
+  -- function to center and focus the app window
+  local focusAndCenter = function()
+    local window = getApp():mainWindow()
+    hs.spaces.moveWindowToSpace(window, hs.spaces.focusedSpace())
+    -- TODO: make this a parameter
+    window:moveToUnit '[80,30,20,10]'
+    window:moveToScreen(hs.screen.mainScreen())
 
-  -- check if window exists
-  return kitty:mainWindow() ~= nil
-end
+    window:focus()
+  end
 
-local positionWindow = function(window)
-  hs.spaces.moveWindowToSpace(window, hs.spaces.focusedSpace())
-  window:moveToUnit '[80,30,20,10]'
-  window:moveToScreen(hs.screen.mainScreen())
+  local setupApp = function()
+    focusAndCenter()
 
-  window:focus()
-end
+    -- application watcher that hides the app when focus is lost
+    local app = getApp()
+    local watcher = hs.application.watcher.new(
+      function(_name, eventType, eventApp)
+        if eventType ~= hs.application.watcher.deactivated then return end
 
-function setupWatcher()
-  if watcher == nil then
-    print("Starting watcher to close floating terminal when focus is lost")
-    watcher = hs.application.watcher.new(
-      function(_name, event, app)
-        if (event == hs.application.watcher.deactivated)
-            and (app:mainWindow():title() == "FloatingKittyWindow")
-        then
-          print("Hiding floating terminal (focus lost)")
-          kitty:hide()
-        end
+        if eventApp ~= app then return end
+
+        print("Hiding " .. appName .. " (focus lost)")
+        app:hide()
       end
     )
     watcher:start()
   end
+
+  -- toggling function
+  local toggle = function()
+    -- -- get the hammerspoon application object
+    local app = getApp()
+
+    -- if app isn't running, open it
+    if app == nil then
+      print("No runninng application found for " .. appName .. ". Creating one.")
+      openApp()
+
+      -- once the window appears, do necessary setup
+      hs.timer.waitUntil(windowExists, setupApp, .1)
+      return
+    end
+
+    -- hide app if it's in focus
+    if app:mainWindow() == hs.window.focusedWindow() then
+      print("Hiding " .. appName .. " (hotkey pressed)")
+      app:hide()
+      return
+    end
+
+    -- focus main window if it exists
+    if app:mainWindow() then
+      print("Showing " .. appName)
+      focusAndCenter()
+      return
+    end
+
+    -- create a window if one doesn't exist
+    print("Creating window for " .. appName)
+    hs.eventtap.keyStroke("cmd", "n", nil, app)
+    hs.timer.waitUntil(windowExists, focusAndCenter, .1)
+  end
+
+  return toggle
 end
 
-toggleKitty = function()
-  setupWatcher()
+-- floating kitty terminal
+hs.hotkey.bind("ctrl", "`",
+  toggleApp("FloatingKitty",
+    function()
+      local floatingKittyPid = hs.execute("pgrep -f FloatingKittyWindow")
+      local kittyApp = hs.application(tonumber(floatingKittyPid))
 
-  -- -- get the kitty application object
-  kitty = getFloatingKittyApplication()
-
-  if kitty == nil then
-    -- open background process
-    print("No floating terminal process found. Creating one.")
-    hs.execute("pkill -f FloatingKittyWindow")           -- kill all previous instances
-    io.popen("open -a ~/.hammerspoon/FloatingKitty.app") -- open a new instance
-
-    hs.timer.waitUntil(
-      kittyWindowExists,
-      function()
-        local kitty = getFloatingKittyApplication()
-
-        -- center kity window
-        positionWindow(kitty:mainWindow())
-      end,
-      .1
-    )
-    return
-  end
-
-  -- hide app if it's showing
-  if kitty:mainWindow() == hs.window.focusedWindow() then
-    print("Hiding floating terminal (hotkey pressed)")
-    kitty:hide()
-    return
-  end
-
-  -- show window if it exists
-  if kitty:mainWindow() then
-    print("Showing floating terminal")
-    positionWindow(kitty:mainWindow())
-
-    return
-  end
-
-  -- create a window if one doesn't exist
-  print("Creating floating terminal")
-  hs.eventtap.keyStroke("cmd", "n", nil, kitty)
-
-  -- wait until it is created, then center it
-  hs.timer.waitUntil(
-    kittyWindowExists,
-    function() positionWindow(kitty:mainWindow()) end,
-    .1
+      return kittyApp
+    end,
+    function()
+      hs.execute("pkill -f FloatingKittyWindow")               -- kill all previous instances
+      io.popen("open -a ~/.hammerspoon/FloatingKitty.app")     -- open a new instance
+    end
   )
-end
+)
 
-hs.hotkey.bind("ctrl", "`", toggleKitty)
