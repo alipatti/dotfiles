@@ -1,105 +1,120 @@
-%%%%%%%%%
-% SETUP %
-%%%%%%%%%
-
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{presentation}
+\ProvidesClass{ali-presentation}
 \LoadClass{beamer}
+
+\RequirePackage[utf8]{inputenc}
 \RequirePackage{ali-macros}
 
-%%%%%%%%%%
-% COLORS %
-%%%%%%%%%%
+% --- COLORS --- %
 
-% DEFAULTS
-\def\logoPath{logos/carleton_logo.png}
-\def\colorOne{carleton-blue}
-\def\colorTwo{carleton-blue}
-\def\colorThree{carleton-maize}
-\def\logoPath{logos/carleton_logo.png}
-\def\logoWidth{.2}
-
-% UMN COLORS
+% minnesota
 \xdefinecolor{umn-maroon}{HTML}{7A0019}
 \xdefinecolor{umn-maroon-dark}{HTML}{5B0013}
 \xdefinecolor{umn-gold}{HTML}{FFCC33}
 \xdefinecolor{umn-gold-dark}{HTML}{FFB71E}
 \xdefinecolor{umn-gold-light}{HTML}{FFDE7A}
 
-\DeclareOption{umn}{
-	\def\colorOne{umn-maroon}
-	\def\colorTwo{umn-maroon-dark}
-	\def\colorThree{umn-gold-light}
-	\def\logoPath{logos/umn_logo.png}
-	\def\logoWidth{.2}
-}
-
-% CARLETON COLORS
+% carleton
 \xdefinecolor{carleton-blue}{HTML}{003E7E}
 \xdefinecolor{carleton-blue-light}{HTML}{2D538F}
 \xdefinecolor{carleton-maize}{HTML}{FFD24F}
 \xdefinecolor{carleton-maize-dark}{HTML}{EEB111}
 \xdefinecolor{carleton-maize-light}{HTML}{FFEFC8}
 
-\DeclareOption{carleton}{
-	\def\colorOne{carleton-blue}
-	\def\colorTwo{carleton-blue}
-	\def\colorThree{carleton-maize}
-	\def\logoPath{logos/carleton_logo.png}
-	\def\logoWidth{.25}
+% opportunity insights
+\xdefinecolor{oi-green}{HTML}{29B6A4}
+\xdefinecolor{oi-darkcyan}{HTML}{1B7372}
+
+% --- CLASS OPTIONS --- %
+
+\DeclareOption{umn}{
+	\colorlet{primaryColor}{umn-maroon}
+	\colorlet{secondaryColor}{umn-gold}
+	\def\logo{\includegraphics{logo_umn.png}}
 }
+
+\DeclareOption{carleton}{
+	\colorlet{primaryColor}{carleton-blue}
+	\colorlet{secondaryColor}{carleton-maize}
+	\def\logo{\includegraphics{logo_carleton.png}}
+}
+
+\DeclareOption{oi}{
+	\colorlet{primaryColor}{oi-green}
+	\colorlet{secondaryColor}{oi-darkcyan}
+	\def\logo{\includegraphics{oi.png}}
+}
+
+% defaults
+\colorlet{primaryColor}{carleton-blue}
+\colorlet{secondaryColor}{carleton-maize}
+\def\logo{\color{white}x}
+
+\newif\if@ali@memey
+\DeclareOption{memey}{\@ali@memeytrue}
 
 %%%%%%%%%%
 % BEAMER %
 %%%%%%%%%%
 
 % pass all other class options to beamer
-\DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{beamer}}
 \ProcessOptions\relax
 
-% TITLES
-\setbeamerfont{title}{series=\bfseries}
-\setbeamercolor{title}{fg=\colorOne}
-\setbeamercolor{subtitle}{fg=\colorOne!90}
-
-\setbeamerfont{date}{size=\small}
-
-\setbeamerfont{frametitle}{}
-\setbeamercolor{frametitle}{fg=\colorOne}
-
-% LISTS
-\setbeamerfont*{enumerate item}{series=\bfseries}
-\setbeamercolor{item}{fg=\colorOne}
-
-% FRAME COLORS
-\setbeamercolor{lower separation line head}{bg=\colorOne}
-\setbeamercolor{palette tertiary}{fg=\colorTwo,bg=\colorThree}
-\setbeamercolor{palette quaternary}{fg=\colorTwo,bg=\colorThree}
-
-\usefonttheme[onlymath]{serif}
-\setbeamertemplate{headline}[none]
+% hide navigation symbols
 \setbeamertemplate{navigation symbols}{}
 
-% \setbeamercovered{transparent}
-\useoutertheme{infolines}
-\useoutertheme[subsection=false]{miniframes}
+% lists
+\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize subitem}{-}
+\setbeamertemplate{itemize subsubitem}{-}
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{sections/subsections in toc}[sections numbered]
 
-% HEADER
-\addtobeamertemplate{headline}{}{\vspace{1em}}
+% COLORS
+\setbeamercolor{structure}{fg=primaryColor}
+
+\addtobeamertemplate{block begin}{}{
+	\vspace{4pt} {\color{primaryColor!40!white} \hrule} \vspace{1em}
+}
+
+% FONTS
+\RequirePackage{fontspec}
+\usefonttheme[onlymath]{serif}
+
+\setbeamerfont{date}{size=\footnotesize}
+\setbeamerfont{author}{size=\footnotesize}
+\setbeamerfont{subtitle}{series=\normalfont}
+\setbeamerfont{framesubtitle}{series=\normalfont}
+
+\if@ali@memey
+	\setsansfont{Comic Sans MS}
+	\usefonttheme{structurebold}
+\else
+	\setsansfont{Trebuchet MS}
+	% \usefonttheme{structuresmallcapsserif}
+\fi
 
 % FOOTER 
-\setbeamertemplate{footline}{\parbox{\textwidth}{
+\setbeamertemplate{footline}{
+	\parbox{\textwidth}{
 		\hspace{1em}
-		\vspace{1em}
-		\includegraphics[width=\logoWidth\paperwidth]{\logoPath}
+		\resizebox{!}{3em}{\logo}
 		\hfill
 		\color{gray}\tiny
 		\insertframenumber\,/\,\inserttotalframenumber
 		\hspace{1em}
-	}}
 
-% SPACING
+		\vspace{1em}
+	}
+}
+
+% FRAME TITLE
+\addtobeamertemplate{frametitle}{\vspace*{1em}}{\vspace*{.5em}}
+
 \setbeamersize{
-	text margin right=3em,
-	text margin left=3em,
+	sidebar width left=1em,
+	sidebar width right=1em,
+	% 	text margin right=3em,
+	% 	text margin left=3em,
 }

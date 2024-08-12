@@ -14,6 +14,9 @@
 \@ali@sectionstrue
 \DeclareOption{nosections}{\@ali@sectionsfalse}
 
+\newif\if@ali@partnewpage
+\DeclareOption{partnewpage}{\@ali@partnewpagetrue}
+
 \newif\if@ali@lists
 \@ali@liststrue
 \DeclareOption{nolists}{\@ali@listsfalse}
@@ -22,11 +25,11 @@
 \@ali@spacingtrue
 \DeclareOption{nospacing}{\@ali@spacingfalse}
 
-\newif\if@ali@math
-\DeclareOption{math}{\@ali@mathtrue}
-
 \newif\if@ali@theorems
 \DeclareOption{theorems}{\@ali@theoremstrue}
+
+\newif\if@ali@listoftheorems
+\DeclareOption{listoftheorems}{\@ali@listoftheoremstrue}
 
 \newif\if@ali@pseudocode
 \DeclareOption{pseudocode}{\@ali@pseudocodetrue}
@@ -41,22 +44,14 @@
 
 % --- DO THINGS THAT SHOULD ALWAYS HAPPEN --- %
 
-% packages that should always get loaded
 \RequirePackage[colorlinks]{hyperref}
-\RequirePackage{amsmath, amssymb}
-
-% fix greek letters because i'm not a psychopath
-\let\oldphi\phi
-\let\phi\varphi
-\let\varphi\oldphi
-
-\let\oldepsilon\epsilon
-\let\epsilon\varepsilon
-\let\varepsilon\oldepsilon
+\RequirePackage{ali-macros}
 
 % --- PROCESS PACKAGE OPTIONS --- %
 
 \if@ali@titlepage
+	\RequirePackage{tocloft}
+
 	% title on separate page
 	\renewcommand{\maketitle}{
 		\begin{titlepage}
@@ -74,6 +69,9 @@
 				\vspace{1in}
 
 				\begin{minipage}{4in}
+					\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+					\renewcommand*\l@section{\@dottedtocline{1}{.75em}{1.5em}}
+					% \setlength{\cftpartafterpnum}{.5em}
 					\tableofcontents
 				\end{minipage}
 			\end{center}
@@ -112,6 +110,10 @@
 	{\thesubsection}
 	{.7em}
 	{}
+\fi
+
+\if@ali@partnewpage
+	\AddToHook{cmd/part/before}{\clearpage}
 \fi
 
 \if@ali@lists
@@ -153,146 +155,30 @@
 	\RequirePackage{thmtools}
 
 	% --- primary environments ---
-	\declaretheorem{claim}
-
 	\declaretheorem{theorem}
-	\declaretheorem[sibling=theorem]{definition, conjecture}
-
-	% --- secondary environments --- 
-	\declaretheoremstyle[
-		headfont=\itshape\bfseries,
-		notefont=\itshape\mdseries,
-		notebraces={(}{)},
-		bodyfont=\normalfont,
-	]{secondary}
-
-	\declaretheorem[
-		style=secondary,
-		sibling=theorem,
-	]{lemma, corollary, example, remark}
+	\declaretheorem[sibling=theorem]{definition, conjecture, corollary, lemma, example, remark, claim}
 \fi
 
-\if@ali@math
-	\RequirePackage{mathtools} % does a bunch of stuff
-	\RequirePackage{xfrac}  % inline slanted fractions with \sfrac
-	\RequirePackage{eucal} % nicer-looking \mathcal
-	\RequirePackage{mathrsfs}  % add mathscr (script)
+\if@ali@listoftheorems
+	\AtEndDocument{
+		\appendix
 
-	% bracket pairs
-	\newcommand{\set}[1]{\left\{ #1 \right\}}
-	\newcommand{\tuple}[1]{\left\langle #1 \right\rangle}
-	\newcommand{\paren}[1]{\left( #1 \right)}
-	\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
-	\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
-	\newcommand{\abs}[1]{\left| #1 \right|}
-	\newcommand{\norm}[1]{\left\| #1 \right\|}
-	\newcommand{\inner}[2]{\left\langle #1 , #2 \right\rangle}
+		\clearpage
+		\phantomsection
+		\addcontentsline{toc}{section}{\listtheoremname}
+		\listoftheorems[
+			ignoreall,
+			show={definition,theorem,conjecture},
+		]
 
-	% left maps to arrow: <-|
-	\newcommand{\mapsfrom}{\mathbin{\scalebox{-1}[1]{\mapsto}}}
+		\phantomsection
+		\addcontentsline{toc}{section}{\listfigurename}
+		\listoffigures
 
-	% common sets
-	\newcommand{\Z}{\mathbb Z}  % integers
-	\newcommand{\R}{\mathbb R}  % reals
-	\newcommand{\Q}{\mathbb Q}  % rationals
-	\newcommand{\C}{\mathbb C}  % complexes
-	\newcommand{\N}{\mathbb N}  % naturals
-	\newcommand{\T}{\mathbb T}  % circle group
-	\newcommand{\A}{\mathbb A}  % algebraic integers
-	\newcommand{\F}{\mathbb F}  % finite field
-	% \newcommand{\S}{\mathcal{S}} % symetric group
-	\newcommand{\bit}{\set{0,1}}  % bits
-
-	% function groups, etc.
-	\DeclareMathOperator{\Hom}{Hom} % homomorphisms
-	\DeclareMathOperator{\Aut}{Aut} % automorphisms
-	\DeclareMathOperator{\Gal}{Gal} % Galois group
-	\DeclareMathOperator{\Fix}{Fix} % Fixed field
-	\DeclareMathOperator{\End}{End} % endomorphism
-	\DeclareMathOperator{\Sym}{Sym}
-	\DeclareMathOperator{\Frac}{Frac} % fraction field
-	\DeclareMathOperator{\Stab}{Stab} % stabilizer
-
-	% groups
-	\DeclareMathOperator{\GL}{GL}
-	\DeclareMathOperator{\SL}{SL}
-	\DeclareMathOperator{\M}{M}
-	\DeclareMathOperator{\SO}{SO}
-	\DeclareMathOperator{\SU}{SU}
-	\DeclareMathOperator{\U}{U}
-
-	% misc operations
-	\DeclareMathOperator*{\argmin}{arg\,min}  % argmin
-	\DeclareMathOperator*{\argmax}{arg\,max}  % argmax
-	\DeclareMathOperator*{\med}{median}  % median
-	\DeclareMathOperator*{\sign}{sign}  % sign
-	\DeclareMathOperator*{\lcm}{lcm}  % lcm
-	\DeclareMathOperator*{\supp}{supp}  % support
-	\DeclareMathOperator*{\Li}{Li}
-	\newcommand{\given}{\mid}
-	\newcommand{\divides}{\mid}
-	\newcommand{\concat}{\mid}
-	\newcommand{\tensor}{\otimes}  % tensor product
-	\newcommand{\tensorpower}[1]{^{\tensor #1}}  % tensor power
-	\newcommand{\conj}{\overline}  % complex conjugate
-	\newcommand{\cross}{\times}  % cross product
-	\newcommand{\of}{\circ}  % function composition
-	\newcommand{\quotient}[1]{\, \big/ \, #1} % quotient groups
-	\newcommand{\iso}{\cong} % isomorphic
-	\newcommand{\normal}{\lhd} % normal subgroup
-
-	\newcommand{\dual}{\widetilde}
-
-	% frequent text
-	\newcommand{\id}{{\mathrm{id}}} % identity
-	\newcommand{\squarefree}{\ \text{$\square$-free}}
-	\newcommand{\otherwise}{\text{otherwise}}
-	\renewcommand{\and}{\text{and}}
-
-	% common exponents
-	\newcommand{\inv}{^{-1}}  % inversion
-	\newcommand{\trans}{^T} % transpose
-	\renewcommand{\perp}{^\bot} % perp
-	\renewcommand{\star}{^*} % star
-	\newcommand{\units}{^\times}
-
-	% image, rank, span, trace, etc.
-	\DeclareMathOperator{\im}{im}
-	\DeclareMathOperator{\rank}{rank}
-	\DeclareMathOperator{\spn}{span}  % \span is a built-in latex command
-	\DeclareMathOperator{\tr}{tr}
-	\DeclareMathOperator{\adj}{adj}
-	\DeclareMathOperator{\chr}{char} % \char is built in
-
-	% different equals signs
-	\RequirePackage{mathtools}
-	\newcommand{\ceq}{\coloneqq} % definition
-	\newcommand{\qeq}{\overset ? =} % maybe equal
-
-	% fixing \Re, \Im
-	\DeclareMathOperator{\Real}{Re}
-	\DeclareMathOperator{\Imag}{Im}
-
-	% stats/probability stuff
-	\newcommand{\prob}[1]{{\mathrm P}\paren{#1}}
-	\newcommand{\expec}[1]{{\mathrm E}\paren{#1}}
-	\DeclareMathOperator*{\var}{var}
-	\DeclareMathOperator*{\Bias}{Bias}
-	\DeclareMathOperator*{\MSE}{MSE}
-	\DeclareMathOperator{\Norm}{Norm}
-	\DeclareMathOperator{\Gam}{Gamma}
-	\DeclareMathOperator{\Binom}{Binom}
-	\DeclareMathOperator{\logit}{logit}
-
-	% crypto stuff
-	\newcommand{\Enc}{\Call{Enc}{}}
-	\newcommand{\Dec}{\Call{Dec}{}}
-	\newcommand{\Sign}{\Call{Sign}{}}
-	\newcommand{\KeyGen}{\Call{KeyGen}{}}
-	\newcommand{\Eav}{\Call{Eav}{}}
-	\newcommand{\linkedwith}{\: \vcenter{\hbox{\text{\footnotesize$\diamondsuit$}}}\: }
-	\renewcommand{\L}{\mathcal L}
-
+		\phantomsection
+		\addcontentsline{toc}{section}{\listtablename}
+		\listoftables
+	}
 \fi
 
 \if@ali@pseudocode
