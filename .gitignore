@@ -1,14 +1,9 @@
 .DS_store
 
-brew/Brewfile.*
-
-.vscode/History
-.vscode/globalStorage
-.vscode/workspaceStorage
-
 nvim/lazy-lock.json
 github/hosts.yml
 fish/fish_variables
+fish/conf.d
 
 *.aux
 *.fdb_latexmk
