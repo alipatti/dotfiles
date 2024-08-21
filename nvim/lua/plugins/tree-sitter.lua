@@ -84,15 +84,15 @@ return {
 		"windwp/nvim-ts-autotag",
 	},
 
-	{
-		-- show context at top of screen when scrolling
-		"nvim-treesitter/nvim-treesitter-context",
-		config = function()
-			require("treesitter-context").setup({
-				separator = "—",
-			})
-			vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "LineNr" })
-			vim.api.nvim_set_hl(0, "TreesitterContext", { link = "Normal" })
-		end
-	}
+	-- 	{
+	-- 		-- show context at top of screen when scrolling
+	-- 		"nvim-treesitter/nvim-treesitter-context",
+	-- 		config = function()
+	-- 			require("treesitter-context").setup({
+	-- 				separator = "—",
+	-- 			})
+	-- 			vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "LineNr" })
+	-- 			vim.api.nvim_set_hl(0, "TreesitterContext", { link = "Normal" })
+	-- 		end,
+	-- 	}
 }

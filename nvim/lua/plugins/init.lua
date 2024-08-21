@@ -12,8 +12,6 @@ return {
 		},
 	},
 
-	-- "lervag/vimtex", -- latex plugin
-
 	-- shows pending keybinds
 	{
 		"folke/which-key.nvim",
@@ -51,7 +49,7 @@ return {
 		}
 	},
 
-	{ "hiphish/rainbow-delimiters.nvim" },
+	-- { "hiphish/rainbow-delimiters.nvim" },
 
 	-- "gc" to comment visual regions/lines
 	{

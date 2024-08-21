@@ -75,15 +75,14 @@ vim.o.timeout = true
 vim.o.timeoutlen = 300
 
 -- set completeopt to have a better completion experience
-vim.o.completeopt = "menuone,noselect" -- use full terminal colors
+vim.o.completeopt = "menuone,noselect"
+
+-- use full terminal colors
 vim.o.termguicolors = true
 
 -- use natural line wrapping
 -- vim.wo.wrap = "linebreak"
 vim.opt.linebreak = true
-
--- load snippets from external file
--- require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/snippets/" })
 
 -- set color scheme
 vim.cmd.colorscheme "catppuccin-frappe"

@@ -42,13 +42,6 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		dependencies = {
 			{ "neovim/nvim-lspconfig", },
-			{
-				"weilbith/nvim-code-action-menu",
-				config = function()
-					vim.g.code_action_menu_window_border = "rounded"
-					vim.g.code_action_menu_show_details = false
-				end
-			},
 			{ "williamboman/mason.nvim", opts = {} },
 			{ "j-hui/fidget.nvim",       opts = {}, tag = "legacy" },
 			{ "folke/neodev.nvim",       opts = {} },
@@ -107,17 +100,19 @@ return {
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
 			"jmbuhr/otter.nvim",
-			"hrsh7th/cmp-omni",
+			-- "hrsh7th/cmp-omni",
 		},
 		config = function()
-			-- nvim-cmp setup
-			local cmp = require("cmp")
+			-- load snippet enginge
 			local luasnip = require("luasnip")
-
 			luasnip.config.setup({
 				enable_autosnippets = true,
 			})
+			require("luasnip.loaders.from_lua")
+				.load({ paths = "~/.config/nvim/snippets/" })
 
+			-- nvim-cmp setup
+			local cmp = require("cmp")
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -127,13 +122,11 @@ return {
 				mapping = cmp.mapping.preset.insert({
 					["<C-n>"] = cmp.mapping.select_next_item(),
 					["<C-p>"] = cmp.mapping.select_prev_item(),
+					['<C-c>'] = cmp.mapping.abort(),
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.complete({}),
-					["<CR>"] = cmp.mapping.confirm({
-						behavior = cmp.ConfirmBehavior.Replace,
-						select = true,
-					}),
+					["<CR>"] = cmp.mapping.confirm({ select = true }),
 					["<Tab>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.select_next_item()
@@ -156,13 +149,11 @@ return {
 				sources = {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
-					{ name = "omni" },
+					-- { name = "omni" },
 					{ name = "otter" }, -- for quarto
 				},
 			})
 		end
 
 	},
-
-	"gibiansky/vim-latex-objects",
 }
