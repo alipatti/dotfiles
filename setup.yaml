@@ -45,15 +45,13 @@
 
     # languages
     - rustup-init
-    - r
 
 - cask:
     - docker
     - kitty
-    - miniconda
+    - miniforge
     - skim
     - stats
-    - zoom
     - hiddenbar
     - the-unarchiver
 
