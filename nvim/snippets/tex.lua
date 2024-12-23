@@ -98,12 +98,47 @@ return {
   ),
 
   -- environments
-  s({ trig = "beq", snippetType = "autosnippet" },
+  -- TODO: make this programatic
+  s({ trig = "\\beq%s", snippetType = "autosnippet", regTrig = true },
     fmta(
       [[
       \begin{equation}
           <>
       \end{equation}
+      ]],
+      { i(1) }
+    )
+  ),
+
+  s({ trig = "\\bit\\s", snippetType = "autosnippet", regTrig = true },
+    fmta(
+      [[
+      \begin{itemize}
+          <>
+      \end{itemize}
+      ]],
+      { i(1) }
+    )
+  ),
+
+
+  s({ trig = "\\ben\\s", snippetType = "autosnippet", regTrig = true },
+    fmta(
+      [[
+      \begin{enumerate}
+          <>
+      \end{enumerate}
+      ]],
+      { i(1) }
+    )
+  ),
+
+  s({ trig = "\\baled\\s", snippetType = "autosnippet", regTrig = true },
+    fmta(
+      [[
+      \begin{aligned}
+          <>
+      \end{aligned}
       ]],
       { i(1) }
     )
