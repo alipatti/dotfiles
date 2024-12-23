@@ -1,0 +1,17 @@
+name: r
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # r environment
+  - r-base=4.3
+  - libblas=*=*openblas
+  - radian
+
+  # r packages
+  - r-essentials
+  - r-gtools
+  - r-janitor
+  - r-qgam
+  - r-tidycensus
+  - r-furrr
