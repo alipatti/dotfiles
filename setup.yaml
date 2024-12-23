@@ -78,13 +78,12 @@
     ~/.config/starship.toml: starship/starship.toml
     ~/.gitconfig: git/.gitconfig
     ~/.hammerspoon: hammerspoon
-    ~/.pandoc: pandoc
 
     ~/.rprofile: r/.rprofile
     ~/.lintr: r/.lintr
     ~/.radian_profile: r/.radian_profile
 
-    ~/texmf/tex/latex/local: latex
+    ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
     ~/.rustfmt.toml: rust/.rustfmt.toml
     ~/.prettierrc.yml: prettier/.prettierrc.yml
