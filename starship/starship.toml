@@ -32,7 +32,7 @@ format = '[ $duration]($style) '
 style = "bright-black"
 
 [conda]
-format = "\\([$symbol $environment]($style)\\)"
+format = "\\([$symbol $environment]($style)\\) "
 symbol = ""
 
 [sudo]
