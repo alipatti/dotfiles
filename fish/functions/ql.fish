@@ -1,3 +1,5 @@
 function ql
-	qlmanage -p $argv[1] >> /dev/null
+	set file $argv[1]
+	echo "Viewing $file"
+	qlmanage -p $file 2> /dev/null > /dev/null &
 end
