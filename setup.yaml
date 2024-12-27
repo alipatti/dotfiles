@@ -1,4 +1,10 @@
-#rustfmt see: https://github.com/anishathalye/dotbot#directives
+# see: https://github.com/anishathalye/dotbot#directives
+
+# TODO: refactor into separate files
+# - essential stuff that doesn't require root (zoxide, starship, etc.)
+#   used on e.g. machines i ssh into
+# - comprehensive mac-only workstation setup
+#   split this up further? e.g. command-line utilities, python, R, rust, etc.
 
 - defaults:
     link:
@@ -6,7 +12,9 @@
     shell:
       quiet: true
 
+# essential setup (all platforms)
 - shell:
+    # TODO: use the brew dotbot directive
     - description: Installing brew if not installed...
       command: |
         if ! command -v brew &> /dev/null
@@ -29,6 +37,7 @@
           curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
         fi
 
+# mac-only setup
 - brew:
     # essentials
     - fish
@@ -42,9 +51,6 @@
     - bat # better cat
     - jq # json parser
     - httpie # api client
-
-    # languages
-    - rustup-init
 
 - cask:
     - docker
@@ -68,28 +74,36 @@
 
 - create:
     - ~/texmf/tex/latex # local TeX tree
+    - ~/.local/bin
 
 - link:
     ~/.config/fish: fish
     ~/.config/kitty: kitty
     ~/.config/nvim: nvim
-    ~/.config/marksman: marksman
     ~/.config/gh: github
+    ~/.config/conda: conda
     ~/.config/starship.toml: starship/starship.toml
+
     ~/.gitconfig: git/.gitconfig
     ~/.hammerspoon: hammerspoon
 
     ~/.rprofile: r/.rprofile
+
     ~/.lintr: r/.lintr
     ~/.radian_profile: r/.radian_profile
+    ~/.rustfmt.toml: rust/.rustfmt.toml
+    ~/.prettierrc.yml: prettier/.prettierrc.yml
 
     ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
-    ~/.rustfmt.toml: rust/.rustfmt.toml
-    ~/.prettierrc.yml: prettier/.prettierrc.yml
+
+    ~/.local/bin/:
+      path: bin/**
+      glob: true
 
 # remove broken symlinks
 - clean:
     - "~"
     - ~/texmf/
-    - ~/.config/*
+    - ~/.config/
+    - ~/.local/bin
