@@ -10,6 +10,7 @@ set -gx EDITOR nvim
 # update path
 fish_add_path ~/.cargo/bin
 fish_add_path ~/.local/bin
+fish_add_path ~/.deno/bin
 
 zoxide init fish | source
 starship init fish | source
