@@ -33,18 +33,20 @@
         fi
 
 # mac-only setup
-- install-brew:
-  true
+- install-brew: true
 
 - brew:
     # essentials
-    - fish
-    - neovim
     - git
+    - fish # shell
+    - neovim # editor
+    - tectonic # latex
 
     # command line tools
     - gh # github
     - eza # better ls
+    - fd # better find
+    - zoxide # better cd
     - ripgrep # better grep
     - ripgrep-all # search pdfs & more
     - bat # better cat
@@ -62,7 +64,6 @@
 
     # development
     - miniforge # anaconda
-    - tectonic # latex
     - docker
 
     # misc

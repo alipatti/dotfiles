@@ -2,9 +2,8 @@
 
 set -e
 
-CONFIG="setup.yaml"
+TEMPFILE="/tmp/dotbot-config-tempfile.yml"
 DOTBOT_DIR="dotbot/dotbot"
-
 DOTBOT_BIN="bin/dotbot"
 BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -12,8 +11,13 @@ cd "${BASEDIR}"
 git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
 git submodule update --init --recursive "dotbot"
 
+# concatenate all config files into one
+cat *.dotbot.yaml > "$TEMPFILE"
+
 "${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" \
 	--plugin-dir dotbot/dotbot-brew \
 	--plugin-dir dotbot/dotbot-conditional \
-	-c "${CONFIG}" "${@}"
+	--exit-on-failure \
+	-c "${TEMPFILE}" \
+	"${@}"
 
