@@ -20,6 +20,10 @@ devpod completion fish | source
 set -xg MANPAGER "sh -c 'col -bx | bat -l man -p'"
 set -xg BAT_THEME "Coldark-Dark"
 
+# https://docs.brew.sh/Manpage#environment
+set -xg HOMEBREW_AUTO_UPDATE_SECS (units -t '2 weeks' seconds)
+set -xg HOMEBREW_NO_ENV_HINTS 1
+
 set -xg FZF_DEFAULT_OPTS '--border --height 40%
     --layout="reverse" --info="right"
     --padding="1" --margin="1"
