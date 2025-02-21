@@ -13,3 +13,6 @@ fish/conf.d
 # ipython stuff
 ipython/**/README
 ipython/**/*.sqlite
+
+# dummy file to bin symlinking works properly
+bin/temp
