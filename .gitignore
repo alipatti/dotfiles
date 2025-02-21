@@ -10,3 +10,6 @@ fish/conf.d
 *.fls
 *.log
 
+# ipython stuff
+ipython/**/README
+ipython/**/*.sqlite
