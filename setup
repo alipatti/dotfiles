@@ -17,6 +17,7 @@ cat *.dotbot.yaml > "$TEMPFILE"
 "${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" \
 	--plugin-dir dotbot/dotbot-brew \
 	--plugin-dir dotbot/dotbot-conditional \
+	--plugin-dir dotbot/dotbot-if \
 	--exit-on-failure \
 	-c "${TEMPFILE}" \
 	"${@}"

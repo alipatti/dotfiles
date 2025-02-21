@@ -13,8 +13,10 @@
       quiet: true
     brew:
       stdout: false
+      stderr: false
     cask:
       stdout: false
+      stderr: false
 
 # essential setup (all platforms)
 - shell:
@@ -31,43 +33,6 @@
         then
           curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
         fi
-
-# mac-only setup
-- install-brew: true
-
-- brew:
-    # essentials
-    - git
-    - fish # shell
-    - neovim # editor
-    - tectonic # latex
-
-    # command line tools
-    - gh # github
-    - eza # better ls
-    - fd # better find
-    - zoxide # better cd
-    - ripgrep # better grep
-    - ripgrep-all # search pdfs & more
-    - bat # better cat
-    - jq # json parser
-    - scc # line counter
-
-- cask:
-    # gui apps
-    - kitty # terminal
-    - skim # pdf viewer
-
-    # menu bar apps
-    - stats
-    - hiddenbar
-
-    # development
-    - miniforge # anaconda
-    - docker
-
-    # misc
-    - the-unarchiver
 
 - shell:
     - description: Setting fish as default shell...
