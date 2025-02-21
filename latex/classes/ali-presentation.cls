@@ -1,8 +1,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{ali-presentation}
+
+\PassOptionsToClass{aspectratio=169}{beamer}
 \LoadClass{beamer}
 
-\RequirePackage[utf8]{inputenc}
 \RequirePackage{ali-macros}
 
 % --- COLORS --- %
@@ -65,7 +66,7 @@
 \setbeamertemplate{navigation symbols}{}
 
 % lists
-\setbeamertemplate{itemize item}{\textbullet}
+\setbeamertemplate{itemize item}{-}
 \setbeamertemplate{itemize subitem}{-}
 \setbeamertemplate{itemize subsubitem}{-}
 \setbeamertemplate{enumerate items}[default]
@@ -77,6 +78,10 @@
 \addtobeamertemplate{block begin}{}{
 	\vspace{4pt} {\color{primaryColor!40!white} \hrule} \vspace{1em}
 }
+
+% SPACING 
+\setlength{\parskip}{0.7em}
+% \setlength{\itemsep}{2em}
 
 % FONTS
 \RequirePackage{fontspec}
