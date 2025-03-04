@@ -1,6 +1,13 @@
 -- LSPs to be installed
 local lsp_servers = {
-	pyright = {},
+	-- python
+	pyright = {
+		pyright = {
+			-- using ruff's import organizer
+			disableOrganizeImports = true,
+		},
+	},
+	ruff = {},
 
 	-- rust
 	rust_analyzer = {},
@@ -12,6 +19,9 @@ local lsp_servers = {
 
 	-- r
 	r_language_server = {},
+
+	-- lua
+	lua_ls = {},
 
 	-- quarto/markdown
 	marksman = {
@@ -83,10 +93,14 @@ return {
 					-- require("null-ls").builtins.diagnostics.proselint.with({
 					-- 	extra_filetypes = { "toml", "yaml" },
 					-- }),
-					require("null-ls").builtins.diagnostics.swiftlint,
+
+					-- fish
+					require("null-ls").builtins.diagnostics.fish,
+					require("null-ls").builtins.formatting.fish_indent,
+
+					-- swift
 					require("null-ls").builtins.formatting.swiftlint,
 					require("null-ls").builtins.formatting.swiftformat,
-					require("null-ls").builtins.formatting.black,
 				}
 			})
 		end
