@@ -6,6 +6,7 @@
     - fish # shell
     - neovim # editor
     - tectonic # latex
+    - uv # python
 
     # command line tools
     - gh # github
