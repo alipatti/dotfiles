@@ -7,10 +7,11 @@ $hostname\
 $localip\
 $directory\
 $sudo\
-$conda\
-$env_var\
 $cmd_duration\
 $fill\
+$conda\
+$python\
+
 $git_branch\
 $git_commit\
 $git_state\
@@ -30,6 +31,15 @@ symbol = " "
 [cmd_duration]
 format = '[ $duration]($style) '
 style = "bright-black"
+
+[python]
+format = '[${symbol} (${version} )(\($virtualenv\) )]($style)'
+symbol = ""
+style = ""
+detect_extensions = []
+detect_files = []
+detect_folders = []
+version_format = '${major}.${minor}'
 
 [conda]
 format = "\\([$symbol $environment]($style)\\) "
