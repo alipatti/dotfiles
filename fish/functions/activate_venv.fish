@@ -23,7 +23,7 @@ function activate_venv --on-variable PWD
         set cur (echo $cur | sed 's/\/[^\/]*$//')
     end
 
-    if [ (which python3) -ef $venv_directory/bin/python3 ]
+    if [ (which python3) = $venv_directory/bin/python3 ]
         # venv is already active!
         return 0
     end
