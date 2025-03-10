@@ -13,7 +13,7 @@ bind \cr search_history
 activate_venv
 
 # load environment variables
-export (cat ~/.config/fish/env/*.env | grep "^[^#]" | xargs -L 1)
+cat ~/.config/fish/env/*.env | grep "^[^#]" | sed "s/^/export /" | source
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
