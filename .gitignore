@@ -1,7 +1,6 @@
 .DS_store
 
 nvim/lazy-lock.json
-github/hosts.yml
 fish/fish_variables
 fish/conf.d
 
@@ -16,3 +15,7 @@ ipython/**/*.sqlite
 
 # dummy file to bin symlinking works properly
 bin/temp
+
+# secrets
+*.local.*
+github/hosts.yml
