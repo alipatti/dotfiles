@@ -33,6 +33,8 @@ set -xg FZF_DEFAULT_OPTS '--border --height 40%
 
 bind \cr search_history
 
+# load the automatic venv activation function
+activate_venv
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
