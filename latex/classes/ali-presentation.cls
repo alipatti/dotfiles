@@ -66,9 +66,13 @@
 \setbeamertemplate{navigation symbols}{}
 
 % lists
-\setbeamertemplate{itemize item}{-}
-\setbeamertemplate{itemize subitem}{-}
-\setbeamertemplate{itemize subsubitem}{-}
+
+% \setbeamertemplate{itemize item}{-}
+% \setbeamertemplate{itemize subitem}{-}
+% \setbeamertemplate{itemize subsubitem}{-}
+\setbeamertemplate{itemize item}{▪}
+\setbeamertemplate{itemize subitem}{▪}
+\setbeamertemplate{itemize subsubitem}{▪}
 \setbeamertemplate{enumerate items}[default]
 \setbeamertemplate{sections/subsections in toc}[sections numbered]
 
@@ -81,7 +85,7 @@
 
 % SPACING 
 \setlength{\parskip}{0.7em}
-% \setlength{\itemsep}{2em}
+\setlength{\itemsep}{2em}
 
 % FONTS
 \RequirePackage{fontspec}
@@ -89,6 +93,7 @@
 
 \setbeamerfont{date}{size=\footnotesize}
 \setbeamerfont{author}{size=\footnotesize}
+\setbeamerfont{title}{series=\bfseries, size=\huge}
 \setbeamerfont{subtitle}{series=\normalfont}
 \setbeamerfont{framesubtitle}{series=\normalfont}
 
@@ -114,6 +119,24 @@
 	}
 }
 
+% TITLE PAGE
+\setbeamertemplate{title page}{
+	% \centering
+	\usebeamercolor[fg]{subtitle}
+
+	\usebeamerfont{title}\inserttitle
+
+	\usebeamerfont{subtitle}\insertsubtitle
+
+	\bigskip
+
+	\usebeamerfont{author}\insertauthor
+
+	% \usebeamerfont{institute}\insertinstitute
+
+	\usebeamerfont{date}\insertdate
+}
+
 % FRAME TITLE
 \addtobeamertemplate{frametitle}{\vspace*{1em}}{\vspace*{.5em}}
 
@@ -123,3 +146,18 @@
 	% 	text margin right=3em,
 	% 	text margin left=3em,
 }
+
+% SECTION SPLASH PAGE
+\AtBeginSection[]{\begin{frame}
+	\begin{minipage}[b][\textwidth / 8][c]{\textwidth}
+		\centering
+		\color{primaryColor} \huge
+		\insertsection
+	\end{minipage}
+	 
+	% \hrule
+	\bigskip
+
+	\footnotesize \insertsectionnavigationhorizontal{\textwidth}{}{}
+\end{frame}}
+
