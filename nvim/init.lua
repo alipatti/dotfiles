@@ -28,6 +28,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup("plugins")
+-- require("telescope").load_extension("ui-select")
 
 -------------
 -- KEYMAPS --
@@ -90,5 +91,6 @@ vim.cmd.colorscheme "catppuccin-frappe"
 vim.filetype.add({
 	extension = {
 		sage = "python",
+		pest = "pest",
 	}
 })

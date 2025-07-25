@@ -1,32 +1,43 @@
 -- LSPs to be installed
 local lsp_servers = {
-	-- python
+	-- python type checking
+	-- TODO: remove this when ruff type checker comes out
 	pyright = {
 		pyright = {
 			-- using ruff's import organizer
 			disableOrganizeImports = true,
 		},
 	},
+	-- python formatting/linting
 	ruff = {},
 
 	-- rust
-	rust_analyzer = {},
+	rust_analyzer = {
+		['rust-analyzer'] = {
+			cargo = { targetDir = true }
+		}
+	},
 
 	-- web development
 	html = {},
+	deno = {},
 	cssls = {},
 	emmet_ls = {},
 
 	-- r
-	r_language_server = {},
+	-- r_language_server = {},
+
+	pest_ls = {
+		filetypes = { "pest" },
+	},
 
 	-- lua
 	lua_ls = {},
 
 	-- quarto/markdown
-	marksman = {
-		filetypes = { "markdown", "quarto" },
-	},
+	-- marksman = {
+	-- 	filetypes = { "markdown", "quarto" },
+	-- },
 
 	-- latex
 	texlab = {
@@ -86,14 +97,9 @@ return {
 		config = function()
 			require("null-ls").setup({
 				sources = {
-					require("null-ls").builtins.formatting.prettierd,
-					require("null-ls").builtins.diagnostics.markdownlint,
-					-- FIX: this was causing crash... figure out why
-					-- require("null-ls").builtins.code_actions.proselint,
-					-- require("null-ls").builtins.diagnostics.proselint.with({
-					-- 	extra_filetypes = { "toml", "yaml" },
-					-- }),
-
+					-- require("null-ls").builtins.formatting.prettier,
+					-- require("null-ls").builtins.diagnostics.markdownlint,
+					
 					-- fish
 					require("null-ls").builtins.diagnostics.fish,
 					require("null-ls").builtins.formatting.fish_indent,

@@ -45,5 +45,8 @@ return {
 			end,
 		},
 		lazy = false,
+		keys = {
+			{ "<leader>f", "<cmd>NvimTreeToggle<cr>", desc = "Open file tree" },
+		}
 	},
 }
