@@ -8,8 +8,10 @@ local lsp_servers = {
 			disableOrganizeImports = true,
 		},
 	},
-	-- python formatting/linting
-	ruff = {},
+	
+	-- astral python tools
+	ruff = {}, -- linter/formatter
+	-- ty = {}, -- type checker
 
 	-- rust
 	rust_analyzer = {
@@ -20,12 +22,12 @@ local lsp_servers = {
 
 	-- web development
 	html = {},
-	deno = {},
+	denols = {},
 	cssls = {},
 	emmet_ls = {},
 
 	-- r
-	-- r_language_server = {},
+	r_language_server = {},
 
 	pest_ls = {
 		filetypes = { "pest" },
@@ -75,20 +77,13 @@ return {
 			capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 
 			require("mason-lspconfig").setup({
+				automatic_enable = true,
 				ensure_installed = vim.tbl_keys(lsp_servers),
 				automatic_installation = true,
 			})
 
-			require("mason-lspconfig").setup_handlers({
-				function(server_name)
-					require("lspconfig")[server_name].setup({
-						capabilities = capabilities,
-						settings = lsp_servers[server_name],
-					})
-				end,
-			})
 
-			require("lspconfig").sourcekit.setup({})
+			-- require("lspconfig").sourcekit.setup({})
 		end
 	},
 
@@ -97,9 +92,9 @@ return {
 		config = function()
 			require("null-ls").setup({
 				sources = {
-					-- require("null-ls").builtins.formatting.prettier,
-					-- require("null-ls").builtins.diagnostics.markdownlint,
-					
+					require("null-ls").builtins.formatting.prettier,
+					require("null-ls").builtins.diagnostics.markdownlint,
+
 					-- fish
 					require("null-ls").builtins.diagnostics.fish,
 					require("null-ls").builtins.formatting.fish_indent,
