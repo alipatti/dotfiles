@@ -1,0 +1,42 @@
+#!/usr/bin/env -S uv run --script --quiet
+# /// script
+# dependencies = ["tomli"]
+# ///
+
+import subprocess
+from pathlib import Path
+
+import tomli
+
+
+def get_version(commit: str) -> str:
+    commit_hash = subprocess.check_output(["git", "rev-parse", commit]).decode().strip()
+
+    pyproject_str = subprocess.check_output(
+        ["git", "show", f"{commit_hash}:pyproject.toml"]
+    )
+
+    return tomli.loads(pyproject_str.decode())["project"]["version"]
+
+
+def main():
+    if not Path("pyproject.toml").exists():
+        return  # not python project
+
+    current_version = get_version("HEAD")
+    old_version = get_version("HEAD~1")
+
+    if current_version != old_version:
+        print(f"Detected package version change ({old_version} -> {current_version})")
+        print(f"Adding tag v{current_version}")
+
+        subprocess.check_call(["git", "tag", f"v{current_version}"])
+
+    else:
+        print("No package version change detected")
+
+
+if __name__ == "__main__":
+    main()
+
+# vim: filetype=python
