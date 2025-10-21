@@ -5,6 +5,7 @@
 	helper = osxkeychain
 [init]
 	defaultBranch = main
+	templatedir = ~/.git/templates
 
 [push]
 	autoSetupRemote = true
@@ -15,3 +16,5 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[core]
+	excludesfile = /Users/ali/.gitignore
