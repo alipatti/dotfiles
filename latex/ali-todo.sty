@@ -1,0 +1,20 @@
+\ProvidesPackage{ali-macros}
+
+\RequirePackage[dvipsnames]{xcolor}
+
+\RequirePackage[final]{todonotes}
+
+\setuptodonotes{
+	tickmarkheight=3pt,
+	size=small,
+	linecolor=red,
+	backgroundcolor=red!10,
+	bordercolor=red,
+	textcolor=red,
+	prepend,
+	caption={\textbf{TODO}}
+}
+
+\newcommand{\note}[1]{\todo[noprepend,textcolor=black,linecolor=orange,bordercolor=orange,backgroundcolor=orange!5]{#1}}
+
+\newcommand{\inlinetodo}[1]{{\color{red}\textbf{TODO:} \textit{#1}}}

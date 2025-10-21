@@ -46,6 +46,7 @@
 
 \RequirePackage[colorlinks]{hyperref}
 \RequirePackage{ali-macros}
+\RequirePackage{ali-todo}
 
 % --- PROCESS PACKAGE OPTIONS --- %
 
@@ -110,6 +111,13 @@
 	{\thesubsection}
 	{.7em}
 	{}
+
+	\titleformat{\subsubsection}[runin]
+	{\normalfont\normalsize\scshape}
+	{}
+	{0em}
+	{}
+	[.]
 \fi
 
 \if@ali@partnewpage
@@ -156,7 +164,7 @@
 
 	% --- primary environments ---
 	\declaretheorem{theorem}
-	\declaretheorem[sibling=theorem]{definition, conjecture, corollary, lemma, example, remark, claim}
+	\declaretheorem[sibling=theorem]{definition, conjecture, corollary, lemma, example, remark, claim, proposition}
 \fi
 
 \if@ali@listoftheorems

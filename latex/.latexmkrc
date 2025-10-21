@@ -4,9 +4,11 @@ $pdf_mode = 4; # compile directly to pdf w/ lualatex
 $silent = 1; # don't show log messages
 $rc_report = 0; # don't show list of read RC files
 
-$lualatex = "lualatex --interaction=nonstopmode --synctex=1 --shell-escape %O %S";
+# $aux_dir = ".latexmk"; # put temporary files here
 
-$clean_ext = 'fls log synctex.gz sagetex.* run.xml loe';
+$lualatex = "lualatex --interaction=nonstopmode --shell-escape %O %S";
+
+$clean_ext = 'fls log synctex.gz sagetex.* run.xml loe bbl texput.fls bbl*';
 
 @default_files = ("main.tex"); # compile main tex file if no arguments given
 
