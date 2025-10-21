@@ -27,7 +27,7 @@ local lsp_servers = {
 	emmet_ls = {},
 
 	-- r
-	r_language_server = {},
+	-- r_language_server = {},
 
 	pest_ls = {
 		filetypes = { "pest" },
@@ -67,15 +67,11 @@ return {
 			{ "neovim/nvim-lspconfig", }, -- TODO: update to new lsp integration in nvim
 			{ "williamboman/mason.nvim", opts = {} },
 			{ "j-hui/fidget.nvim",       opts = {}, tag = "legacy" },
-			{ "folke/neodev.nvim",       opts = {} },
+			{ "folke/lazydev.nvim",      opts = {} },
 			{ "hrsh7th/cmp-nvim-lsp",    opts = {} },
 
 		},
 		config = function()
-			-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-			-- local capabilities = vim.lsp.protocol.make_client_capabilities()
-			-- capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
-
 			require("mason-lspconfig").setup({
 				automatic_enable = true,
 				ensure_installed = vim.tbl_keys(lsp_servers),

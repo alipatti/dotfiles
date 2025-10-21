@@ -19,13 +19,14 @@ return {
 			spec = {
 				{
 					mode = "n",
-					{ ";e", vim.diagnostic.open_float,   desc = "Hover diagnostic" },
+					{ ";e", vim.diagnostic.open_float,   desc = "hover diagnostic" },
 					{ ";f", vim.lsp.buf.format,          desc = "format buffer" },
+					{ ";a", vim.lsp.buf.code_action,     desc = "code actions" },
 					{ ";d", vim.lsp.buf.definition,      desc = "go to definition" },
 					{ ";D", vim.lsp.buf.declaration,     desc = "go to declaration" },
 					{ ";i", vim.lsp.buf.implementation,  desc = "go to implementation" },
 					{ ";t", vim.lsp.buf.type_definition, desc = "go to type definition" },
-					{ ";R", vim.lsp.buf.rename,          desc = "rename symbol" },
+					{ ";r", vim.lsp.buf.rename,          desc = "rename symbol" },
 					{ ";h", vim.lsp.buf.hover,           desc = "hover" },
 				},
 				{
@@ -36,9 +37,10 @@ return {
 				},
 				{
 					mode = "n",
-					{ "U",     "<cmd>redo<cr>", desc = "redo" },
-					{ "<D-]>", "<cmd>bn<cr>",   desc = "next buffer" },
-					{ "<D-[>", "<cmd>bp<cr>",   desc = "previous buffer" },
+					{ "U",                "<cmd>redo<cr>", desc = "redo" },
+					{ "<D-]>",            "<cmd>bn<cr>",   desc = "next buffer" },
+					{ "<D-[>",            "<cmd>bp<cr>",   desc = "previous buffer" },
+					{ "<leader><leader>", "<C-^>",         desc = "previous buffer" },
 				},
 			}
 		},
@@ -48,14 +50,12 @@ return {
 	-- highlight todo comments
 	{
 		"folke/todo-comments.nvim",
-		opts = {},
+		opts = {
+			keywords = {
+				SECTION = { icon = "§ ", color = "hint" },
+			}
+		},
 		dependencies = { "nvim-lua/plenary.nvim" },
-	},
-
-	-- adds git releated signs to the gutter, as well as utilities for managing changes
-	{
-		"lewis6991/gitsigns.nvim",
-		opts = {},
 	},
 
 	-- add indentation guides and highlighting of current scope

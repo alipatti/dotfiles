@@ -24,18 +24,6 @@ return {
 				"<cmd>QuartoClosePreview<cr>",
 				desc = "stop preview"
 			},
-			{
-				"<leader>qr",
-				"<cmd>ToggleTermSendCurrentLine<cr>",
-				desc = "run current line",
-				mode = "n",
-			},
-			{
-				"<leader>qr",
-				"<cmd>'<,'>ToggleTermSendVisualLines<cr>",
-				desc = "run selection",
-				mode = "v",
-			}
 		},
 	},
 

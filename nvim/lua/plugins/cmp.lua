@@ -7,8 +7,9 @@ return {
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
 			"jmbuhr/otter.nvim",
-			"davidsierradz/cmp-conventionalcommits",
 			"hrsh7th/cmp-path",
+			"davidsierradz/cmp-conventionalcommits",
+			"petertriho/cmp-git", -- reference issues, people, etc.
 		},
 		config = function()
 			-- load snippet enginge
@@ -33,31 +34,14 @@ return {
 					['<C-c>'] = cmp.mapping.abort(),
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
-					["<C-Space>"] = cmp.mapping.complete({}),
-					["<CR>"] = cmp.mapping.confirm({ select = true }),
-					["<Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_next_item()
-						elseif luasnip.expand_or_jumpable() then
-							luasnip.expand_or_jump()
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
-					["<S-Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_prev_item()
-						elseif luasnip.jumpable(-1) then
-							luasnip.jump(-1)
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
+					["<C-Space>"] = cmp.mapping.confirm({ select = true }),
+					["<tab>"] = cmp.mapping.confirm({ select = true }),
 				}),
 				sources = {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "otter" }, -- for quarto
+					{ name = "git" },
 					{ name = "conventionalcommits" },
 					{
 						name = "path",
@@ -65,7 +49,21 @@ return {
 					},
 				},
 			})
+
+			-- clear tabstops when i exit insert mode
+			vim.api.nvim_create_autocmd("ModeChanged", {
+				pattern = { "i:*" },
+				callback = function()
+					local ls = require("luasnip")
+					if ls.in_snippet() then
+						ls.unlink_current()
+					end
+				end,
+			})
 		end
 
 	},
+
+	{ "petertriho/cmp-git", opts = {} }
+
 }

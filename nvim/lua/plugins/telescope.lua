@@ -5,14 +5,13 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim", 'nvim-telescope/telescope-ui-select.nvim' },
 		opts = {},
 		keys = {
-			{ "<leader>ss", "<cmd>Telescope live_grep theme=dropdown<cr>",      desc = "grep current folder" },
-			{ ";r",         "<cmd>Telescope lsp_references theme=dropdown<cr>", desc = "go to references" },
-			{ ";s",         "<cmd>Telescope lsp_document_symbols<cr>",          desc = "search document symbols" },
-			{
-				"<leader>sc",
-				"<cmd>Telescope current_buffer_fuzzy_find theme=dropdown previewer=false<cr>",
-				desc = "within current buffer"
-			},
+			{ ";R",         "<cmd>Telescope lsp_references theme=dropdown<cr>",            desc = "go to references" },
+			{ "<leader>ss", "<cmd>Telescope live_grep theme=dropdown<cr>",                 desc = "current folder" },
+			{ "<leader>sl", "<cmd>Telescope lsp_document_symbols theme=dropdown<cr>",      desc = "LSP symbols" },
+			{ "<leader>sL", "<cmd>Telescope lsp_workspace_symbols theme=dropdown<cr>",     desc = "LSP symbols" },
+			{ "<leader>sc", "<cmd>Telescope current_buffer_fuzzy_find theme=dropdown<cr>", desc = "within current buffer" },
+			{ "<leader>sd", "<cmd>Telescope diagnostics theme=dropdown<cr>",               desc = "diagnostics" },
+			{ "<leader>sg", "<cmd>Telescope git_commits<cr>",                              desc = "git commits" },
 		}
 	},
 
