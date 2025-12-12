@@ -2,21 +2,20 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
-$username\
-$hostname\
-$localip\
 $directory\
 $sudo\
 $cmd_duration\
 $fill\
+$username\
+$hostname\
 $conda\
 $python\
-
 $git_branch\
 $git_commit\
 $git_state\
 $git_status\
 $git_metrics\
+
 $line_break\
 $jobs\
 $battery\
@@ -33,9 +32,8 @@ format = '[ $duration]($style) '
 style = "bright-black"
 
 [python]
-format = '[${symbol} (${version} )(\($virtualenv\) )]($style)'
-symbol = ""
-style = ""
+format = '[ |  v${version} $virtualenv]($style)'
+style = "bright-white"
 detect_extensions = []
 detect_files = []
 detect_folders = []
@@ -49,14 +47,21 @@ symbol = ""
 format = "[\\(as sudo\\)]($style)"
 disabled = false
 
+
+[hostname]
+# ssh_only = false
+format = '[@$hostname](bright-white) '
+
+[username]
+show_always = true
+format = '[ $user](bright-white)'
+
 # --- #
 # GIT #
 # --- #
 
 [git_branch]
-format = "[$symbol $branch]($style) "
-symbol = ""
-style = "bright-yellow"
+format = "[ | ](bright-white)[ $branch](bright-white) "
 
 [git_status]
 format = '[$ahead_behind$untracked$stashed$renamed$deleted$staged]($style) '
