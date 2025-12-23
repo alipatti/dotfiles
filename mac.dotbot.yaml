@@ -19,7 +19,7 @@
     - bat # better cat
     - jq # json parser
     - scc # line counter
-    - watchexec # run command on file change 
+    - watchexec # run command on file change
 
 - cask:
     # gui apps
@@ -36,3 +36,10 @@
 
     # misc
     - the-unarchiver
+
+# latex
+# TODO: move this out?
+- create:
+    - ~/Library/texmf/tex/latex/local
+- link:
+    ~/Library/texmf/tex/latex/local: latex
