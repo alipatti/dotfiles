@@ -1,8 +1,8 @@
-# see: https://github.com/anishathalye/dotbot#directives
+# config file to run on all systems.
+# does not require any elevated privilages.
+# runs on both mac and linux.
 
-# TODO: refactor into separate files
-# - essential stuff that doesn't require root (zoxide, starship, etc.)
-#   used on e.g. machines i ssh into
+# see: https://github.com/anishathalye/dotbot#directives
 
 - defaults:
     link:
@@ -16,7 +16,7 @@
       stdout: false
       stderr: false
 
-# essential setup (all platforms)
+# essential setup
 - shell:
     - description: Installing zoxide if not installed...
       command: |
@@ -32,16 +32,20 @@
           curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
         fi
 
-- shell:
     - description: Setting fish as default shell...
+      # TODO: install fish into ~/.local/bin if it doesn't exist
       stdout: true
-      # TODO: should also test to see if fish exists on the system
       command: |
         if [[ $SHELL != *"fish"* ]]
         then
-          echo "Shell not fish. Setting now."
-          FISH=$(readlink -f $(which fish))
-          sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
+          if [[ command -v fish ]]
+          then
+            echo "Shell not fish. Setting now."
+            FISH=$(readlink -f $(which fish))
+            sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
+          else 
+            echo "Fish shell not found in PATH."
+          fi
         fi
 
 - create:
@@ -68,7 +72,7 @@
     ~/.radian_profile: r/.radian_profile
 
     ~/.ipython: ipython
-    
+
     ~/.rustfmt.toml: rust/.rustfmt.toml
     ~/.prettierrc.yml: prettier/.prettierrc.yml
 
