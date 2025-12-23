@@ -32,21 +32,21 @@
           curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
         fi
 
-    - description: Setting fish as default shell...
-      # TODO: install fish into ~/.local/bin if it doesn't exist
-      stdout: true
-      command: |
-        if [[ $SHELL != *"fish"* ]]
-        then
-          if [[ command -v fish ]]
-          then
-            echo "Shell not fish. Setting now."
-            FISH=$(readlink -f $(which fish))
-            sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
-          else 
-            echo "Fish shell not found in PATH."
-          fi
-        fi
+    # - description: Setting fish as default shell...
+    #   # TODO: install fish into ~/.local/bin if it doesn't exist
+    #   stdout: true
+    #   command: |
+    #     if [[ $SHELL != *"fish"* ]]
+    #     then
+    #       if [[ command -v fish ]]
+    #       then
+    #         echo "Shell not fish. Setting now."
+    #         FISH=$(readlink -f $(which fish))
+    #         sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
+    #       else 
+    #         echo "Fish shell not found in PATH."
+    #       fi
+    #     fi
 
 - create:
     - ~/texmf/tex/latex # local TeX tree
