@@ -14,4 +14,4 @@ bind \cr search_history
 activate_venv
 
 # load environment variables
-echo export $(cat ~/.config/fish/env/*.env | rg "^[^#]" | string join " ") | source
+echo export $(cat ~/.config/fish/env/*.env | grep "^[^#]" | string join " ") | source
