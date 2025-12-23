@@ -12,7 +12,11 @@ git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
 git submodule update --init --recursive "dotbot"
 
 # concatenate all config files into one
-cat *.dotbot.yaml > "$TEMPFILE"
+if [ "$(uname)" = "Darwin" ]; then
+	cat *.dotbot.yaml > "$TEMPFILE"
+else
+	cat basic.dotbot.yaml > "$TEMPFILE"
+fi
 
 "${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" \
 	--plugin-dir dotbot/dotbot-brew \
