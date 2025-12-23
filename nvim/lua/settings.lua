@@ -1,11 +1,12 @@
 -- highlight on search
 vim.o.hlsearch = true
 
--- make line numbers default
+-- relative line numbering
 vim.wo.number = true
+vim.o.relativenumber = true
 
--- tab == four spaces
-vim.opt_local.tabstop = 4
+-- tab = four spaces
+vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 vim.o.expandtab = true
 
@@ -17,9 +18,6 @@ vim.o.clipboard = "unnamedplus"
 
 -- enable break indent
 vim.o.breakindent = true
-
--- relative line numbers
-vim.opt.relativenumber = true
 
 -- save undo history
 vim.o.undofile = true
@@ -62,6 +60,5 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function()
 		vim.opt_local.tabstop = 2
 		vim.opt_local.shiftwidth = 2
-		vim.opt_local.expandtab = true
 	end,
 })

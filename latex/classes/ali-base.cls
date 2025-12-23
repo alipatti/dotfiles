@@ -216,3 +216,4 @@
 	\RequirePackage{minted}
 	\setminted{autogobble}
 \fi
+

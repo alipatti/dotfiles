@@ -1,9 +1,10 @@
-\ProvidesPackage{ali-macros}
+\ProvidesPackage{ali-todo}
 
 \RequirePackage[dvipsnames]{xcolor}
 
 \RequirePackage[final]{todonotes}
 
+% margin
 \setuptodonotes{
 	tickmarkheight=3pt,
 	size=small,
@@ -15,6 +16,13 @@
 	caption={\textbf{TODO}}
 }
 
-\newcommand{\note}[1]{\todo[noprepend,textcolor=black,linecolor=orange,bordercolor=orange,backgroundcolor=orange!5]{#1}}
+\newcommand{\warn}[1]{\PackageWarning{ali-todo}{Unfinished TODO item: #1}}
 
+\newcommand{\note}[1]{\todo[noprepend,textcolor=black,linecolor=ForestGreen,bordercolor=ForestGreen,backgroundcolor=ForestGreen!5]{#1}}
+
+% inline
 \newcommand{\inlinetodo}[1]{{\color{red}\textbf{TODO:} \textit{#1}}}
+\newcommand{\inlinenote}[1]{{\color{ForestGreen}\textbf{NOTE:} \textit{#1}}}
+
+\newcommand{\undertodo}[1]{{\color{red}\underline{#1}}}
+\newcommand{\XX}{{\warn{XX} \color{red} \bfseries XX}}

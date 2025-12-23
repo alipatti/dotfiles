@@ -26,8 +26,6 @@ local lsp_servers = {
 	cssls = {},
 	emmet_ls = {},
 
-	-- r
-	-- r_language_server = {},
 
 	pest_ls = {
 		filetypes = { "pest" },
@@ -77,6 +75,13 @@ return {
 				ensure_installed = vim.tbl_keys(lsp_servers),
 				automatic_installation = true,
 			})
+
+			vim.lsp.config('r_language_server', {
+				cmd       = { "R", "--slave", "-e", "languageserver::run()" },
+				filetypes = { "r", "R", "Rmd", "rmd" },
+				root_dir  = vim.fs.dirname(vim.fs.find({ '.git', 'DESCRIPTION' }, { upward = true })[1])
+			})
+			vim.lsp.enable('r_language_server')
 		end
 	},
 
@@ -99,5 +104,6 @@ return {
 			})
 		end
 	},
+
 
 }

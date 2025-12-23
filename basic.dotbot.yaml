@@ -79,9 +79,9 @@
     ~/Library/texmf/tex/latex/local: latex
     ~/.latexmkrc: latex/.latexmkrc
 
-    ~/.local/bin/:
-      path: bin/**
-      glob: true
+    # ~/.local/bin/:
+    #   path: bin/**
+    #   glob: true
 
 # remove broken symlinks
 - clean:

@@ -1,4 +1,8 @@
 function activate_venv --on-variable PWD
+    if not status --is-interactive
+        exit
+    end
+
     # search up directory tree for a .venv
     set cur (readlink -f (pwd))
     while true
