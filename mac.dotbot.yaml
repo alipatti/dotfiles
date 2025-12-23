@@ -7,17 +7,19 @@
     - neovim # editor
     - tectonic # latex
     - uv # python
+    - n # node version
+    - deno
 
     # command line tools
     - gh # github
     - eza # better ls
     - fd # better find
-    - zoxide # better cd
     - ripgrep # better grep
     - ripgrep-all # search pdfs & more
     - bat # better cat
     - jq # json parser
     - scc # line counter
+    - watchexec # run command on file change 
 
 - cask:
     # gui apps
