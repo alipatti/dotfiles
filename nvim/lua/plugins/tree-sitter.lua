@@ -3,7 +3,8 @@ return {
 		"nvim-treesitter/nvim-treesitter",
 		dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
 		build = ":TSUpdate",
-		event = "VeryLazy",
+		lazy = false,
+		branch = "master",
 		config = function()
 			require("nvim-treesitter.configs").setup({
 				-- languages to be installed
