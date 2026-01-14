@@ -6,7 +6,6 @@ fish_add_path ~/.n/bin
 
 zoxide init fish | source
 starship init fish | source
-# devpod completion fish | source
 
 bind \cr search_history
 
