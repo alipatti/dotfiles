@@ -1,8 +1,18 @@
 [user]
 	email = alistairpattison@gmail.com
 	name = Alistair Pattison
+
+# use the gh binary to manage credentials for github
+[credential "https://github.com"]
+	helper = !/usr/bin/env gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper = !/usr/bin/env gh auth git-credential
+
+# otherwise use the keychain
 [credential]
 	helper = osxkeychain
+
 [init]
 	defaultBranch = main
 	templatedir = ~/.git/templates
@@ -18,3 +28,4 @@
 	required = true
 [core]
 	excludesfile = /Users/ali/.gitignore
+
