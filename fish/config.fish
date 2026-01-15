@@ -4,8 +4,17 @@ fish_add_path ~/.local/bin
 fish_add_path ~/.deno/bin
 fish_add_path ~/.n/bin
 
-zoxide init fish | source
-starship init fish | source
+if command -q nix-your-shell
+    nix-your-shell fish | source
+end
+
+if command -q zoxide
+    zoxide init fish | source
+end
+
+if command -q starship
+    starship init fish | source
+end
 
 bind \cr search_history
 
