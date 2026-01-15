@@ -9,10 +9,6 @@
 [credential "https://gist.github.com"]
 	helper = !/usr/bin/env gh auth git-credential
 
-# otherwise use the keychain
-[credential]
-	helper = osxkeychain
-
 [init]
 	defaultBranch = main
 	templatedir = ~/.git/templates
