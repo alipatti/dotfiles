@@ -21,14 +21,11 @@
     ~/.config/kitty: kitty
     ~/.config/nvim: nvim
     ~/.config/gh: github
-    ~/.config/conda: conda
     ~/.config/starship.toml: starship/starship.toml
 
     ~/.gitignore: git/.gitignore
     ~/.gitconfig: git/.gitconfig
     ~/.git/templates: git/templates
-
-    ~/.hammerspoon: hammerspoon
 
     ~/.rprofile: r/.rprofile
     ~/.lintr: r/.lintr
