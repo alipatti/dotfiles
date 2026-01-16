@@ -23,3 +23,16 @@ activate_venv
 
 # load environment variables
 echo export $(cat ~/.config/fish/env/*.env | grep "^[^#]" | string join " ") | source
+
+# git shortcuts
+abbr g git
+abbr gs git status
+abbr gd git diff
+abbr ga git add
+abbr gc git commit
+abbr gcm git commit -m
+abbr gcam git commit -am
+abbr gp git push
+
+# other abbr
+abbr vim nvim
