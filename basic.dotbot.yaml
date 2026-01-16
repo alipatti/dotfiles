@@ -1,7 +1,3 @@
-# config file to run on all systems.
-# does not require any elevated privilages.
-# runs on both mac and linux.
-
 # see: https://github.com/anishathalye/dotbot#directives
 
 - defaults:
@@ -36,17 +32,6 @@
     #   # TODO: install fish into ~/.local/bin if it doesn't exist
     #   stdout: true
     #   command: |
-    #     if [[ $SHELL != *"fish"* ]]
-    #     then
-    #       if [[ command -v fish ]]
-    #       then
-    #         echo "Shell not fish. Setting now."
-    #         FISH=$(readlink -f $(which fish))
-    #         sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
-    #       else 
-    #         echo "Fish shell not found in PATH."
-    #       fi
-    #     fi
 
 - create:
     - ~/.local/bin
