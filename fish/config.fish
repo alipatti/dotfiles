@@ -36,3 +36,4 @@ abbr gp git push
 
 # other abbr
 abbr vim nvim
+abbr r radian

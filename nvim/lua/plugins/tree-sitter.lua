@@ -1,4 +1,5 @@
 return {
+	-- TODO: update this to the new treesitter config format
 	{
 		"nvim-treesitter/nvim-treesitter",
 		dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
@@ -23,11 +24,6 @@ return {
 				-- https://github.com/nvim-treesitter/nvim-treesitter?tab=readme-ov-file#highlight
 				highlight = {
 					enable = true,
-					-- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-					-- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-					-- Using this option may slow down your editor, and you may see some duplicate highlights.
-					-- Instead of true it can also be a list of languages
-					additional_vim_regex_highlighting = false,
 				},
 
 				-- synchronous or async installation
@@ -91,20 +87,8 @@ return {
 		end
 	},
 
-	{
-		-- auto close/rename html (and other) tags
-		"windwp/nvim-ts-autotag",
-	},
-
-	-- 	{
-	-- 		-- show context at top of screen when scrolling
-	-- 		"nvim-treesitter/nvim-treesitter-context",
-	-- 		config = function()
-	-- 			require("treesitter-context").setup({
-	-- 				separator = "—",
-	-- 			})
-	-- 			vim.api.nvim_set_hl(0, "TreesitterContextSeparator", { link = "LineNr" })
-	-- 			vim.api.nvim_set_hl(0, "TreesitterContext", { link = "Normal" })
-	-- 		end,
-	-- 	}
+	-- {
+	-- 	-- auto close/rename html (and other) tags
+	-- 	"windwp/nvim-ts-autotag",
+	-- },
 }
