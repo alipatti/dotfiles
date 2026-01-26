@@ -18,3 +18,5 @@ bin/temp
 # secrets
 *.local.*
 github/hosts.yml
+ssh
+

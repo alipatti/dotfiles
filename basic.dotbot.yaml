@@ -38,6 +38,8 @@
 
     ~/.latexmkrc: latex/.latexmkrc
 
+    ~/.ssh: ssh
+
     # ~/.local/bin/:
     #   path: bin/**
     #   glob: true

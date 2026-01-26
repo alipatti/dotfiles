@@ -1,0 +1,4 @@
+# -- FASRC --
+Host fasrc
+  HostName login.rc.fas.harvard.edu
+  User alipatti
