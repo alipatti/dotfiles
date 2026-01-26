@@ -1,3 +1,0 @@
-function r
-radian
-end
