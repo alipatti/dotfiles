@@ -1,43 +1,11 @@
 -- LSPs to be installed
 local lsp_servers = {
-	-- python type checking
-	-- TODO: remove this when ruff type checker comes out
-	pyright = {
-		pyright = {
-			-- using ruff's import organizer
-			disableOrganizeImports = true,
-		},
-	},
-
-	-- astral python tools
-	ruff = {}, -- linter/formatter
-	-- ty = {}, -- type checker
-
 	-- rust
 	rust_analyzer = {
 		['rust-analyzer'] = {
 			cargo = { targetDir = true }
 		}
 	},
-
-	-- web development
-	html = {},
-	denols = {},
-	cssls = {},
-	emmet_ls = {},
-
-
-	pest_ls = {
-		filetypes = { "pest" },
-	},
-
-	-- lua
-	lua_ls = {},
-
-	-- quarto/markdown
-	-- marksman = {
-	-- 	filetypes = { "markdown", "quarto" },
-	-- },
 
 	-- latex
 	texlab = {
@@ -60,29 +28,18 @@ local lsp_servers = {
 return {
 	-- LSP plugins and config
 	{
-		"williamboman/mason-lspconfig.nvim",
+		"mason-org/mason-lspconfig.nvim",
 		dependencies = {
-			{ "neovim/nvim-lspconfig", }, -- TODO: update to new lsp integration in nvim
-			{ "williamboman/mason.nvim", opts = {} },
-			{ "j-hui/fidget.nvim",       opts = {}, tag = "legacy" },
-			{ "folke/lazydev.nvim",      opts = {} },
-			{ "hrsh7th/cmp-nvim-lsp",    opts = {} },
+			{ "neovim/nvim-lspconfig", },
+			{ "mason-org/mason.nvim",  opts = {} },
+			{ "j-hui/fidget.nvim",     opts = {}, tag = "legacy" },
+			{ "folke/lazydev.nvim",    opts = {} },
+			{ "hrsh7th/cmp-nvim-lsp",  opts = {} },
 
 		},
-		config = function()
-			require("mason-lspconfig").setup({
-				automatic_enable = true,
-				ensure_installed = vim.tbl_keys(lsp_servers),
-				automatic_installation = true,
-			})
-
-			vim.lsp.config('r_language_server', {
-				cmd       = { "R", "--slave", "-e", "languageserver::run()" },
-				filetypes = { "r", "R", "Rmd", "rmd" },
-				root_dir  = vim.fs.dirname(vim.fs.find({ '.git', 'DESCRIPTION' }, { upward = true })[1])
-			})
-			vim.lsp.enable('r_language_server')
-		end
+		opts = {
+			automatic_enable = true,
+		},
 	},
 
 	{

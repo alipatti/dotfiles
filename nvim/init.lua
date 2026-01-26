@@ -19,8 +19,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 require("lazy").setup("plugins")
 
-require("highlight-on-yank")
-
 -- highlight on search
 vim.o.hlsearch = true
 
