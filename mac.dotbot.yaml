@@ -31,7 +31,6 @@
     - hiddenbar
 
     # development
-    - miniforge # anaconda
     - docker
 
     # misc

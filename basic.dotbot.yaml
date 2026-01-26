@@ -1,7 +1,3 @@
-# config file to run on all systems.
-# does not require any elevated privilages.
-# runs on both mac and linux.
-
 # see: https://github.com/anishathalye/dotbot#directives
 
 - defaults:
@@ -16,38 +12,6 @@
       stdout: false
       stderr: false
 
-# essential setup
-# - shell:
-    # - description: Installing zoxide if not installed...
-    #   command: |
-    #     if ! command -v zoxide &> /dev/null
-    #     then
-    #       curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-    #     fi
-    #
-    # - description: Installing starship if not installed...
-    #   command: |
-    #     if ! command -v starship &> /dev/null
-    #     then
-    #       curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y
-    #     fi
-
-    # - description: Setting fish as default shell...
-    #   # TODO: install fish into ~/.local/bin if it doesn't exist
-    #   stdout: true
-    #   command: |
-    #     if [[ $SHELL != *"fish"* ]]
-    #     then
-    #       if [[ command -v fish ]]
-    #       then
-    #         echo "Shell not fish. Setting now."
-    #         FISH=$(readlink -f $(which fish))
-    #         sudo add-shell $FISH && chsh -s $FISH && echo "Set shell to $FISH"
-    #       else 
-    #         echo "Fish shell not found in PATH."
-    #       fi
-    #     fi
-
 - create:
     - ~/.local/bin
     - ~/.git
@@ -57,14 +21,11 @@
     ~/.config/kitty: kitty
     ~/.config/nvim: nvim
     ~/.config/gh: github
-    ~/.config/conda: conda
     ~/.config/starship.toml: starship/starship.toml
 
     ~/.gitignore: git/.gitignore
     ~/.gitconfig: git/.gitconfig
     ~/.git/templates: git/templates
-
-    ~/.hammerspoon: hammerspoon
 
     ~/.rprofile: r/.rprofile
     ~/.lintr: r/.lintr
