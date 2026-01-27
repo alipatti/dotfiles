@@ -16,6 +16,10 @@ if command -q starship
     starship init fish | source
 end
 
+if command -q bat
+    set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
+end
+
 bind \cr search_history
 
 # load the automatic venv activation function
