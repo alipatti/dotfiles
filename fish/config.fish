@@ -1,29 +1,33 @@
-# update path
-fish_add_path ~/.cargo/bin
+# add paths
 fish_add_path ~/.local/bin
-fish_add_path ~/.deno/bin
-fish_add_path ~/.n/bin
 
-if command -q nix-your-shell
-    nix-your-shell fish | source
+for cmd in n cargo deno
+    if command -q $cmd
+        fish_add_path ~/.$cmd/bin
+    end
 end
 
-if command -q zoxide
-    zoxide init fish | source
-end
-
-if command -q starship
-    starship init fish | source
+# source init files
+for cmd in starship zoxide
+    if command -q $cmd
+        $cmd init fish | source
+    end
 end
 
 if command -q bat
     set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 end
 
-bind \cr search_history
+if command -q nix-your-shell
+    nix-your-shell fish | source
+end
 
 # load the automatic venv activation function
-activate_venv
+if status is-interactive
+    activate_venv
+end
+
+bind \cr search_history
 
 # load environment variables
 echo export $(cat ~/.config/fish/env/*.env | grep "^[^#]" | string join " ") | source
