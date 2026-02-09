@@ -5,7 +5,7 @@
     - git
     - fish # shell
     - neovim # editor
-    - tectonic # latex
+    - tectonic # # https://search.nixos.org/packages?show=tectonic
     - uv # python
     - n # node version
     - deno
@@ -21,20 +21,24 @@
     - scc # line counter
     - watchexec # run command on file change
 
+    # for later config
+    - zero-sh/tap/apply-user-defaults
+
 - cask:
     # gui apps
-    - kitty # terminal
-    - skim # pdf viewer
+    - kitty # https://search.nixos.org/packages?show=kitty
+    - skim # https://search.nixos.org/packages?show=skimpdf
 
     # menu bar apps
-    - stats
-    - hiddenbar
-
-    # development
-    - docker
+    - stats # https://search.nixos.org/packages?show=stats
+    - hiddenbar # https://search.nixos.org/packages?show=hidden-bar
 
     # misc
-    - the-unarchiver
+    - the-unarchiver # https://search.nixos.org/packages?show=the-unarchiver
+
+- shell:
+    - apply-user-defaults macos/settings.yaml && killall Finder Dock
+      "Some changes may require a restart"
 
 # latex
 # TODO: move this out?

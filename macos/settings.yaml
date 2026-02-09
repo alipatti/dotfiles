@@ -1,0 +1,93 @@
+# https://macos-defaults.com/
+# https://www.acheron.fail/snippets/defaults.html
+# https://github.com/mathiasbynens/dotfiles/blob/master/.macos
+
+# TODO: write json schema?
+
+NSGlobalDomain:
+  AppleShowAllExtensions: true
+  AppleShowAllFiles: true
+  AppleSpacesSwitchOnActivate: false
+  AppleFontSmoothing: true
+
+  NSQuitAlwaysKeepsWindow: false
+  NSDocumentSaveNewDocumentsToCloud: false
+  NSTextShowsControlCharacters: true
+
+  # keyboard
+  NSAutomaticQuoteSubstitutionEnabled: false
+  NSAutomaticCapitalizationEnabled: false
+  NSAutomaticDashSubstitutionEnabled: false
+  NSAutomaticPeriodSubstitutionEnabled: false
+  NSAutomaticSpellingCorrectionEnabled: false
+  AppleKeyboardUIMode: 3 # full keyboard controll
+  ApplePressAndHoldEnabled: false
+  KeyRepeat: 1
+  InitialKeyRepeat: 10
+
+com.apple.dock:
+  orientation: bottom
+  tilesize: 85
+  autohide: true
+  autohide-time-modifier: .3
+  autohide-delay: 0
+  show-recents: false
+  showhidden: true # hidden => translucent
+
+  # spaces
+  scroll-to-open: true
+  expose-group-apps: true
+  mru-spaces: false # don't rearrange by most recently used
+
+  # hot corners
+  # https://github.com/mathiasbynens/dotfiles/blob/c886e139233320e29fd882960ba3dd388d57afd7/.macos#L433
+  wvous-tl-corner: 0
+  wvous-tl-modifier: 0
+  wvous-bl-corner: 0
+  wvous-bl-modifier: 0
+  wvous-tr-corner: 0
+  wvous-tr-modifier: 0
+  wvous-br-corner: 0
+  wvous-br-modifier: 0
+
+com.apple.screencapture:
+  location: ~/Downloads/
+  show-thumbnail: false
+
+com.apple.finder:
+  ShowPathbar: true # /path/to/folder
+  ShowStatusBar: false # xx items, XX gb remaining
+  FXPreferredViewStyle: "Nlsv" # list view
+  _FXSortFoldersFirst: true
+  FXDefaultSearchScope: "SCcf" # current folder
+  FXRemoveOldTrashItems: true
+  FXEnableExtensionChangeWarning: false
+  _FXEnableColumnAutoSizing: true
+
+  NewWindowTarget: "PfDe"
+  NewWindowTargetPath: "file://${HOME}"
+
+com.apple.menuextra.clock:
+  DateFormat: \"EEE d MMM h:mm:ss\"
+
+com.apple.spaces:
+  spans-displays: true
+
+com.apple.print.PrintingPrefs:
+  \"Quit When Finished\": true
+
+com.apple.CrashReporter:
+  DialogType: none
+
+com.apple.ImageCapture:
+  disableHotPlug: false # don't open photos when plugging in camera
+
+# require pw immediately
+com.apple.screensaver:
+  askForPassword: 1
+  askForPasswordDelay: 0
+
+# no .DS_Store on drives/network
+com.apple.desktopservices:
+  DSDontWriteUSBStores: false
+  DSDontWriteNetworktores: false
