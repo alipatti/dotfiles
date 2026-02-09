@@ -37,6 +37,7 @@ abbr gc git commit
 abbr gcm git commit -m
 abbr gcam git commit -am
 abbr gp git push
+abbr gl git log
 
 # other abbr
 abbr vim nvim
