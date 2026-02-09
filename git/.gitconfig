@@ -25,3 +25,5 @@
 [core]
 	excludesfile = /Users/ali/.gitignore
 
+[alias]
+	ladog = log --all --decorate --oneline --graph
