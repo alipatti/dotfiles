@@ -40,6 +40,10 @@
     # ~/.local/bin/:
     #   path: bin/**
     #   glob: true
+    #
+
+- shell:
+    - touch ~/.hushlogin # hide fish "last login message"
 
 # remove broken symlinks
 - clean:
