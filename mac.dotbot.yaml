@@ -42,7 +42,5 @@
 
 # latex
 # TODO: move this out?
-- create:
-    - ~/Library/texmf/tex/latex/local
 - link:
     ~/Library/texmf/tex/latex/local: latex
