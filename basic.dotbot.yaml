@@ -20,8 +20,8 @@
     ~/.config/gh: github
     ~/.config/starship.toml: starship/starship.toml
 
-    ~/.gitignore: git/.gitignore
-    ~/.gitconfig: git/.gitconfig
+    ~/.gitignore: git/ignore
+    ~/.gitconfig: git/config
     ~/.git/templates: git/templates
 
     ~/.rprofile: r/.rprofile
