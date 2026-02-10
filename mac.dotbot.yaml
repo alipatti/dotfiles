@@ -11,6 +11,8 @@
     - deno
 
     # command line tools
+    - zoxide # cd
+    - starship # prompt
     - gh # github
     - eza # better ls
     - fd # better find
@@ -20,6 +22,7 @@
     - jq # json parser
     - scc # line counter
     - watchexec # run command on file change
+    - tree-sitter-cli
 
     # for later config
     - zero-sh/tap/apply-user-defaults
@@ -28,6 +31,7 @@
     # gui apps
     - kitty # https://search.nixos.org/packages?show=kitty
     - skim # https://search.nixos.org/packages?show=skimpdf
+    - slack
 
     # menu bar apps
     - stats # https://search.nixos.org/packages?show=stats
@@ -36,9 +40,10 @@
     # misc
     - the-unarchiver # https://search.nixos.org/packages?show=the-unarchiver
 
+    - font-cousine-nerd-font # font for kitty
+
 - shell:
     - apply-user-defaults macos/settings.yaml && killall Finder Dock
-      "Some changes may require a restart"
 
 # latex
 # TODO: move this out?
