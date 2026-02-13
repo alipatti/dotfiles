@@ -1,0 +1,16 @@
+services:
+  cloudflare-ddns:
+    image: favonia/cloudflare-ddns:1
+    network_mode: host
+    restart: always # restart after reboot
+    environment:
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_TOKEN_ALIPATTI_DDNS} # pull from environment
+      - DOMAINS=fridge.alipatti.com
+      - PROXIED=false # don't go through cloudflare proxy
+
+    # restrict container privilages
+    user: "1000:1000" # user:group  TODO: is this needed?
+    read_only: true
+    cap_drop: [all]
+    security_opt: [no-new-privileges:true]
+
