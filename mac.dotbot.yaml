@@ -1,5 +1,3 @@
-- install-brew: true
-
 - brew:
     # essentials
     - git
@@ -26,12 +24,14 @@
 
     # for later config
     - zero-sh/tap/apply-user-defaults
+    - dockutil
 
 - cask:
     # gui apps
     - kitty # https://search.nixos.org/packages?show=kitty
     - skim # https://search.nixos.org/packages?show=skimpdf
     - slack
+    - zoom
 
     # menu bar apps
     - stats # https://search.nixos.org/packages?show=stats
@@ -39,11 +39,35 @@
 
     # misc
     - the-unarchiver # https://search.nixos.org/packages?show=the-unarchiver
+    - displaylink # third monitor on MBP
 
     - font-cousine-nerd-font # font for kitty
 
+# dock settings
 - shell:
-    - apply-user-defaults macos/settings.yaml && killall Finder Dock
+    - | 
+        # apply settings
+        apply-user-defaults macos/settings.yaml 
+
+        # set dock items
+        dockutil --remove all
+
+        set -l apps \
+            '/Applications/Kitty.app' \
+            '/Applications/Safari.app' \
+            '/Applications/Calendar.app' \
+            '/Applications/Messages.app' \
+            '/Applications/Slack.app' \
+            '/Applications/Mail.app'
+
+        for app in $apps
+            dockutil --add $app --no-restart
+        end
+
+        dockutil --add "~/Downloads/" --display stack --sort dateadded --view fan --no-restart
+
+        killall Finder Dock
+
 
 # latex
 # TODO: move this out?

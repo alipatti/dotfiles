@@ -14,6 +14,8 @@ NSGlobalDomain:
   NSDocumentSaveNewDocumentsToCloud: false
   NSTextShowsControlCharacters: true
 
+  NSWindowResizeTime: .025
+
   # keyboard
   NSAutomaticQuoteSubstitutionEnabled: false
   NSAutomaticCapitalizationEnabled: false
@@ -71,7 +73,7 @@ com.apple.menuextra.clock:
   DateFormat: \"EEE d MMM h:mm:ss\"
 
 com.apple.spaces:
-  spans-displays: true
+  spans-displays: false # displays have separate spaces
 
 com.apple.print.PrintingPrefs:
   \"Quit When Finished\": true
