@@ -29,8 +29,7 @@ end
 
 bind \cr search_history
 
-# load environment variables
-echo export $(cat ~/.config/fish/env/*.env | grep "^[^#]" | string join " ") | source
+load_dotenv ~/.dotfiles/env/*
 
 # git shortcuts
 abbr g git
