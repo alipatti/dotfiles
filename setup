@@ -2,7 +2,7 @@
 
 set -e
 
-TEMPFILE="/tmp/dotbot-config-tempfile.yml"
+TEMPFILE="$(mktemp)"
 DOTBOT_DIR="dotbot/dotbot"
 DOTBOT_BIN="bin/dotbot"
 BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,10 +13,10 @@ git submodule update --init --recursive "dotbot"
 
 # concatenate all config files into one
 if [ "$(uname)" = "Darwin" ]; then
-	cat *.dotbot.yaml > "$TEMPFILE"
-else
-	cat basic.dotbot.yaml > "$TEMPFILE"
+	cat macos/dotbot.yaml >> "$TEMPFILE"
 fi
+
+cat dotbot.yaml >> "$TEMPFILE"
 
 "${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" \
 	--plugin-dir dotbot/dotbot-brew \
@@ -26,3 +26,4 @@ fi
 	-c "${TEMPFILE}" \
 	"${@}"
 
+rm "${TEMPFILE}"

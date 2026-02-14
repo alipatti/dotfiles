@@ -30,7 +30,6 @@
 
     ~/.ipython: ipython
 
-    ~/.rustfmt.toml: rust/.rustfmt.toml
     ~/.prettierrc.yml: prettier/.prettierrc.yml
 
     ~/.latexmkrc: latex/.latexmkrc
