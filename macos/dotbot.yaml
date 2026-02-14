@@ -1,6 +1,5 @@
 - brew:
     # essentials
-    - git
     - fish # shell
     - neovim # editor
     - tectonic # # https://search.nixos.org/packages?show=tectonic
@@ -8,10 +7,14 @@
     - n # node version
     - deno
 
+    # git
+    - git
+    - git-crypt # encryption
+    - gh # github
+
     # command line tools
     - zoxide # cd
     - starship # prompt
-    - gh # github
     - eza # better ls
     - fd # better find
     - ripgrep # better grep
