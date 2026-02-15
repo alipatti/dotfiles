@@ -1,3 +1,6 @@
 function load_dotenv
-    echo export $(cat $argv | grep "^[^#]" | string join " ") | source
+    for file in $argv
+        set vars "$(cat $file | grep '^[^#]' 2>/dev/null | string join ' ')"
+        echo "export $vars" | source >/dev/null
+    end
 end
