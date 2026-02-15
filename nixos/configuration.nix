@@ -66,6 +66,11 @@
   programs.nix-ld.enable = true; # needed for uv
   programs.fish.enable = true;
 
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+  };
+
   # TODO: home manager?
   users.users.ali = {
     isNormalUser = true;
@@ -73,6 +78,7 @@
     extraGroups = [
       "networkmanager" # allow network config
       "wheel" # allow sudo
+      "docker"
     ];
     packages = with pkgs; [
       # gui apps
