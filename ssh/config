@@ -2,3 +2,8 @@
 Host fasrc
   HostName login.rc.fas.harvard.edu
   User alipatti
+
+Host fridge
+  HostName fridge.alipatti.com
+  User ali
+  Port 8191
