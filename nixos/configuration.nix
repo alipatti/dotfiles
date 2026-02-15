@@ -4,7 +4,7 @@
 
 {
   imports = [
-    # Include the results of the hardware scan.
+    # include the results of the hardware scan.
     /etc/nixos/hardware-configuration.nix
   ];
 
@@ -21,13 +21,18 @@
   # ssh
   services.openssh = {
     enable = true;
-    ports = [ 8191 ]; # to reduce bot noise
+    ports = [ 8191 ];
     settings = {
-      PasswordAuthentication = false; # ssh keypairs only for now
+      PasswordAuthentication = false; # ssh keypairs only
       PermitRootLogin = "no";
     };
   };
   services.fail2ban.enable = true;
+  services.endlessh = {
+    enable = true;
+    port = 22;
+    openFirewall = true;
+  };
 
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -61,6 +66,7 @@
   programs.nix-ld.enable = true; # needed for uv
   programs.fish.enable = true;
 
+  # TODO: home manager?
   users.users.ali = {
     isNormalUser = true;
     shell = pkgs.fish;
@@ -97,7 +103,6 @@
       rustup
       gcc
       uv
-      node
     ];
   };
 
