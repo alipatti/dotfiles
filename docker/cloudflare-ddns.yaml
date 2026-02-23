@@ -4,7 +4,7 @@ services:
     network_mode: host
     restart: always # restart after reboot
     environment:
-      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_TOKEN_ALIPATTI_DDNS} # pull from environment
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_TOKEN_ALIPATTI_DNS} # pull from environment
       - DOMAINS=fridge.alipatti.com
       - PROXIED=false # don't go through cloudflare proxy
 

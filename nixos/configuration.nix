@@ -104,6 +104,8 @@
 
       # editor
       neovim
+      claude-code
+      tree-sitter
 
       # language tooling
       rustup
