@@ -1,16 +1,28 @@
 - brew:
-    # essentials
     - fish # shell
-    - neovim # editor
-    - tectonic # # https://search.nixos.org/packages?show=tectonic
+
+    # languages
     - uv # python
-    - n # node version
-    - deno
+    - node # js
+    - rustup # rust
+
+    # docker
+    - docker
+    - docker-compose
+    - colima # open source docker runtime
+
+    # tex
+    - tectonic
 
     # git
     - git
     - git-crypt # encryption
     - gh # github
+
+    # editor
+    - neovim # editor
+    - claude-code
+    - tree-sitter-cli
 
     # command line tools
     - zoxide # cd
@@ -23,7 +35,6 @@
     - jq # json parser
     - scc # line counter
     - watchexec # run command on file change
-    - tree-sitter-cli
 
     # for later config
     - zero-sh/tap/apply-user-defaults
@@ -45,6 +56,7 @@
     - displaylink # third monitor on MBP
 
     - font-cousine-nerd-font # font for kitty
+    - mactex-no-gui # latex
 
 # dock settings
 - shell:
