@@ -1,3 +1,5 @@
+Include /Users/ali/.colima/ssh_config
+
 # -- FASRC --
 Host fasrc
   HostName login.rc.fas.harvard.edu

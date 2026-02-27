@@ -71,9 +71,10 @@
             '/Applications/Kitty.app' \
             '/Applications/Safari.app' \
             '/Applications/Calendar.app' \
-            '/Applications/Messages.app' \
+            '/Applications/Reminders.app' \
+            '/Applications/Mail.app' \
             '/Applications/Slack.app' \
-            '/Applications/Mail.app'
+            '/Applications/Messages.app'
 
         for app in $apps
             dockutil --add $app --no-restart
