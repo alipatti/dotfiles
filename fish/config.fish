@@ -1,11 +1,6 @@
 # add paths
 fish_add_path ~/.local/bin
-
-for cmd in n cargo deno
-    if command -q $cmd
-        fish_add_path ~/.$cmd/bin
-    end
-end
+fish_add_path ~/.cargo/bin
 
 # source init files
 for cmd in starship zoxide
