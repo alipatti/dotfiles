@@ -1,18 +1,21 @@
-# add paths
+# local bin
 fish_add_path ~/.local/bin
-fish_add_path ~/.cargo/bin
 
-# source init files
-for cmd in starship zoxide
-    if command -q $cmd
-        $cmd init fish | source
-    end
-end
+# rust setup
+test -f "$HOME/.cargo/env.fish" && source "$HOME/.cargo/env.fish"
 
+# prompt setup
+command -q starship && starship init fish | source
+
+# z setup
+command -q starship && zoxide init fish | source
+
+# bat setup
 if command -q bat
     set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 end
 
+# nixos setup
 if command -q nix-your-shell
     nix-your-shell fish | source
 end
