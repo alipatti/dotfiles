@@ -115,11 +115,9 @@
       "docker"
     ];
   };
-
-  # TODO: migrate to env/
+  
+  # env vars
   environment.sessionVariables = {
-    TERMINAL = "kitty";
-    EDITOR = "nvim";
     BROWSER = "firefox";
   };
 
