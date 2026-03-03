@@ -71,7 +71,41 @@
     enableOnBoot = true;
   };
 
-  # TODO: home manager?
+  # packages
+  environment.systemPackages = with pkgs; [
+    # gui apps
+    nautilus # files
+    firefox # browser
+    kitty # terminal
+    prismlauncher
+    spotify
+    slack
+
+    # git
+    git
+    git-crypt
+    git-lfs
+    gh
+
+    # cli tools
+    zoxide
+    starship
+    eza
+    ripgrep
+    nix-your-shell # use fish by default for nix-shell etc.
+    trashy
+
+    # editor
+    neovim
+    claude-code
+    tree-sitter
+
+    # language tooling
+    rustup
+    gcc
+    uv
+  ];
+
   users.users.ali = {
     isNormalUser = true;
     shell = pkgs.fish;
@@ -79,38 +113,6 @@
       "networkmanager" # allow network config
       "wheel" # allow sudo
       "docker"
-    ];
-    packages = with pkgs; [
-      # gui apps
-      nautilus # files
-      firefox # browser
-      kitty # terminal
-      prismlauncher
-      spotify
-      slack
-
-      # git
-      git
-      git-crypt
-      git-lfs
-      gh
-
-      # cli tools
-      zoxide
-      starship
-      eza
-      ripgrep
-      nix-your-shell # use fish by default for nix-shell etc.trashy
-
-      # editor
-      neovim
-      claude-code
-      tree-sitter
-
-      # language tooling
-      rustup
-      gcc
-      uv
     ];
   };
 
