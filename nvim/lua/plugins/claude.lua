@@ -1,8 +1,8 @@
-local Terminal = require("toggleterm.terminal").Terminal
 local term = nil
 
 local function get_or_create_term(cmd_string, env_table, effective_config)
 	if not term then
+		local Terminal = require("toggleterm.terminal").Terminal
 		term = Terminal:new({
 			cmd = cmd_string,
 			env = env_table,
@@ -18,8 +18,8 @@ local function get_or_create_term(cmd_string, env_table, effective_config)
 	return term
 end
 
-local function get_size(effective_config)
-	return math.floor(vim.o.columns * (effective_config.split_width_percentage or 0.3))
+local function get_size(_effective_config)
+	return 80
 end
 
 local toggleterm_provider = {
@@ -85,11 +85,12 @@ local toggleterm_provider = {
 return {
 	"coder/claudecode.nvim",
 	dependencies = { "akinsho/toggleterm.nvim" },
-	config = function()
-		require("claudecode").setup({
-			terminal = {
-				provider = toggleterm_provider,
-			},
-		})
-	end,
+
+	opts = {
+		terminal = {
+			provider = toggleterm_provider,
+		},
+	},
+
+	keys = { "<leader>c", desc = "Toggle Claude" },
 }

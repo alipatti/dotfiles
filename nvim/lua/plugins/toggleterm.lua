@@ -9,10 +9,10 @@ return {
 			{
 				"<leader>t",
 				function()
-					if vim.api.nvim_win_get_width(0) > 150 then
-						require("toggleterm").toggle(nil, 80, nil, "vertical")
+					if vim.o.columns > 150 then
+						vim.cmd("ToggleTerm99 size=80 direction=vertical")
 					else
-						require("toggleterm").toggle(nil, 20, nil, "horizontal")
+						vim.cmd("ToggleTerm99 size=20 direction=horizontal")
 					end
 				end,
 				desc = "Toggle terminal"
