@@ -1,11 +1,12 @@
 # see `nixos-help`
 
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
     # include the results of the hardware scan.
     /etc/nixos/hardware-configuration.nix
+    ./nas.nix
   ];
 
   # bootloader (don't touch these)
@@ -25,6 +26,11 @@
       PermitRootLogin = "no";
     };
   };
+
+  # tailscale
+  services.tailscale.enable = true;
+
+  # TODO: setup nginx reverse proxy
 
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";

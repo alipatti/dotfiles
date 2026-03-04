@@ -2,36 +2,33 @@
 
 let
   uuids = [
-    # TODO: add real uuids
-    "uuid-1"
-    "uuid-2"
-    "uuid-3"
+    # TODO: add real uuids here
   ];
 in {
-  fileSystems = builtins.listToAttrs (lib.imap0 (i: uuid: {
-    # mount physicsl disks by uuid
-    # https://wiki.nixos.org/wiki/Filesystems
-    name = "/mnt/disk${toString i}";
-    value = {
-      device = "/dev/disk/by-uuid/${uuid}";
-      fsType = "ext4";
-    };
-  }) uuids) // {
-    # create pooled virtual disk with mergerfs
-    # https://www.reddit.com/r/NixOS/comments/18dxmwi
-    "/storage" = {
-      fsType = "fuse.mergerfs";
-      device = "/mnt/disk*"; # mergerfs allows globs
-      # TODO: check whether these are the options i want
-      options = ["cache.files=partial" "dropcacheonclose=true" "category.create=mfs"];
-      # don't mount until physical disks have mounted
-      depends = lib.imap0 (i: _uuid: "/mnt/disk${toString i}")
-    };
-  };
-
   environment.systemPackages = with pkgs; [
     mergerfs
   ];
+
+  # fileSystems = builtins.listToAttrs (lib.imap0 (i: uuid: {
+  #   # mount physicsl disks by uuid
+  #   # https://wiki.nixos.org/wiki/Filesystems
+  #   name = "/mnt/disk${toString i}";
+  #   value = {
+  #     device = "/dev/disk/by-uuid/${uuid}";
+  #     fsType = "ext4";
+  #   };
+  # }) uuids) // {
+  #   # create pooled virtual disk with mergerfs
+  #   # https://www.reddit.com/r/NixOS/comments/18dxmwi
+  #   "/storage" = {
+  #     fsType = "fuse.mergerfs";
+  #     device = "/mnt/disk*"; # mergerfs allows globs
+  #     # TODO: check whether these are the options i want
+  #     options = ["cache.files=partial" "dropcacheonclose=true" "category.create=mfs"];
+  #     # don't mount until physical disks have mounted
+  #     depends = lib.imap0 (i: _uuid: "/mnt/disk${toString i}");
+  #   };
+  # };
   
   # enable samba file sharing
   # https://wiki.nixos.org/wiki/Samba
@@ -39,10 +36,10 @@ in {
     enable = true;
     openFirewall = true;
     settings = {
-      share = {
-        path = "/storage";
+      test = {
+        path = "/home/ali/Screenshots/";
         "read only" = false;
-        # NOTE: still need to create user with
+        # NOTE: create user with
         # sudo smbpasswd -a ali
         "valid users" = "ali";
       };
