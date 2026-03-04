@@ -92,5 +92,9 @@ return {
 		},
 	},
 
-	keys = { "<leader>c", desc = "Toggle Claude" },
+	keys = {
+		{ "<leader>C", "<cmd>ClaudeCodeFocus<cr>", desc = "Toggle Claude" },
+		{ "<leader>ca", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept Claude diff" },
+		{ "<leader>cd", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny Claude diff" },
+	}
 }
