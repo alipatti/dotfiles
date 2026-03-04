@@ -1,10 +1,11 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let
   uuids = [
     # TODO: add real uuids here
   ];
-in {
+in
+{
   environment.systemPackages = with pkgs; [
     mergerfs
   ];
@@ -29,7 +30,7 @@ in {
   #     depends = lib.imap0 (i: _uuid: "/mnt/disk${toString i}");
   #   };
   # };
-  
+
   # enable samba file sharing
   # https://wiki.nixos.org/wiki/Samba
   services.samba = {
