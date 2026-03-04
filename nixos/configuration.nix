@@ -35,7 +35,6 @@
   hardware.nvidia = {
     open = true; # recommended for Turing onwards
     powerManagement.enable = true; # fixes broken graphics after sleep
-    powerManagement.finegrained = true; # turn off gpu when idle
   };
   services.xserver.videoDrivers = [ "nvidia" ];
 
