@@ -22,9 +22,10 @@ in {
     "/storage" = {
       fsType = "fuse.mergerfs";
       device = "/mnt/disk*"; # mergerfs allows globs
+      # TODO: check whether these are the options i want
       options = ["cache.files=partial" "dropcacheonclose=true" "category.create=mfs"];
       # don't mount until physical disks have mounted
-      depends = map (i: "/mnt/disk${toString i}") (lib.range 0 ((builtins.length uuids) - 1));
+      depends = lib.imap0 (i: _uuid: "/mnt/disk${toString i}")
     };
   };
 

@@ -8,11 +8,9 @@
     /etc/nixos/hardware-configuration.nix
   ];
 
-  # bootloader
-  boot.loader.systemd-boot.enable = true;
+  # bootloader (don't touch these)
   boot.loader.efi.canTouchEfiVariables = true;
-
-  nixpkgs.config.allowUnfree = true; # allow non-OS software
+  boot.loader.systemd-boot.enable = true;
 
   # networking
   networking.hostName = "fridge";
@@ -27,28 +25,19 @@
       PermitRootLogin = "no";
     };
   };
-  services.fail2ban.enable = true;
-  services.endlessh = {
-    enable = true;
-    port = 22;
-    openFirewall = true;
-  };
 
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
 
   # graphics
+  nixpkgs.config.allowUnfree = true; # allow non open source
   hardware.graphics.enable = true; # use hardware graphics card
-  hardware.nvidia.open = false; # use closed-source nvidia drivers
-  services.xserver = {
-    enable = true;
-    videoDrivers = [ "nvidia" ];
-    excludePackages = with pkgs; [ xterm ];
-    xkb = {
-      layout = "us";
-      variant = "";
-    };
+  hardware.nvidia = {
+    open = true; # recommended for Turing onwards
+    powerManagement.enable = true; # fixes broken graphics after sleep
+    powerManagement.finegrained = true; # turn off gpu when idle
   };
+  services.xserver.videoDrivers = [ "nvidia" ];
 
   # gdm/gnome
   services.displayManager.gdm.enable = true;
@@ -61,15 +50,10 @@
     gnome-user-docs
   ];
 
-  services.printing.enable = true;
-
+  # misc
   programs.nix-ld.enable = true; # needed for uv
   programs.fish.enable = true;
-
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = true;
-  };
+  virtualisation.docker.enable = enable = true;
 
   # packages
   environment.systemPackages = with pkgs; [
@@ -126,5 +110,5 @@
     nerd-fonts.cousine
   ];
 
-  system.stateVersion = "25.11"; # don't change this
+  system.stateVersion = "25.11"; # don't change this line
 }
