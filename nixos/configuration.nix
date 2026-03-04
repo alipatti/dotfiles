@@ -53,7 +53,7 @@
   # misc
   programs.nix-ld.enable = true; # needed for uv
   programs.fish.enable = true;
-  virtualisation.docker.enable = enable = true;
+  virtualisation.docker.enable = true;
 
   # packages
   environment.systemPackages = with pkgs; [
