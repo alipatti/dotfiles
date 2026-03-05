@@ -28,7 +28,10 @@
   };
 
   # tailscale
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    useRoutingFeatures = "both";
+  };
 
   # TODO: setup nginx reverse proxy
 
