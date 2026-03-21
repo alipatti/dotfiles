@@ -6,7 +6,7 @@
   imports = [
     # include the results of the hardware scan.
     /etc/nixos/hardware-configuration.nix
-    ./nas.nix
+    # ./nas.nix # TODO: fix this (currently breaks system)
   ];
 
   # bootloader (don't touch these)
