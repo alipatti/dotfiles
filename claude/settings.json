@@ -17,7 +17,8 @@
         "api.anthropic.com",
         "docs.anthropic.com",
         "crates.io",
-        "static.crates.io"
+        "static.crates.io",
+        "docs.pola.rs"
       ]
     }
   }
