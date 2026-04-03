@@ -1,4 +1,8 @@
 {
+  "statusLine": {
+    "type": "command",
+    "command": "\"/private/tmp/temp path/prompt.py\""
+  },
   "sandbox": {
     "enabled" : true,
     "network": {
@@ -8,33 +12,13 @@
         "github.com",
         "api.github.com",
         "raw.githubusercontent.com",
-        "objects.githubusercontent.com"
+        "objects.githubusercontent.com",
+        "anthropic.com",
+        "api.anthropic.com",
+        "docs.anthropic.com",
+        "crates.io",
+        "static.crates.io"
       ]
     }
-  },
-  "permissions": {
-    "allow": [
-      "Bash(git:*)",
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(echo:*)",
-      "Bash(find:*)",
-      "Bash(grep:*)",
-      "Bash(rg:*)",
-      "Bash(fd:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(wc:*)",
-      "Bash(sort:*)",
-      "Bash(uniq:*)",
-      "Bash(jq:*)",
-      "Bash(sed:*)",
-      "Bash(which:*)",
-      "Bash(pwd:*)",
-      "Bash(uv:*)"
-    ],
-    "deny": [
-      "Bash(sudo:*)"
-    ]
   }
 }
