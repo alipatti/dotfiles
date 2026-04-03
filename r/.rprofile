@@ -1,6 +1,5 @@
-# vim: set filetype=r :
+# vim: set filetype=r
 
-ggplot2::theme_set(ggplot2::theme_light())
 options(
     readr.show_col_types = FALSE,
     repos = c(CRAN = "https://cloud.r-project.org/"),
