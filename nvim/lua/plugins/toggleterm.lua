@@ -18,8 +18,8 @@ return {
 				desc = "Toggle terminal"
 			},
 			{ "<esc>", [[<C-\><C-n><C-w><C-w>]], desc = "Leave terminal mode", mode = "t" },
-			{ "L", "<cmd>ToggleTermSendCurrentLine<cr>", desc = "send line to terminal" },
-			{ "L", "<cmd>ToggleTermSendVisualSelection<cr>", desc = "send selection to terminal", mode = "x" },
+			{ "L", "<cmd>ToggleTermSendCurrentLine99<cr>", desc = "send line to terminal" },
+			{ "L", "<cmd>ToggleTermSendVisualSelection99<cr>", desc = "send selection to terminal", mode = "x" },
 		}
 	},
 }
