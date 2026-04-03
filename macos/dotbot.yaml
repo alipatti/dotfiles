@@ -21,7 +21,6 @@
 
     # editor
     - neovim # editor
-    - claude-code
     - tree-sitter-cli
 
     # command line tools

@@ -1,7 +1,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "\"/private/tmp/temp path/prompt.py\""
+    "command": "~/.claude/prompt.py"
   },
   "sandbox": {
     "enabled" : true,
