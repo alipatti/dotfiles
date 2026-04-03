@@ -53,7 +53,9 @@ return {
 		opts = {
 			keywords = {
 				SECTION = { icon = "§ ", color = "hint" },
-			}
+				SAFETY = { icon = " ", color = "warning" },
+				CLAUDE = { icon = "󰚩 ", color = "info" },
+			},
 		},
 		dependencies = { "nvim-lua/plenary.nvim" },
 	},
@@ -81,8 +83,8 @@ return {
 		opts = {},
 	},
 
-	"tpope/vim-eunuch", -- vim wrappers for mkdir, mv, etc.
-	"tpope/vim-sleuth", -- automatically detect indentation
+	"tpope/vim-eunuch",  -- vim wrappers for mkdir, mv, etc.
+	"tpope/vim-sleuth",  -- automatically detect indentation
 	"tpope/vim-surround", -- surround with quotes, parens, tags, etc.
 	-- "tpope/vim-fugitive", -- git support
 	"tpope/vim-surround", -- support for editing surround quotes, html tags, etc
