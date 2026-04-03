@@ -25,7 +25,9 @@ if status is-interactive
     activate_venv
 end
 
-bind \cr search_history
+if command -q fzf
+    bind \cr search_history
+end
 
 load_dotenv ~/.dotfiles/env/*
 
@@ -34,11 +36,13 @@ abbr g git
 abbr gs git status
 abbr gd git diff
 abbr ga git add
+abbr gaa git add --all
 abbr gc git commit
 abbr gcm git commit -m
 abbr gcam git commit -am
 abbr gp git push
 abbr gl git log
+abbr gb git branch
 
 # other abbr
 abbr vim nvim
