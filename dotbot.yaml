@@ -28,6 +28,8 @@
     ~/.lintr: r/.lintr
     ~/.radian_profile: r/.radian_profile
 
+    ~/.claude: claude
+
     ~/.ipython: ipython
 
     ~/.prettierrc.yml: prettier/.prettierrc.yml
