@@ -3,6 +3,19 @@
     "type": "command",
     "command": "~/.claude/prompt.py"
   },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$NVIM\" ] && nvim --server \"$NVIM\" --remote-send '<cmd>checktime<cr>' || true"
+          }
+        ]
+      }
+    ]
+  },
   "sandbox": {
     "enabled" : true,
     "filesystem": {

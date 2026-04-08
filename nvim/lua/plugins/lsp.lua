@@ -46,13 +46,14 @@ local lsp_servers = {
 
 return {
 	-- LSP plugins and config
+	{ "folke/lazydev.nvim", ft = "lua", opts = {} },
+
 	{
 		"mason-org/mason-lspconfig.nvim",
 		dependencies = {
 			{ "neovim/nvim-lspconfig", },
 			{ "mason-org/mason.nvim",  opts = { ensure_installed = { "prettier" } } },
 			{ "j-hui/fidget.nvim",     opts = {},                                   tag = "legacy" },
-			{ "folke/lazydev.nvim",    opts = {} },
 			{ "hrsh7th/cmp-nvim-lsp",  opts = {} },
 
 		},
