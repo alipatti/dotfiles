@@ -1,5 +1,24 @@
 -- LSPs to be installed
 local lsp_servers = {
+	-- python
+	basedpyright  = {},
+	ruff          = {},
+
+	-- lua
+	lua_ls        = {},
+
+	-- yaml
+	yamlls        = {},
+
+	-- toml
+	taplo         = {}, --
+
+	-- json
+	jsonls        = {},
+
+	-- markdown
+	marksman      = {},
+
 	-- rust
 	rust_analyzer = {
 		['rust-analyzer'] = {
@@ -8,7 +27,7 @@ local lsp_servers = {
 	},
 
 	-- latex
-	texlab = {
+	texlab        = {
 		texlab = {
 			forwardSearch = {
 				executable = '/Applications/Skim.app/Contents/SharedSupport/displayline',
@@ -31,13 +50,14 @@ return {
 		"mason-org/mason-lspconfig.nvim",
 		dependencies = {
 			{ "neovim/nvim-lspconfig", },
-			{ "mason-org/mason.nvim",  opts = {} },
-			{ "j-hui/fidget.nvim",     opts = {}, tag = "legacy" },
+			{ "mason-org/mason.nvim",  opts = { ensure_installed = { "prettier" } } },
+			{ "j-hui/fidget.nvim",     opts = {},                                   tag = "legacy" },
 			{ "folke/lazydev.nvim",    opts = {} },
 			{ "hrsh7th/cmp-nvim-lsp",  opts = {} },
 
 		},
 		opts = {
+			ensure_installed = vim.tbl_keys(lsp_servers),
 			automatic_enable = true,
 		},
 	},
@@ -47,7 +67,7 @@ return {
 		config = function()
 			require("null-ls").setup({
 				sources = {
-					require("null-ls").builtins.formatting.prettier,
+					-- require("null-ls").builtins.formatting.prettier,
 					require("null-ls").builtins.diagnostics.markdownlint,
 
 					-- fish
