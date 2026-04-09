@@ -1,0 +1,14 @@
+# browser
+com.apple.Safari public.html all
+com.apple.Safari https all
+com.apple.Safari http all
+
+# email
+com.apple.mail mailto all
+
+# PDF
+net.sourceforge.skim-app.skim com.adobe.pdf all
+
+# images
+com.apple.Preview public.jpeg all
+com.apple.Preview public.png all

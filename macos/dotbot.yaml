@@ -38,6 +38,7 @@
     # for later config
     - zero-sh/tap/apply-user-defaults
     - dockutil
+    - duti
 
     # networking
     - tailscale
@@ -64,7 +65,8 @@
 - shell:
     - | 
         # apply settings
-        apply-user-defaults macos/settings.yaml 
+        apply-user-defaults macos/settings.yaml
+        duti macos/duti
 
         # set dock items
         dockutil --remove all
