@@ -1,7 +1,7 @@
 -- LSPs to be installed
 local lsp_servers = {
 	-- python
-	basedpyright  = {},
+	pyright  = {},
 	ruff          = {},
 
 	-- lua
