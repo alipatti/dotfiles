@@ -1,22 +1,18 @@
-#!/usr/bin/env -S uv run --script --quiet
-# /// script
-# dependencies = ["tomli"]
-# ///
+#!/usr/bin/env -S uv run --script --quiet --python 3.11
 
 import subprocess
+import tomllib
 from pathlib import Path
-
-import tomli
 
 
 def get_version(commit: str) -> str:
     commit_hash = subprocess.check_output(["git", "rev-parse", commit]).decode().strip()
 
-    pyproject_str = subprocess.check_output(
+    pyproject_bytes = subprocess.check_output(
         ["git", "show", f"{commit_hash}:pyproject.toml"]
     )
 
-    return tomli.loads(pyproject_str.decode())["project"]["version"]
+    return tomllib.loads(pyproject_bytes.decode())["project"]["version"]
 
 
 def main():
@@ -30,7 +26,7 @@ def main():
         print(f"Detected package version change ({old_version} -> {current_version})")
         print(f"Adding tag v{current_version}")
 
-        subprocess.check_call(["git", "tag", f"v{current_version}"])
+        subprocess.check_call(["git", "tag", "-a", f"v{current_version}", "-m", f"v{current_version}"])
 
     else:
         print("No package version change detected")
