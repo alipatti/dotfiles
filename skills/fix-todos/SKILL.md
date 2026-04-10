@@ -1,6 +1,6 @@
 ---
 name: fix-todos
-description: "Use this skill when the user asks to fix, resolve, or address TODO comments in the codebase. Triggers include: 'fix todos', 'resolve claude todos', 'address the TODOs', 'implement the TODOs'. Searches for CLAUDE: prefixed comments and executes them."
+description: "Use this skill when the user asks to search for and address TODO comments in the codebase."
 ---
 
 # fix-todos
