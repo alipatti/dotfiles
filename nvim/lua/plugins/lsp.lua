@@ -1,7 +1,7 @@
 -- LSPs to be installed
 local lsp_servers = {
 	-- python
-	pyright  = {},
+	pyright       = {},
 	ruff          = {},
 
 	-- lua
@@ -16,8 +16,16 @@ local lsp_servers = {
 	-- json
 	jsonls        = {},
 
+	-- fish
+	fish_lsp      = {},
+
 	-- markdown
 	marksman      = {},
+
+	-- typst
+	tinymist      = {
+		rootPath = vim.fn.getcwd(),
+	},
 
 	-- rust
 	rust_analyzer = {
@@ -44,6 +52,12 @@ local lsp_servers = {
 	}
 }
 
+for server, config in pairs(lsp_servers) do
+	if next(config) then
+		vim.lsp.config(server, { settings = config })
+	end
+end
+
 return {
 	-- LSP plugins and config
 	{ "folke/lazydev.nvim", ft = "lua", opts = {} },
@@ -68,12 +82,14 @@ return {
 		config = function()
 			require("null-ls").setup({
 				sources = {
+					-- TODO: remove this (superceded by lsp)
 					-- require("null-ls").builtins.formatting.prettier,
-					require("null-ls").builtins.diagnostics.markdownlint,
+					-- require("null-ls").builtins.diagnostics.markdownlint,
 
-					-- fish
-					require("null-ls").builtins.diagnostics.fish,
-					require("null-ls").builtins.formatting.fish_indent,
+					-- TODO: remove this (superceded by lsp)
+					-- -- fish
+					-- require("null-ls").builtins.diagnostics.fish,
+					-- require("null-ls").builtins.formatting.fish_indent,
 
 					-- swift
 					require("null-ls").builtins.formatting.swiftlint,
