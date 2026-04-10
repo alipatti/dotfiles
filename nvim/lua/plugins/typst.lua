@@ -2,6 +2,10 @@ return {
 	'chomosuke/typst-preview.nvim',
 	ft = 'typst',
 	version = '1.*',
-	dependencies_bin = { tinymist = 'tinymist' },
-	opts = {},
+	opts = {
+		dependencies_bin = { tinymist = 'tinymist' },
+		get_root = function()
+			return vim.fn.getcwd()
+		end,
+	},
 }
