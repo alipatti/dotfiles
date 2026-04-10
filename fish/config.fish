@@ -20,6 +20,11 @@ if command -q nix-your-shell
     nix-your-shell fish | source
 end
 
+# tinymist
+if command -q tinymist
+    tinymist completion | source
+end
+
 # load the automatic venv activation function
 if status is-interactive
     activate_venv
