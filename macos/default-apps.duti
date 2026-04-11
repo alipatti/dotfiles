@@ -6,8 +6,8 @@ com.apple.Safari http all
 # email
 com.apple.mail mailto all
 
-# PDF
-net.sourceforge.skim-app.skim com.adobe.pdf all
+# pdf
+net.apple.Preview com.adobe.pdf all
 
 # images
 com.apple.Preview public.jpeg all
