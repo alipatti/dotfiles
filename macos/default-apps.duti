@@ -7,7 +7,7 @@ com.apple.Safari http all
 com.apple.mail mailto all
 
 # pdf
-net.apple.Preview com.adobe.pdf all
+com.apple.Preview com.adobe.pdf all
 
 # images
 com.apple.Preview public.jpeg all
