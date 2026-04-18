@@ -1,3 +1,62 @@
+local required_grammars = {
+	-- languages
+	"python", "r", "rust",
+	"javascript", "typescript", "tsx",
+	"lua",
+
+	-- markup
+	"html", "markdown",
+	"latex", "typst",
+
+	-- data
+	"json", "toml", "yaml",
+
+	-- shell and config
+	"fish",
+	"dockerfile",
+
+	-- git
+	"gitcommit", "gitignore", "gitattributes",
+
+	-- vim
+	"vimdoc",
+}
+
+local function select_textobj(lhs, obj)
+	local function rhs()
+		local select = require("nvim-treesitter-textobjects.select")
+		select.select_textobject(obj, "textobjects")
+	end
+
+	return { lhs, rhs, mode = { "x", "o" } }
+end
+
+local function next_textobj(lhs, obj)
+	local function rhs()
+		local move = require("nvim-treesitter-textobjects.move")
+		move.goto_next_start(obj, "textobjects")
+	end
+
+	return { lhs, rhs }
+end
+
+local function prev_textobj(lhs, obj)
+	local function rhs()
+		local move = require("nvim-treesitter-textobjects.move")
+		move.goto_previous_start(obj, "textobjects")
+	end
+
+	return { lhs, rhs }
+end
+
+local function expand_selection()
+	require("vim.treesitter._select").select_parent(vim.v.count1)
+end
+
+local function contract_selection()
+	require("vim.treesitter._select").select_child(vim.v.count1)
+end
+
 return {
 	{
 		"neovim-treesitter/nvim-treesitter",
@@ -6,63 +65,33 @@ return {
 			"nvim-treesitter/nvim-treesitter-textobjects",
 		},
 		build = ":TSUpdate",
-		lazy = false,
+		keys = {
+			{ "<C-k>", expand_selection,   mode = { "n", "x" }, silent = true },
+			{ "<C-j>", contract_selection, mode = "x",          silent = true },
+		},
 		config = function()
 			require("nvim-treesitter").setup()
-
-			require("nvim-treesitter").install({
-				"lua", "vimdoc", "python", "r", "latex",
-				"javascript", "typescript", "tsx", "html",
-				"yaml", "typst", "toml", "json", "fish", "markdown", "rust",
-				"dockerfile", "gitcommit", "gitignore", "gitattributes",
-			})
-
-			-- enable highlighting for all filetypes with an installed parser
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = "*",
-				callback = function() pcall(vim.treesitter.start) end,
-			})
-
-			-- incremental selection via native neovim 0.12 api
-			local sel = require("vim.treesitter._select")
-			vim.keymap.set("n", "<C-k>", function() sel.select_parent(vim.v.count1) end, { silent = true })
-			vim.keymap.set("x", "<C-k>", function() sel.select_parent(vim.v.count1) end, { silent = true })
-			vim.keymap.set("x", "<C-j>", function() sel.select_child(vim.v.count1) end, { silent = true })
+			require("nvim-treesitter").install(required_grammars)
 		end,
 	},
 
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
 		branch = "main",
-		config = function()
-			require("nvim-treesitter-textobjects").setup({
-				select = {
-					enable = true,
-					lookahead = true,
-					keymaps = {
-						-- function parameters
-						["aa"] = "@parameter.outer",
-						["ia"] = "@parameter.inner",
-						-- functions
-						["af"] = "@function.outer",
-						["if"] = "@function.inner",
-						-- classes
-						["ac"] = "@class.outer",
-						["ic"] = "@class.inner",
-					},
-				},
-				move = {
-					enable = true,
-					set_jumps = true,
-					goto_next_start = {
-						["]]"] = "@function.outer",
-					},
-					goto_previous_start = {
-						["[["] = "@function.outer",
-					},
-				},
-			})
-		end,
+		keys = {
+			select_textobj("aa", "@parameter.outer"),
+			select_textobj("ia", "@parameter.inner"),
+			select_textobj("af", "@function.outer"),
+			select_textobj("if", "@function.inner"),
+			select_textobj("ac", "@class.outer"),
+			select_textobj("ic", "@class.inner"),
+			next_textobj("]]", "@function.outer"),
+			prev_textobj("[[", "@function.outer"),
+		},
+		opts = {
+			select = { lookahead = true },
+			move = { set_jumps = true },
+		}
 	},
 
 	-- {

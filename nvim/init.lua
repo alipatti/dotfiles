@@ -72,6 +72,12 @@ vim.filetype.add({
 	}
 })
 
+-- enable treesitter highlighting for all filetypes with an installed parser
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "*",
+	callback = function() pcall(vim.treesitter.start) end,
+})
+
 -- highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
