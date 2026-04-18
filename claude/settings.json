@@ -34,7 +34,8 @@
       "WebFetch(domain:crates.io)",
       "WebFetch(domain:static.crates.io)",
       "WebFetch(domain:docs.pola.rs)",
-      "WebFetch(domain:pola.rs)"
+      "WebFetch(domain:pola.rs)",
+      "WebFetch(domain:neovim.io)"
     ]
   },
   "sandbox": {
@@ -58,7 +59,8 @@
         "crates.io",
         "static.crates.io",
         "docs.pola.rs",
-        "pola.rs"
+        "pola.rs",
+        "neovim.io"
       ]
     }
   }
