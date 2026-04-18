@@ -28,7 +28,7 @@ local function select_textobj(lhs, obj)
 		select.select_textobject(obj, "textobjects")
 	end
 
-	return { lhs, rhs, mode = { "x", "o" } }
+	return { lhs, rhs, mode = { "x", "o" }, desc = "Select " .. obj }
 end
 
 local function next_textobj(lhs, obj)
@@ -37,7 +37,7 @@ local function next_textobj(lhs, obj)
 		move.goto_next_start(obj, "textobjects")
 	end
 
-	return { lhs, rhs }
+	return { lhs, rhs, desc = "Next " .. obj }
 end
 
 local function prev_textobj(lhs, obj)
@@ -46,7 +46,7 @@ local function prev_textobj(lhs, obj)
 		move.goto_previous_start(obj, "textobjects")
 	end
 
-	return { lhs, rhs }
+	return { lhs, rhs, desc = "Previous " .. obj }
 end
 
 local function expand_selection()
@@ -66,8 +66,8 @@ return {
 		},
 		build = ":TSUpdate",
 		keys = {
-			{ "<C-k>", expand_selection,   mode = { "n", "x" }, silent = true },
-			{ "<C-j>", contract_selection, mode = "x",          silent = true },
+			{ "<C-k>", expand_selection,   mode = { "n", "x" }, silent = true, desc = "Expand selection" },
+			{ "<C-j>", contract_selection, mode = "x",          silent = true, desc = "Contract selection" },
 		},
 		config = function()
 			require("nvim-treesitter").setup()
