@@ -20,6 +20,23 @@
       }
     ]
   },
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:files.pythonhosted.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:objects.githubusercontent.com)",
+      "WebFetch(domain:anthropic.com)",
+      "WebFetch(domain:api.anthropic.com)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:crates.io)",
+      "WebFetch(domain:static.crates.io)",
+      "WebFetch(domain:docs.pola.rs)",
+      "WebFetch(domain:pola.rs)"
+    ]
+  },
   "sandbox": {
     "enabled" : true,
     "filesystem": {
@@ -40,7 +57,8 @@
         "docs.anthropic.com",
         "crates.io",
         "static.crates.io",
-        "docs.pola.rs"
+        "docs.pola.rs",
+        "pola.rs"
       ]
     }
   }
