@@ -7,7 +7,7 @@
 NSGlobalDomain:
   AppleShowAllExtensions: true
   AppleShowAllFiles: true
-  AppleSpacesSwitchOnActivate: false
+  AppleSpacesSwitchOnActivate: true
   AppleFontSmoothing: true
 
   NSQuitAlwaysKeepsWindow: false
@@ -24,6 +24,7 @@ NSGlobalDomain:
   NSAutomaticSpellingCorrectionEnabled: false
   AppleKeyboardUIMode: 3 # full keyboard controll
   ApplePressAndHoldEnabled: false
+  AppleWindowTabbingMode: always
   KeyRepeat: 1
   InitialKeyRepeat: 20
 
