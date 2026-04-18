@@ -14,7 +14,9 @@
       "WebFetch(domain:static.crates.io)",
       "WebFetch(domain:docs.pola.rs)",
       "WebFetch(domain:pola.rs)",
-      "WebFetch(domain:neovim.io)"
+      "WebFetch(domain:neovim.io)",
+      "WebFetch(domain:json.schemastore.org)",
+      "WebFetch(domain:schemastore.org)"
     ]
   },
   "hooks": {
@@ -56,7 +58,9 @@
         "static.crates.io",
         "docs.pola.rs",
         "pola.rs",
-        "neovim.io"
+        "neovim.io",
+        "json.schemastore.org",
+        "schemastore.org"
       ]
     },
     "filesystem": {
