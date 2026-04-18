@@ -1,90 +1,68 @@
 return {
-	-- TODO: update this to the new treesitter config format
 	{
-		"nvim-treesitter/nvim-treesitter",
-		dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
+		"neovim-treesitter/nvim-treesitter",
+		dependencies = {
+			"neovim-treesitter/treesitter-parser-registry",
+			"nvim-treesitter/nvim-treesitter-textobjects",
+		},
 		build = ":TSUpdate",
 		lazy = false,
-		branch = "master",
 		config = function()
-			require("nvim-treesitter.configs").setup({
-				-- languages to be installed
-				ensure_installed = {
-					"lua",
-					"vimdoc",
-					"python",
-					"r",
-					"latex",
-					"javascript",
-					"typescript",
-					"tsx",
-					"html",
-				},
+			require("nvim-treesitter").setup()
 
-				-- https://github.com/nvim-treesitter/nvim-treesitter?tab=readme-ov-file#highlight
-				highlight = {
-					enable = true,
-				},
-
-				-- synchronous or async installation
-				sync_install = false,
-
-				modules = {},
-				ignore_install = {},
-
-				-- add uninstalled languages automatically
-				auto_install = false,
-
-				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "<C-k>",
-						node_incremental = "<C-k>",
-						-- scope_incremental = "<C-s>",
-						node_decremental = "<C-j>",
-					},
-				},
-
-				textobjects = {
-					select = {
-						enable = true,
-						-- Automatically jump forward to textobj, similar to targets.vim
-						lookahead = true,
-						keymaps = {
-							-- function parameters
-							["aa"] = "@parameter.outer",
-							["ia"] = "@parameter.inner",
-							-- functions
-							["af"] = "@function.outer",
-							["if"] = "@function.inner",
-							-- classes
-							["ac"] = "@class.outer",
-							["ic"] = "@class.inner",
-						},
-					},
-					move = {
-						enable = true,
-						set_jumps = true, -- whether to set jumps in the jumplist
-						goto_next_start = {
-							["]m"] = "@function.outer",
-							["]]"] = "@class.outer",
-						},
-						goto_next_end = {
-							["]M"] = "@function.outer",
-							["]["] = "@class.outer",
-						},
-						goto_previous_start = {
-							["[m"] = "@function.outer",
-							["[["] = "@class.outer",
-						},
-						goto_previous_end = {
-							["[M"] = "@function.outer",
-							["[]"] = "@class.outer",
-						},
-					},
-				}
+			require("nvim-treesitter").install({
+				"lua", "vimdoc", "python", "r", "latex",
+				"javascript", "typescript", "tsx", "html",
+				"yaml", "typst", "toml", "json", "fish", "markdown", "rust",
+				"dockerfile", "gitcommit", "gitignore", "gitattributes",
 			})
-		end
+
+			-- enable highlighting for all filetypes with an installed parser
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "*",
+				callback = function() pcall(vim.treesitter.start) end,
+			})
+
+			-- incremental selection via native neovim 0.12 api
+			local sel = require("vim.treesitter._select")
+			vim.keymap.set("n", "<C-k>", function() sel.select_parent(vim.v.count1) end, { silent = true })
+			vim.keymap.set("x", "<C-k>", function() sel.select_parent(vim.v.count1) end, { silent = true })
+			vim.keymap.set("x", "<C-j>", function() sel.select_child(vim.v.count1) end, { silent = true })
+		end,
+	},
+
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+		branch = "main",
+		config = function()
+			require("nvim-treesitter-textobjects").setup({
+				select = {
+					enable = true,
+					lookahead = true,
+					keymaps = {
+						-- function parameters
+						["aa"] = "@parameter.outer",
+						["ia"] = "@parameter.inner",
+						-- functions
+						["af"] = "@function.outer",
+						["if"] = "@function.inner",
+						-- classes
+						["ac"] = "@class.outer",
+						["ic"] = "@class.inner",
+					},
+				},
+				move = {
+					enable = true,
+					set_jumps = true,
+					goto_next_start = {
+						["]]"] = "@function.outer",
+					},
+					goto_previous_start = {
+						["[["] = "@function.outer",
+					},
+				},
+			})
+		end,
 	},
 
 	-- {
