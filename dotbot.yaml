@@ -32,8 +32,6 @@
 
     ~/.ipython: ipython
 
-    ~/.prettierrc.yml: prettier/.prettierrc.yml
-
     ~/.latexmkrc: latex/.latexmkrc
 
     ~/.ssh: ssh
