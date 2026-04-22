@@ -9,7 +9,6 @@
     # languages
     - uv # python
     - node # js
-    - rustup # rust
 
     # docker
     - docker
@@ -64,8 +63,11 @@
     - font-cousine-nerd-font # font for kitty
     - mactex-no-gui # latex
 
-# settings
 - shell:
+    - description: Install rustup
+      command: command -v rustup || curl --proto '=https' --tlsv1.2 -sSf
+        https://sh.rustup.rs | sh -s -- -y
+
     - description: Set fish as default shell
       command: |
         bash -c '
