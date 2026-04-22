@@ -8,5 +8,4 @@
 !agents/**
 !commands/
 !commands/**
-!plugins/
-!plugins/**
+!prompt*

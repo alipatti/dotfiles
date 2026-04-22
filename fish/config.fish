@@ -51,4 +51,4 @@ abbr gb git branch
 
 # other abbr
 abbr vim nvim
-abbr r radian
+abbr r arf

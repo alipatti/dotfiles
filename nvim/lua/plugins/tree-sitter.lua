@@ -1,90 +1,97 @@
+local required_grammars = {
+	-- languages
+	"python", "r", "rust",
+	"javascript", "typescript", "tsx",
+	"lua",
+
+	-- markup
+	"html", "markdown",
+	"latex", "typst",
+
+	-- data
+	"json", "toml", "yaml",
+
+	-- shell and config
+	"fish",
+	"dockerfile",
+
+	-- git
+	"gitcommit", "gitignore", "gitattributes",
+
+	-- vim
+	"vimdoc",
+}
+
+local function select_textobj(lhs, obj)
+	local function rhs()
+		local select = require("nvim-treesitter-textobjects.select")
+		select.select_textobject(obj, "textobjects")
+	end
+
+	return { lhs, rhs, mode = { "x", "o" }, desc = "Select " .. obj }
+end
+
+local function next_textobj(lhs, obj)
+	local function rhs()
+		local move = require("nvim-treesitter-textobjects.move")
+		move.goto_next_start(obj, "textobjects")
+	end
+
+	return { lhs, rhs, desc = "Next " .. obj }
+end
+
+local function prev_textobj(lhs, obj)
+	local function rhs()
+		local move = require("nvim-treesitter-textobjects.move")
+		move.goto_previous_start(obj, "textobjects")
+	end
+
+	return { lhs, rhs, desc = "Previous " .. obj }
+end
+
+local function expand_selection()
+	require("vim.treesitter._select").select_parent(vim.v.count1)
+end
+
+local function contract_selection()
+	require("vim.treesitter._select").select_child(vim.v.count1)
+end
+
 return {
-	-- TODO: update this to the new treesitter config format
 	{
-		"nvim-treesitter/nvim-treesitter",
-		dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" },
+		"neovim-treesitter/nvim-treesitter",
+		dependencies = {
+			"neovim-treesitter/treesitter-parser-registry",
+			"nvim-treesitter/nvim-treesitter-textobjects",
+		},
 		build = ":TSUpdate",
-		lazy = false,
-		branch = "master",
+		keys = {
+			{ "<C-k>", expand_selection,   mode = { "n", "x" }, silent = true, desc = "Expand selection" },
+			{ "<C-j>", contract_selection, mode = "x",          silent = true, desc = "Contract selection" },
+		},
 		config = function()
-			require("nvim-treesitter.configs").setup({
-				-- languages to be installed
-				ensure_installed = {
-					"lua",
-					"vimdoc",
-					"python",
-					"r",
-					"latex",
-					"javascript",
-					"typescript",
-					"tsx",
-					"html",
-				},
+			require("nvim-treesitter").setup()
+			require("nvim-treesitter").install(required_grammars)
+		end,
+	},
 
-				-- https://github.com/nvim-treesitter/nvim-treesitter?tab=readme-ov-file#highlight
-				highlight = {
-					enable = true,
-				},
-
-				-- synchronous or async installation
-				sync_install = false,
-
-				modules = {},
-				ignore_install = {},
-
-				-- add uninstalled languages automatically
-				auto_install = false,
-
-				incremental_selection = {
-					enable = true,
-					keymaps = {
-						init_selection = "<C-k>",
-						node_incremental = "<C-k>",
-						-- scope_incremental = "<C-s>",
-						node_decremental = "<C-j>",
-					},
-				},
-
-				textobjects = {
-					select = {
-						enable = true,
-						-- Automatically jump forward to textobj, similar to targets.vim
-						lookahead = true,
-						keymaps = {
-							-- function parameters
-							["aa"] = "@parameter.outer",
-							["ia"] = "@parameter.inner",
-							-- functions
-							["af"] = "@function.outer",
-							["if"] = "@function.inner",
-							-- classes
-							["ac"] = "@class.outer",
-							["ic"] = "@class.inner",
-						},
-					},
-					move = {
-						enable = true,
-						set_jumps = true, -- whether to set jumps in the jumplist
-						goto_next_start = {
-							["]m"] = "@function.outer",
-							["]]"] = "@class.outer",
-						},
-						goto_next_end = {
-							["]M"] = "@function.outer",
-							["]["] = "@class.outer",
-						},
-						goto_previous_start = {
-							["[m"] = "@function.outer",
-							["[["] = "@class.outer",
-						},
-						goto_previous_end = {
-							["[M"] = "@function.outer",
-							["[]"] = "@class.outer",
-						},
-					},
-				}
-			})
-		end
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+		branch = "main",
+		keys = {
+			select_textobj("aa", "@parameter.outer"),
+			select_textobj("ia", "@parameter.inner"),
+			select_textobj("af", "@function.outer"),
+			select_textobj("if", "@function.inner"),
+			select_textobj("ac", "@class.outer"),
+			select_textobj("ic", "@class.inner"),
+			next_textobj("]]", "@function.outer"),
+			prev_textobj("[[", "@function.outer"),
+		},
+		opts = {
+			select = { lookahead = true },
+			move = { set_jumps = true },
+		}
 	},
 
 	-- {

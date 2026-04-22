@@ -1,10 +1,14 @@
+- shell:
+    - description: Install Homebrew
+      command: command -v brew || /bin/bash -c "$(curl -fsSL
+        https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
 - brew:
     - fish # shell
 
     # languages
     - uv # python
     - node # js
-    - rustup # rust
 
     # docker
     - docker
@@ -40,9 +44,6 @@
     - dockutil
     - duti
 
-    # networking
-    - tailscale
-
 - cask:
     # gui apps
     - kitty # https://search.nixos.org/packages?show=kitty
@@ -57,39 +58,60 @@
     # misc
     - the-unarchiver # https://search.nixos.org/packages?show=the-unarchiver
     - displaylink # third monitor on MBP
+    - tailscale-app
 
     - font-cousine-nerd-font # font for kitty
     - mactex-no-gui # latex
 
-# dock settings
 - shell:
-    - | 
-        # apply settings
-        apply-user-defaults macos/settings.yaml
-        duti macos/default-apps.duti
+    - description: Install rustup
+      command: command -v rustup || curl --proto '=https' --tlsv1.2 -sSf
+        https://sh.rustup.rs | sh -s -- -y
 
-        # set dock items
+    - description: Install arf
+      command: command -v arf || curl --proto '=https' --tlsv1.2 -LsSf
+        https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh
+
+    - description: Set fish as default shell
+      command: |
+        bash -c '
+        FISH=$(which fish)
+        grep -qF "$FISH" /etc/shells || echo "$FISH" | sudo tee -a /etc/shells
+        [ "$SHELL" = "$FISH" ] || chsh -s "$FISH"
+        '
+
+    - description: Apply user defaults
+      command: bash -c 'apply-user-defaults macos/settings.yaml'
+
+    - description: Set default apps
+      command: bash -c 'duti macos/default-apps.duti'
+
+    - description: Configure dock
+      command: |
+        bash -c '
         dockutil --remove all
 
-        set -l apps \
-            '/Applications/Kitty.app' \
-            '/Applications/Safari.app' \
-            '/Applications/Calendar.app' \
-            '/Applications/Reminders.app' \
-            '/Applications/Mail.app' \
-            '/Applications/Slack.app' \
-            '/Applications/Messages.app'
+        apps=(
+            /Applications/Kitty.app
+            /Applications/Safari.app
+            /Applications/Calendar.app
+            /Applications/Reminders.app
+            /Applications/Mail.app
+            /Applications/Slack.app
+            /Applications/Messages.app
+        )
 
-        for app in $apps
-            dockutil --add $app --no-restart
-        end
+        for app in "${apps[@]}"; do
+            dockutil --add "$app" --no-restart
+        done
 
-        dockutil --add "~/Downloads/" --display stack --sort dateadded --view fan --no-restart
+        dockutil --add "$HOME/Downloads/" --display stack --sort dateadded --view fan --no-restart
 
         killall Finder Dock
-
+        '
 
 # latex
-# TODO: move this out?
+- create:
+    - ~/Library/texmf/tex/latex
 - link:
     ~/Library/texmf/tex/latex/local: latex
