@@ -29,6 +29,8 @@
     ~/.radian_profile: r/.radian_profile
 
     ~/.claude: claude
+    ~/.codex/AGENTS.md: claude/CLAUDE.md
+    ~/.codex/skills: skills
 
     ~/.ipython: ipython
 
