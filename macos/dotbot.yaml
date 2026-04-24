@@ -14,6 +14,8 @@
     - docker
     - docker-compose
     - colima # open source docker runtime
+    - lima-additional-guestagents
+    - qemu
 
     # tex
     - tectonic
@@ -68,9 +70,17 @@
       command: command -v rustup || curl --proto '=https' --tlsv1.2 -sSf
         https://sh.rustup.rs | sh -s -- -y
 
+    - description: Link docker-compose plugin
+      command: |
+        bash -c '
+        mkdir -p ~/.docker/cli-plugins
+        ln -sfn "$(brew --prefix)/opt/docker-compose/bin/docker-compose" ~/.docker/cli-plugins/docker-compose
+        '
+
     - description: Install arf
       command: command -v arf || curl --proto '=https' --tlsv1.2 -LsSf
-        https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | sh
+        https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh
+        | sh
 
     - description: Set fish as default shell
       command: |
