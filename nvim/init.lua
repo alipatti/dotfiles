@@ -53,6 +53,9 @@ vim.o.completeopt = "menuone,noselect"
 -- use full terminal colors
 vim.o.termguicolors = true
 
+-- rounded borders on all floating windows
+vim.o.winborder = "rounded"
+
 -- use natural line wrapping
 -- vim.wo.wrap = "linebreak"
 vim.opt.linebreak = true

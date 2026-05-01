@@ -18,7 +18,7 @@ return {
 				enable_autosnippets = true,
 			})
 			require("luasnip.loaders.from_lua")
-				.load({ paths = "~/.config/nvim/snippets/" })
+					.load({ paths = "~/.config/nvim/snippets/" })
 
 			-- nvim-cmp setup
 			local cmp = require("cmp")
@@ -32,11 +32,18 @@ return {
 					["<C-n>"] = cmp.mapping.select_next_item(),
 					["<C-p>"] = cmp.mapping.select_prev_item(),
 					['<C-c>'] = cmp.mapping.abort(),
-					["<C-d>"] = cmp.mapping.scroll_docs(-4),
-					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.confirm({ select = true }),
-					["<tab>"] = cmp.mapping.confirm({ select = true }),
 				}),
+				window = {
+					completion = {
+						border = "rounded",
+						max_width = 80,
+					},
+					documentation = {
+						border = "rounded",
+						max_width = 80,
+					},
+				},
 				sources = {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },

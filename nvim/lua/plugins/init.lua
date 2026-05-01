@@ -40,7 +40,6 @@ return {
 					{ "U",                "<cmd>redo<cr>", desc = "redo" },
 					{ "<D-]>",            "<cmd>bn<cr>",   desc = "next buffer" },
 					{ "<D-[>",            "<cmd>bp<cr>",   desc = "previous buffer" },
-					{ "<leader><leader>", "<C-^>",         desc = "previous buffer" },
 				},
 			}
 		},
