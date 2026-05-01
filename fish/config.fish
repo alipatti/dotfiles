@@ -52,3 +52,4 @@ abbr gb git branch
 # other abbr
 abbr vim nvim
 abbr r arf
+abbr ipy ipython
