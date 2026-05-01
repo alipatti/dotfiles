@@ -82,10 +82,16 @@ return {
 		opts = {},
 	},
 
-	"tpope/vim-eunuch",  -- vim wrappers for mkdir, mv, etc.
-	"tpope/vim-sleuth",  -- automatically detect indentation
-	"tpope/vim-surround", -- surround with quotes, parens, tags, etc.
-	"tpope/vim-surround", -- support for editing surround quotes, html tags, etc
 
-	"folke/noice.nvim", -- pop up cmd line
+	--pop up cmd line
+	{
+		"folke/noice.nvim",
+		opts = {}
+	},
+
+	"MunifTanjim/nui.nvim", -- notification
+	"tpope/vim-eunuch",    -- vim wrappers for mkdir, mv, etc.
+	"tpope/vim-sleuth",    -- automatically detect indentation
+	"tpope/vim-surround",  -- surround with quotes, parens, tags, etc.
+	"tpope/vim-surround",  -- support for editing surround quotes, html tags, etc
 }
