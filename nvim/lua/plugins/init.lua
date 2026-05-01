@@ -37,9 +37,9 @@ return {
 				},
 				{
 					mode = "n",
-					{ "U",                "<cmd>redo<cr>", desc = "redo" },
-					{ "<D-]>",            "<cmd>bn<cr>",   desc = "next buffer" },
-					{ "<D-[>",            "<cmd>bp<cr>",   desc = "previous buffer" },
+					{ "U",     "<cmd>redo<cr>", desc = "redo" },
+					{ "<D-]>", "<cmd>bn<cr>",   desc = "next buffer" },
+					{ "<D-[>", "<cmd>bp<cr>",   desc = "previous buffer" },
 				},
 			}
 		},
@@ -85,6 +85,7 @@ return {
 	"tpope/vim-eunuch",  -- vim wrappers for mkdir, mv, etc.
 	"tpope/vim-sleuth",  -- automatically detect indentation
 	"tpope/vim-surround", -- surround with quotes, parens, tags, etc.
-	-- "tpope/vim-fugitive", -- git support
 	"tpope/vim-surround", -- support for editing surround quotes, html tags, etc
+
+	"folke/noice.nvim", -- pop up cmd line
 }
