@@ -60,7 +60,15 @@ end
 
 return {
 	-- LSP plugins and config
-	{ "folke/lazydev.nvim", ft = "lua", opts = {} },
+	{
+		"folke/lazydev.nvim",
+		ft = "lua",
+		opts = {
+			library = {
+				{ path = "snacks.nvim", words = { "Snacks" } },
+			},
+		},
+	},
 
 	{
 		"mason-org/mason-lspconfig.nvim",

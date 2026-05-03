@@ -59,16 +59,6 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim" },
 	},
 
-	-- add indentation guides and highlighting of current scope
-	{
-		"lukas-reineke/indent-blankline.nvim",
-		main = "ibl",
-		opts = {
-			scope = { enabled = false },
-		}
-	},
-
-	-- { "hiphish/rainbow-delimiters.nvim" },
 
 	-- "gc" to comment visual regions/lines
 	{
