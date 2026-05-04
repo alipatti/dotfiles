@@ -58,6 +58,11 @@ return {
 			},
 		},
 		keys = {
+			{
+				"<leader>bd",
+				function() Snacks.bufdelete() end,
+				desc = "delete buffer"
+			},
 			-- LSP/DIAGNOSTICS
 			{
 				";R",
