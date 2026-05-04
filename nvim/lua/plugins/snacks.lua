@@ -6,6 +6,10 @@ return {
 		},
 		priority = 1000,
 		lazy = false,
+		config = function(_, opts)
+			require("snacks").setup(opts)
+			vim.api.nvim_set_hl(0, "SnacksIndent", { link = "LineNr" })
+		end,
 		opts = {
 			picker = {
 				enabled = true,
@@ -28,19 +32,17 @@ return {
 				}
 			},
 			indent = {
-				enabled = true,
-				only_current = true, -- only show indent guides in the current window
-				-- TODO: make wider box char
-				-- TODO: make lighter color
-				-- char = "┃",
-				char = "▎",
-				hl = "SnacksIndent",
+					only_current = true,
+				indent = {
+					char = "▎",
+				},
 				animate = {
 					enabled = false,
 				},
 				scope = {
 					enabled = true,
-					hl = "SnacksIndentScope",
+					char = "▎",
+					hl = "Comment",
 				},
 			},
 			bufdelete = {
