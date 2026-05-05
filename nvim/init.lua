@@ -60,6 +60,9 @@ vim.o.winborder = "rounded"
 -- vim.wo.wrap = "linebreak"
 vim.opt.linebreak = true
 
+-- load project-local config
+vim.o.exrc = true
+
 -- set color scheme
 vim.cmd.colorscheme("catppuccin-frappe")
 
@@ -70,7 +73,6 @@ vim.diagnostic.config({
 
 vim.filetype.add({
 	extension = {
-		sage = "python",
 		pest = "pest",
 	}
 })
