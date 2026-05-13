@@ -68,5 +68,8 @@
         "~/.cache/uv/"
       ]
     }
-  }
+  },
+  "awaySummaryEnabled": false,
+  "theme": "dark-ansi",
+  "preferredNotifChannel": "notifications_disabled"
 }
