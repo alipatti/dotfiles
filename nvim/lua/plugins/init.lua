@@ -84,4 +84,14 @@ return {
 	"tpope/vim-sleuth",    -- automatically detect indentation
 	"tpope/vim-surround",  -- surround with quotes, parens, tags, etc.
 	"tpope/vim-surround",  -- support for editing surround quotes, html tags, etc
+
+	-- highlight color codes inline
+	{
+		"brenoprata10/nvim-highlight-colors",
+		opts = {
+			render = "virtual",
+			virtual_symbol = "●",
+			virtual_symbol_position = "eol",
+		},
+	},
 }
