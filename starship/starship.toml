@@ -71,7 +71,7 @@ format = "[ $branch ](bright-white)"
 format = '[$conflicted$stashed$deleted$renamed$typechanged$staged$untracked$ahead_behind](red) '
 
 [git_metrics]
-format = '[+$added](green) [-$deleted](red) [|](bright-white) '
+format = '([+$added](green) )([-$deleted](red) )[|](bright-white) '
 ignore_submodules = true
 disabled = false
 
