@@ -3,18 +3,19 @@
 
 format = """
 $directory\
+$hostname\
 $sudo\
 $cmd_duration\
 $fill\
 $username\
-$hostname\
-$conda\
+$rust\
 $python\
 $git_branch\
 $git_commit\
 $git_state\
 $git_status\
 $git_metrics\
+$custom\
 
 $line_break\
 $jobs\
@@ -31,37 +32,40 @@ symbol = " "
 format = '[ $duration]($style) '
 style = "bright-black"
 
-[python]
-format = '[ |  v${version} $virtualenv]($style)'
-style = "bright-white"
-detect_extensions = []
-detect_files = []
-detect_folders = []
-version_format = '${major}.${minor}'
-
-[conda]
-format = "\\([$symbol $environment]($style)\\) "
-symbol = ""
-
 [sudo]
 format = "[\\(as sudo\\)]($style)"
 disabled = false
 
-
 [hostname]
-# ssh_only = false
-format = '[@$hostname](bright-white) '
+ssh_only = true
+format = '[| $hostname](bright-white) '
 
 [username]
+disabled = true
 show_always = true
-format = '[ $user](bright-white)'
+format = '[ $user | ](bright-white)'
+
+# --------- #
+# LANGUAGES #
+# --------- #
+
+[python]
+format = '[ ${version} $virtualenv | ](bright-white)'
+detect_extensions = []
+detect_files = []
+detect_folders = []
+version_format = '$v${major}.${minor}'
+
+[rust]
+format = '[ ${version} | ](bright-white)'
+version_format = '$v${major}.${minor}'
 
 # --- #
 # GIT #
 # --- #
 
 [git_branch]
-format = "[ | ](bright-white)[ $branch](bright-white) "
+format = "[ $branch ](bright-white)"
 
 [git_status]
 format = '[$ahead_behind$untracked$stashed$renamed$deleted$staged]($style) '
@@ -71,3 +75,14 @@ style = "red"
 added_style = "green"
 deleted_style = "red"
 disabled = false
+
+# ------ #
+# CUSTOM #
+# ------ #
+# 
+[custom.system_icons]
+command     = "echo $(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin//g' | sed 's/linux/󰌽/g') $(whoami)"
+format      = "[| $output]($style) "
+style       = "bright-white"
+shell       = ["bash", "--noprofile", "--norc"]
+when        = "true"
