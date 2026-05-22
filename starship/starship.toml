@@ -3,11 +3,11 @@
 
 format = """
 $directory\
+$username\
 $hostname\
 $sudo\
 $cmd_duration\
 $fill\
-$username\
 $rust\
 $python\
 $git_branch\
@@ -15,7 +15,6 @@ $git_commit\
 $git_state\
 $git_status\
 $git_metrics\
-$custom\
 
 $line_break\
 $jobs\
@@ -38,12 +37,12 @@ disabled = false
 
 [hostname]
 ssh_only = true
-format = '[| $hostname](bright-white) '
+format = '[@$hostname](bright-white) '
 
 [username]
-disabled = true
-show_always = true
-format = '[ $user | ](bright-white)'
+disabled = false
+show_always = false
+format = '[| $user](bright-white)'
 
 # --------- #
 # LANGUAGES #
@@ -71,7 +70,7 @@ format = "[ $branch ](bright-white)"
 format = '[$conflicted$stashed$deleted$renamed$typechanged$staged$untracked$ahead_behind](red) '
 
 [git_metrics]
-format = '([+$added](green) )([-$deleted](red) )[|](bright-white) '
+format = '([+$added](green) )([-$deleted](red) )'
 ignore_submodules = true
 disabled = false
 
@@ -80,7 +79,7 @@ disabled = false
 # ------ #
 [custom.system_icons]
 command = "echo $(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin//g' | sed 's/linux/󰌽/g')"
-format = "[$output]($style) "
+format = "[$output]($style)"
 style = "bright-white"
 shell = ["bash", "--noprofile", "--norc"]
 when = "true"
