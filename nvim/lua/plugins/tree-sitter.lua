@@ -1,7 +1,7 @@
 local required_grammars = {
 	-- languages
 	"python", "r", "rust",
-	"javascript", "typescript", "tsx",
+	"javascript", "typescript", "tsx", "svelte",
 	"lua",
 
 	-- markup
@@ -59,9 +59,8 @@ end
 
 return {
 	{
-		"neovim-treesitter/nvim-treesitter",
+		"nvim-treesitter/nvim-treesitter",
 		dependencies = {
-			"neovim-treesitter/treesitter-parser-registry",
 			"nvim-treesitter/nvim-treesitter-textobjects",
 		},
 		build = ":TSUpdate",
