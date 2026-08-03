@@ -60,6 +60,10 @@ vim.o.winborder = "rounded"
 -- vim.wo.wrap = "linebreak"
 vim.opt.linebreak = true
 
+-- spell checking
+vim.o.spell = true
+vim.o.spelllang = "en"
+
 -- load project-local config
 vim.o.exrc = true
 
