@@ -9,6 +9,7 @@
     # languages
     - uv # python
     - node # js
+    - pnpm # js
 
     # docker
     - docker

@@ -53,3 +53,5 @@ abbr gb git branch
 abbr vim nvim
 abbr r arf
 abbr ipy ipython
+abbr npm pnpm
+
