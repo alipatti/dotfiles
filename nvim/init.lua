@@ -60,9 +60,13 @@ vim.o.winborder = "rounded"
 -- vim.wo.wrap = "linebreak"
 vim.opt.linebreak = true
 
--- spell checking
-vim.o.spell = true
+vim.o.spell = false
 vim.o.spelllang = "en"
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "tex", "markdown" },
+    callback = function() vim.opt_local.spell = true end,
+})
 
 -- load project-local config
 vim.o.exrc = true
