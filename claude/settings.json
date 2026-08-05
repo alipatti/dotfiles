@@ -71,5 +71,6 @@
   },
   "awaySummaryEnabled": false,
   "theme": "dark-ansi",
-  "preferredNotifChannel": "notifications_disabled"
+  "preferredNotifChannel": "notifications_disabled",
+  "effortLevel": "medium"
 }
