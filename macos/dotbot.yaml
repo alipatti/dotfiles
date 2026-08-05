@@ -121,8 +121,10 @@
         killall Finder Dock
         '
 
-# latex
 - create:
-    - ~/Library/texmf/tex/latex
+    - ~/Library/texmf/tex/latex/
+    - ~/Library/Application Support/papis/
+
 - link:
     ~/Library/texmf/tex/latex/local: latex
+    ~/Library/Application Support/papis/config: papis/config
