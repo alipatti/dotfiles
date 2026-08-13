@@ -1,5 +1,27 @@
 # see: https://github.com/anishathalye/dotbot#directives
 
+- shell:
+    - description: Install Homebrew
+      command: command -v brew || /bin/bash -c "$(curl -fsSL
+        https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+- brew:
+     # python
+    - uv
+
+    # git
+    - git
+    - gh # github
+
+    # command line tools
+    - zoxide # cd
+    - starship # prompt
+
+# gui apps
+- cask:
+    - kitty # https://search.nixos.org/packages?show=kitty
+    - font-cousine-nerd-font # font for kitty
+
 - defaults:
     link:
       relink: true
@@ -14,36 +36,16 @@
       stderr: false
 
 - link:
-    ~/.config/fish: fish
     ~/.config/kitty: kitty
-    ~/.config/nvim: nvim
-    ~/.config/gh: github
     ~/.config/starship.toml: starship/starship.toml
-
     ~/.gitignore: git/ignore
     ~/.gitconfig: git/config
-    ~/.git/templates: git/templates
-
-    ~/.rprofile: r/.rprofile
-    ~/.lintr: r/.lintr
-    ~/.radian_profile: r/.radian_profile
-
-    ~/.claude: claude
-    ~/.codex/AGENTS.md: claude/CLAUDE.md
-    ~/.codex/skills: skills
-
-    ~/.ipython: ipython
-
-    ~/.latexmkrc: latex/.latexmkrc
-
-    ~/.ssh: ssh
 
 - shell:
-    - touch ~/.hushlogin # hide fish "last login message"
+    - touch ~/.hushlogin # hide "last login message"
 
 # remove broken symlinks
 - clean:
     - "~"
-    - ~/texmf/
     - ~/.config/
     - ~/.local/bin

@@ -1,6 +1,6 @@
 [user]
-	email = alistairpattison@gmail.com
-	name = Alistair Pattison
+	email = mara.casebeer@gmail.com
+	name = Mara Casebeer
 
 # use the gh binary to manage credentials for github
 [credential "https://github.com"]
@@ -11,7 +11,6 @@
 
 [init]
 	defaultBranch = main
-	templatedir = ~/.git/templates
 
 [push]
 	autoSetupRemote = true

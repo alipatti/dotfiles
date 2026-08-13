@@ -1,6 +1,4 @@
-# Alistair's dotfiles
-
-![the general problem](https://imgs.xkcd.com/comics/the_general_problem.png)
+# Mara's dotfiles
 
 ```bash
 ./setup
