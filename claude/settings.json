@@ -69,8 +69,9 @@
       ]
     }
   },
+  "effortLevel": "medium",
   "awaySummaryEnabled": false,
   "theme": "dark-ansi",
   "preferredNotifChannel": "notifications_disabled",
-  "effortLevel": "medium"
+  "tui": "fullscreen"
 }

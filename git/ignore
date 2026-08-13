@@ -2,3 +2,7 @@
 .DS_Store
 
 *.local.*
+
+**/.claude/.cc-writes/
+
+**/.claude/settings.local.json
