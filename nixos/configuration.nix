@@ -20,7 +20,7 @@
   # ssh
   services.openssh = {
     enable = true;
-    ports = [ 8191 ];
+    ports = [ 22 ];
     settings = {
       PasswordAuthentication = false; # ssh keypairs only
       PermitRootLogin = "no";
