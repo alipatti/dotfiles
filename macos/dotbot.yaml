@@ -41,6 +41,7 @@
     - jq # json parser
     - scc # line counter
     - watchexec # run command on file change
+    - syntax-highlight # quicklook syntax highlighting for code
 
     # for later config
     - zero-sh/tap/apply-user-defaults
@@ -65,6 +66,9 @@
 
     - font-cousine-nerd-font # font for kitty
     - mactex-no-gui # latex
+
+    # quicklook plugins
+    - qlmarkdown # render markdown
 
 - shell:
     - description: Install rustup
