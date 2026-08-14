@@ -15,13 +15,14 @@ In addition:
 
 - Extract a helper when logic repeats multiple times, or a name would clarify intent that inline code doesn't convey.
 - Use lowercase for comments. Include comments iff functionality is not obvious. Prefer extracting descriptively named helper functions to extensive comments.
-- Use ample whitespace. For example, include a blank line between `if` blocks and surrounding code. Group blocks of code into paragraphs separated by whitespace. Start each paragraph with a descriptive comment.
+- Use ample whitespace. For example, include a blank line between `if` blocks and surrounding code. Group blocks of code into paragraphs separated by whitespace. Start a paragraph with a descriptive comment only if its purpose isn't obvious from the code itself.
 - Don't add defensive error handling (`try`/`except`, input validation) for cases that can't occur. Only guard system boundaries: user input, network calls, file I/O.
 
 ## Tooling
 
 - Manage dependencies with `uv` and `pyproject.toml` (`uv add`, `uv run`), not pip/poetry/conda.
 - Format with `uvx ruff format`, lint with `uvx ruff check --fix`, type-check with `uvx ty check`. Run all three after any substantive change — don't wait to be asked.
+- Define CLI entrypoints as `[project.scripts]` in `pyproject.toml` pointing at a cyclopts `App` instance, e.g. `mytool = "mytool.cli:app"`.
 
 ## Documentation
 
@@ -41,6 +42,7 @@ Use type hints for all function signatures. In particular:
 ## Testing
 
 - Use `pytest`.
+- Use plain `assert` statements rather than `unittest`-style assertion methods.
 - Each test should test one specific behavior.
 - Use descriptive test names and include a short, imperative docstring describing the intended functionality.
 - Use test parameterization for similar tests.
@@ -64,6 +66,7 @@ When there's no skill, refer to the sections below and use `context7` to search 
 | HTML parsing | parsel | BeautifulSoup, lxml | https://parsel.readthedocs.io/en/latest/usage.html |
 | Structured data | pydantic or dataclasses | TypedDict, manual dicts | https://docs.pydantic.dev/latest/ |
 | Logging | loguru | -- | https://loguru.readthedocs.io/en/stable/overview.html |
+| Testing | pytest | unittest | https://docs.pytest.org/en/stable/ |
 
 ### plotnine
 
