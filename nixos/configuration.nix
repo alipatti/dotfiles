@@ -32,6 +32,16 @@
     enable = true;
     useRoutingFeatures = "both";
   };
+  # tailscale systray
+  systemd.user.services.tailscale-systray = {
+    description = "Tailscale systray application";
+    wantedBy = [ "graphical-session.target" ];
+    after = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.tailscale}/bin/tailscale systray";
+      Restart = "on-failure";
+    };
+  };
 
   # TODO: setup nginx reverse proxy
 
@@ -62,6 +72,7 @@
   programs.nix-ld.enable = true; # needed for uv
   programs.fish.enable = true;
   virtualisation.docker.enable = true;
+  programs.steam.enable = true;
 
   # packages
   environment.systemPackages = with pkgs; [
@@ -86,16 +97,24 @@
     ripgrep
     nix-your-shell # use fish by default for nix-shell etc.
     trashy
+    file
+    wl-clipboard # clipboard support for tailscale systray
+
+    # ai
+    claude-code
 
     # editor
     neovim
-    claude-code
     tree-sitter
 
     # language tooling
     rustup
     gcc
     uv
+    fnm
+
+    # gnome extensions
+    gnomeExtensions.appindicator # systray support for gnome
   ];
 
   users.users.ali = {
