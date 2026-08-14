@@ -8,7 +8,7 @@ description: "Use this skill whenever you use or consider using python. Contains
 Write pythonic code. In particular:
 
 - Use list/generator comprehensions, `pathlib`, f-strings, `itertools`, `functools`, `collections`, and other tools from the standard library.
-- Use the `if x then y else z` syntax for simple conditionals.
+- Use the ternary conditional (`y if x else z`) for simple conditionals.
 - Use short-circuiting: `x or default` and `condition and value`.
 
 In addition:
@@ -34,7 +34,9 @@ In addition:
 Use type hints for all function signatures. In particular:
 
 - Prefer modern syntax if the python version supports it: `str | None` not `Optional[str]`, `list[int]` not `List[int]`, generics as `def first[T](items: list[T]) -> T`.
-- 
+- Use string literals `Literal["option1", "option2"]` for function arguments that can take multiple values.
+- Extract type aliases when types are complex and/or appear in many places. For example `type OutputType = Literal["json", "txt", "csv"]`, `type InnerFunction = Callable[[pl.DataFrame, int], float]`.
+- Import from `collections.abc` rather than `typing`.
 
 ## Testing
 
