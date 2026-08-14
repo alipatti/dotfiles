@@ -42,7 +42,7 @@ format = '[@$hostname](bright-white) '
 [username]
 disabled = false
 show_always = false
-format = '[| $user](bright-white)'
+format = '[– $user](bright-white)'
 
 # --------- #
 # LANGUAGES #

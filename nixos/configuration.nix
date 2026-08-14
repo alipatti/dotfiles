@@ -22,9 +22,18 @@
     enable = true;
     ports = [ 22 ];
     settings = {
-      PasswordAuthentication = false; # ssh keypairs only
+      PasswordAuthentication = true; # allow password auth (only from tailscale)
       PermitRootLogin = "no";
     };
+  };
+
+  # firewall: only allow ssh from tailscale network
+  networking.firewall = {
+    enable = true;
+    # allow ssh only from tailscale network (100.64.0.0/10)
+    interfaces.tailscale0.allowedTCPPorts = [ 22 ];
+    # block ssh on all other interfaces
+    allowedTCPPorts = [ ];
   };
 
   # tailscale
