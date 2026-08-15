@@ -17,29 +17,17 @@
   networking.hostName = "fridge";
   networking.networkmanager.enable = true;
 
-  # ssh
-  services.openssh = {
-    enable = true;
-    ports = [ 22 ];
-    settings = {
-      PasswordAuthentication = true; # allow password auth (only from tailscale)
-      PermitRootLogin = "no";
-    };
-  };
-
-  # firewall: only allow ssh from tailscale network
+  # firewall
   networking.firewall = {
     enable = true;
-    # allow ssh only from tailscale network (100.64.0.0/10)
-    interfaces.tailscale0.allowedTCPPorts = [ 22 ];
-    # block ssh on all other interfaces
-    allowedTCPPorts = [ ];
+    trustedInterfaces = [ "tailscale0" ]; # allow all traffic on tailscale
   };
 
   # tailscale
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "both";
+    extraSetFlags = [ "--ssh" ]; # enable tailscale ssh
   };
   # tailscale systray
   systemd.user.services.tailscale-systray = {
