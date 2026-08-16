@@ -17,6 +17,9 @@
 	autoSetupRemote = true
 	followTags = true
 
+[pull]
+	rebase = merges
+
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
