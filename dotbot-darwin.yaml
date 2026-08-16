@@ -41,7 +41,6 @@
     - jq # json parser
     - scc # line counter
     - watchexec # run command on file change
-    - syntax-highlight # quicklook syntax highlighting for code
 
     # for later config
     - zero-sh/tap/apply-user-defaults
@@ -69,6 +68,7 @@
 
     # quicklook plugins
     - qlmarkdown # render markdown
+    - syntax-highlight # syntax highlighting for code
 
 - shell:
     - description: Install rustup

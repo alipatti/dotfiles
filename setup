@@ -3,24 +3,23 @@
 set -e
 
 TEMPFILE="$(mktemp)"
-DOTBOT_DIR="dotbot/dotbot"
+DOTBOT_DIR=".dotbot"
 DOTBOT_BIN="bin/dotbot"
 BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 cd "${BASEDIR}"
-git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
-git submodule update --init --recursive "dotbot"
+# git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
+git submodule update --init --recursive ".dotbot"
 
 # concatenate all config files into one
 if [ "$(uname)" = "Darwin" ]; then
-	cat macos/dotbot.yaml >> "$TEMPFILE"
+	cat dotbot-darwin.yaml >> "$TEMPFILE"
 fi
 
 cat dotbot.yaml >> "$TEMPFILE"
 
-"${BASEDIR}/${DOTBOT_DIR}/${DOTBOT_BIN}" -d "${BASEDIR}" \
-	--plugin-dir dotbot/dotbot-brew \
-	--plugin-dir dotbot/dotbot-conditional \
+"${BASEDIR}/${DOTBOT_DIR}/dotbot/${DOTBOT_BIN}" -d "${BASEDIR}" \
+	--plugin-dir .dotbot/dotbot-brew \
 	--exit-on-failure \
 	-c "${TEMPFILE}" \
 	"${@}"
