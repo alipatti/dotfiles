@@ -5,12 +5,16 @@ description: "Use this skill for any tabular data task in Python: loading, trans
 
 # Polars Skill
 
-Use polars for _all_ tabular data tasks unless pandas is strictly required by legacy dependencies.
+Use polars for _all_ tabular data tasks
+unless pandas is strictly required by legacy dependencies.
 
-This document is intended as an overview and style guide, not an exhaustive source on how to use `polars`.
-Refer to surrounding code, the linked documentation, and the context7 documentation MCP server with `libraryId: websites/pola_rs` for more information.
+This document is intended as an overview and style guide,
+not an exhaustive source on how to use `polars`.
+Refer to surrounding code, the linked documentation,
+and the context7 documentation MCP server with `libraryId: websites/pola_rs`
+for more information.
 
-# Setup
+## Setup
 
 ```bash
 uv add polars
@@ -20,9 +24,10 @@ uv add polars
 import polars as pl
 ```
 
-# Loading Data
+## Loading Data
 
-Use the built-in polars `pl.read_*` and `pl.scan_*` functions for loading common file types.
+Use the built-in polars `pl.read_*` and `pl.scan_*` functions
+for loading common file types.
 Always load large (> ~25MB) files lazily.
 
 ```python
@@ -30,15 +35,17 @@ df = pl.read_csv("/path/to/small/csv")
 lf = pl.scan_parquet("/path/to/parquet")
 ```
 
-It's often a good idea to inspect the schema of a file before doing downstream computation.
+It's often a good idea to inspect the schema of a file
+before doing downstream computation.
 
 ```python
 print(lf.collect_schema())
 ```
 
-## From SAS and Stata Files
+### From SAS and Stata Files
 
-Use the `polars_readstat` library for loading SAS (`.sas7bdat`) and Stata (`.dta`) files.
+Use the `polars_readstat` library for loading SAS (`.sas7bdat`)
+and Stata (`.dta`) files.
 
 ```bash
 uv add polars_readstat
@@ -60,9 +67,9 @@ sas_lf = prs.scan_readstat(
 )
 ```
 
-Complete documentation is available [here](https://jrothbaum.github.io/polars_readstat/read/).
+See [the docs](https://jrothbaum.github.io/polars_readstat/read/) for more.
 
-## From Other In-Memory Data
+### From Other In-Memory Data
 
 ```python
 # polars implements the PyCapsule interface and can convert to/from `pyarrow` at zero cost
@@ -84,10 +91,11 @@ pl.DataFrame({"col1" : [1, 2, 3], "col2" : [4, 5, 6]})
 
 ```
 
-# Lazy Evaluation
+## Lazy Evaluation
 
 Polars offers two modes: lazy and eager.
-Lazy queries are first constructed using a DSL and then optimized and distributed across all available cores.
+Lazy queries are first constructed using a DSL and then optimized
+and distributed across all available cores.
 Eager queries are executed on-the-fly and are generally slower.
 Prefer lazy evaluation when working with large data (more than ~ 1M cells)
 
@@ -111,9 +119,10 @@ lazy_query = (
 print(lazy_query.collect())
 ```
 
-## Streaming
+### Streaming
 
-For lazy queries over data too large to fit in memory, use the streaming engine to process the data in batches rather than all at once.
+For lazy queries over data too large to fit in memory,
+use the streaming engine to process the data in batches rather than all at once.
 
 ```python
 # collect() -> new streaming engine
@@ -123,12 +132,14 @@ lazy_query.collect(engine="streaming")
 lazy_query.sink_parquet("output.parquet")
 ```
 
-Not every operation supports streaming (e.g. some joins and sorts require the full frame in memory).
-Check `.explain(engine="streaming")` to see which parts of the plan will run in streaming mode.
+Not every operation supports streaming
+(e.g. some joins and sorts require the full frame in memory).
+Check `.explain(engine="streaming")` to see
+which parts of the plan will run in streaming mode.
 
-# Manipulating Data
+## Manipulating Data
 
-## Adding Columns
+### Adding Columns
 
 Add new columns using `lf.with_columns(expression, ...)`.
 These expressions can be quite complex and appear many places in polars.
@@ -150,7 +161,7 @@ lf.with_columns(
 )
 ```
 
-## Selecting Columns
+### Selecting Columns
 
 Select columns using `lf.select()`.
 
@@ -162,7 +173,7 @@ lf.select(
 )
 ```
 
-## Aggregation
+### Aggregation
 
 Aggregation is done using `.group_by()` and `.agg()`.
 
@@ -173,7 +184,7 @@ lf.group_by("g1", pl.col("g2").cast(pl.Int64).mod(10)).agg(
 )
 ```
 
-## Joining
+### Joining
 
 Polars supports the full suite of standard joins.
 
@@ -185,23 +196,29 @@ df1.join(
 )
 ```
 
-There are also non-equality joins by key proximity (`.join_asof`) or by arbitrary boolean expressions (`.join_where`).
-See [the guide](https://docs.pola.rs/user-guide/transformations/joins/) for more info.
+There are also non-equality joins by key proximity (`.join_asof`)
+or by arbitrary boolean expressions (`.join_where`).
+See [the guide](https://docs.pola.rs/user-guide/transformations/joins/)
+for more info.
 
-## Pivoting
+### Pivoting
 
-To go from long to wide, use `.pivot()` ([guide](https://docs.pola.rs/user-guide/transformations/pivot/),
+To go from long to wide, use `.pivot()`
+([guide](https://docs.pola.rs/user-guide/transformations/pivot/),
 [reference](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html)).
 This is not available lazily (the possible values aren't known a priori).
 
-To go from wide to long, use `.unpivot()` ([guide](https://docs.pola.rs/user-guide/transformations/unpivot/),
+To go from wide to long, use `.unpivot()`
+([guide](https://docs.pola.rs/user-guide/transformations/unpivot/),
 [eager reference](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html),
 [lazy reference](https://docs.pola.rs/api/python/stable/reference/lazyframe/api/polars.LazyFrame.unpivot.html)
-). This works both lazily and eagerly.
+).
+This works both lazily and eagerly.
 
-## Concatenation
+### Concatenation
 
-Stack multiple frames together using `pl.concat()` ([reference](https://docs.pola.rs/api/python/stable/reference/api/polars.concat.html)).
+Stack multiple frames together using `pl.concat()`
+([reference](https://docs.pola.rs/api/python/stable/reference/api/polars.concat.html)).
 
 ```python
 # if the schemas match exactly
@@ -211,12 +228,15 @@ pl.concat(frames_with_identical_schemas, how="vertical")
 pl.concat(frames_with_different_schemas, how="diagonal_relaxed")
 ```
 
-# Expressions
+## Expressions
 
 Expressions are the main way that you interact with data in polars.
-Use expressions as much as possible rather than chaining multiple with_columns calls.
+Use expressions as much as possible rather than chaining multiple with_columns
+calls.
 
-To preserve readability, build up complicated expressions using well-named intermediate expressions and helper functions.
+To preserve readability,
+build up complicated expressions using well-named intermediate expressions
+and helper functions.
 
 ```python
 def weighted_mean(x: pl.Expr, w: pl.Expr | str):
@@ -234,11 +254,13 @@ x_bar = pl.col("x").pipe(weighted_mean, "weight").over("group")
 lf.with_columns(x_bar)
 ```
 
-## Selectors and Expression Expansion
+### Selectors and Expression Expansion
 
 Use selectors to select many columns at once.
 The resulting object can be used like any other polars expression.
-See [the docs](https://docs.pola.rs/user-guide/expressions/expression-expansion/) for more.
+See
+[the docs](https://docs.pola.rs/user-guide/expressions/expression-expansion/)
+for more.
 
 ```python
 from polars import selectors as cs
@@ -258,10 +280,15 @@ cs.string() | cs.categorical() # both strings and categoricals
 cs.int() & cs.contains("foo") # integer columns containing the string foo
 ```
 
-## Window Expressions
+When doing the same operation to many columns, prefer selectors
+(`cs.matches(r"x_\d").log()`) over generator expressions
+(`(pl.col(f"x_{i}").log() for i in range(4))`) over repeated code.
 
-Window functions perform operations within groups.
-They are very useful in select and with_columns statements.
+### Window Expressions
+
+Window functions restrict expressions to operate only _within_ defined groups.
+Prefer them to using `group_by` followed by a join -- they often let one avoid
+constructing temporary dataframes.
 
 ```python
 # demeaning a variable within some group
@@ -274,46 +301,62 @@ x_tm2 = pl.col("x").lag(2).over("unit")
 x_rank = pl.col("x").rank(method="average").over("cohort", "sex")
 ```
 
-## Custom Functions
+### Custom Functions
 
 Make a best effort to implement functionality using the built-in expression API.
-For things that can't be implemented natively in Polars, there are three options in order of preference:
+For things that can't be implemented natively in Polars,
+there are three options in order of preference:
 
-1. Write and then call a `numpy` ufunc or generalized ufunc.
-   These can be used in polars with little overhead [docs](https://docs.pola.rs/user-guide/expressions/numpy-functions/).
-   Polars uses a separate nullity bitmask that numpy does not receive, so only use this if your operation is elementwise or the input contains no null values.
-2. Write a function that operates on `pl.Series` and use `.map_batches()`
+1. Write a function that operates on `pl.Series` and use `.map_batches()`
    [docs](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_batches.html).
-3. Write a python function that operates on individual elements and use `.map_elements()`
+2. Write and then call a `numpy` ufunc or generalized ufunc.
+   These can be used in polars with little overhead
+   [docs](https://docs.pola.rs/user-guide/expressions/numpy-functions/).
+   Polars uses a separate nullity bitmask that numpy does not receive,
+   so only use this if your operation is elementwise
+   or the input contains no null values.
+   Prefer this option makes use of existing numpy-compatible tooling,
+   for example `scipy` or `np.linalg`.
+3. Write a python function that operates on individual elements
+   and use `.map_elements()`
    [docs](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html).
-   This is slow and should only be used on very small DataFrames (e.g. relabeling rows for plotting).
+   This is slow and should only be used on very small DataFrames
+   (e.g. relabeling rows for plotting).
 
-Do NOT index and then directly operate on the columns of a DataFrame unless you have a very, very good reason.
-
-# Data Types
+## Data Types
 
 Choosing appropriate data types is a first-order task.
-Columns should use the data type that is semantically closest to the data being stored.
+Columns should use the data type
+that is semantically closest to the data being stored.
 
-For example, columns indicating the date should be stored as a `pl.Date`, not a `yyyy-mm-dd` string.
+For example, columns indicating the date should be stored as a `pl.Date`,
+not a `yyyy-mm-dd` string.
 Time spans should be stored as `pl.Duration`s.
 
 Categorical columns with a fixed set of options should be stored as `pl.Enum`s.
-Columns with a large or a-priori unknown set of categories should be stored as `pl.Categorical`s.
+Columns with a large or a-priori unknown set of categories should be stored
+as `pl.Categorical`s.
 Do not store categorical columns as strings or integers.
 
-Numeric columns that cannot take on fractional values should be stored as integers.
-Default to `pl.Int64` and use smaller integer types only when you are certain that the values will not overflow (e.g. year can safely be stored as a `pl.Int16`).
+Numeric columns that cannot take on fractional values should be stored
+as integers.
+Default to `pl.Int64` and use smaller integer types only when you are certain
+that the values will not overflow
+(e.g. year can safely be stored as a `pl.Int16`).
 Avoid unsigned integer types (they make subtraction behave in unexpected ways).
 
-## Null Values
+### Null Values
 
-Polars stores missing data as `null`, tracked via a separate per-column validity bitmask rather than a sentinel value in the data itself.
-This means every dtype (including numeric and categorical types) can represent missingness without reserving a value for it.
+Polars stores missing data as `null`,
+tracked via a separate per-column validity bitmask rather than a sentinel value
+in the data itself.
+This means every dtype (including numeric and categorical types) can represent
+missingness without reserving a value for it.
 
 Always use `null` for missing data.
-Do not use sentinel values such as empty strings (`""`) or magic integers (`-1`, `9999`) to mean "missing".
-If there are many meaningful reasons for missingness, 
+Do not use sentinel values such as empty strings (`""`) or magic integers
+(`-1`, `9999`) to mean "missing".
+If there are many meaningful reasons for missingness,
 
 ```python
 lf = pl.scan_csv("raw_messy_data.csv")
@@ -328,10 +371,13 @@ lf.with_columns(
 )
 ```
 
-# Debugging and Development
+## Debugging and Development
 
-Use `.inspect()` to print the content of the dataframe at that point in the query _at execution time_.
-Note that because of Polars' optimizations (reordering statements, removing unused columns), the output may not appear exactly as you expect.
+Use `.inspect()` to print the content of the dataframe at
+that point in the query _at execution time_.
+Note that because of Polars' optimizations
+(reordering statements, removing unused columns),
+the output may not appear exactly as you expect.
 
 ```python
 query = (
@@ -353,9 +399,10 @@ query.show_graph() # show the computational graph (this can be long and complica
 
 It's also often helpful to break long queries into several steps.
 
-## Logging
+### Logging
 
-Use `loguru` to include many log statements. Use the debug level by default.
+Use `loguru` to include many log statements.
+Use the debug level by default.
 
 ```python
 from loguru import logger
@@ -369,10 +416,13 @@ logger.debug("Expensive step done!")
 logger.debug("Data after processing: {}", df_processed)
 ```
 
-## Interactive Use with IPython
+### Interactive Use with IPython
 
-For interactive exploration of a dataframe or query, use the `ipython` MCP server rather than repeatedly editing and rerunning a script.
-It runs a persistent IPython session, so variables and imports stay alive between tool calls.
+For interactive exploration of a dataframe or query,
+use the `ipython` MCP server rather than repeatedly editing
+and rerunning a script.
+It runs a persistent IPython session,
+so variables and imports stay alive between tool calls.
 
 Add it to `settings.json`:
 
@@ -385,9 +435,12 @@ Add it to `settings.json`:
 }
 ```
 
-Use it to collect the desired data once (possibly after performing some operations), and then experiment against the live session instead of re-running `pl.scan_*` from scratch each time.
+Use it to collect the desired data once
+(possibly after performing some operations),
+and then experiment against the live session instead of re-running `pl.scan_*`
+from scratch each time.
 
-# Writing Data
+## Writing Data
 
 Save data to parquet files by default.
 

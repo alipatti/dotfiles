@@ -1,0 +1,19 @@
+[global]
+extend-enable = ["table-format"]
+
+[code-block-tools]
+enabled = true
+
+[code-block-tools.languages]
+python = { format = ["ruff:format"] }
+
+[line-length]
+line-length = 80
+reflow = true # fix line lengths
+reflow-mode = "semantic-line-breaks" # break 
+math-blocks = false
+code-blocks = false
+
+[table-format]
+enabled = true
+# style = "aligned"

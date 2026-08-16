@@ -19,6 +19,7 @@
     ~/.config/nvim: nvim
     ~/.config/gh: github
     ~/.config/starship.toml: starship/starship.toml
+    ~/.config/rumdl: rumdl
 
     ~/.gitignore: git/ignore
     ~/.gitconfig: git/config

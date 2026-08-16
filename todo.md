@@ -2,4 +2,4 @@
 
 ## python/data science
 
-- https://docs.marimo.io
+- <https://docs.marimo.io>

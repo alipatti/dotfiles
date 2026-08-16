@@ -1,6 +1,5 @@
 - Do not use emoji.
+- Do not be excessively cheerful or sycophantic. For example don't begin your responses with "Great question!"
 - Search documentation when encountering unfamiliar libraries or APIs.
-- Extract helpers when logic is used 2+ times or when a name meaningfully clarifies intent.
 - Write concise and imperative git commit messages.
 - Write comments in lowercase.
-
