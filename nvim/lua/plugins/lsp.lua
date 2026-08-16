@@ -20,7 +20,7 @@ local lsp_servers = {
 	fish_lsp      = {},
 
 	-- markdown
-	marksman      = {},
+	rumdl         = {},
 
 	-- typst
 	tinymist      = {
@@ -74,8 +74,8 @@ return {
 		"mason-org/mason-lspconfig.nvim",
 		dependencies = {
 			{ "neovim/nvim-lspconfig", },
-			{ "mason-org/mason.nvim",  opts = { ensure_installed = { "prettier" } } },
-			{ "j-hui/fidget.nvim",     opts = {},                                   tag = "legacy" },
+			{ "mason-org/mason.nvim",  opts = {} },
+			{ "j-hui/fidget.nvim",     opts = {}, tag = "legacy" },
 			{ "hrsh7th/cmp-nvim-lsp",  opts = {} },
 
 		},
@@ -84,28 +84,4 @@ return {
 			automatic_enable = true,
 		},
 	},
-
-	{
-		"nvimtools/none-ls.nvim",
-		config = function()
-			require("null-ls").setup({
-				sources = {
-					-- TODO: remove this (superceded by lsp)
-					-- require("null-ls").builtins.formatting.prettier,
-					-- require("null-ls").builtins.diagnostics.markdownlint,
-
-					-- TODO: remove this (superceded by lsp)
-					-- -- fish
-					-- require("null-ls").builtins.diagnostics.fish,
-					-- require("null-ls").builtins.formatting.fish_indent,
-
-					-- swift
-					require("null-ls").builtins.formatting.swiftlint,
-					require("null-ls").builtins.formatting.swiftformat,
-				}
-			})
-		end
-	},
-
-
 }
