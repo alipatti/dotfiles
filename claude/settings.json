@@ -71,7 +71,7 @@
   },
   "effortLevel": "medium",
   "awaySummaryEnabled": false,
+  "tui": "fullscreen",
   "theme": "dark-ansi",
-  "preferredNotifChannel": "notifications_disabled",
-  "tui": "fullscreen"
+  "preferredNotifChannel": "notifications_disabled"
 }
