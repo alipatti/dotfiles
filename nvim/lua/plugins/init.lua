@@ -76,7 +76,14 @@ return {
 	--pop up cmd line
 	{
 		"folke/noice.nvim",
-		opts = {}
+		opts = {
+			routes = {
+				{
+					view = "popup",
+					filter = { cmdline = "^:!" },
+				},
+			},
+		},
 	},
 
 	"MunifTanjim/nui.nvim", -- notification
