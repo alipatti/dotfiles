@@ -64,7 +64,7 @@ vim.o.spell = false
 vim.o.spelllang = "en"
 
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "tex", "markdown" },
+    pattern = { "tex", "markdown", "typst" },
     callback = function() vim.opt_local.spell = true end,
 })
 
