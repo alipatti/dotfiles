@@ -1,0 +1,108 @@
+spec_version: 1
+name: prover
+description: >
+  Multi-agent search for complete proofs of complex or novel
+  mathematical statements. Generator subagents develop independent proof
+  routes; an adversary subagent audits every candidate before acceptance.
+  Overkill for routine proofs.
+
+prompt: |
+  Orchestrate a multi-agent search for a complete, rigorous proof of the
+  problem you are given. Manage the search with these heuristics:
+
+  - Begin with a genuinely diverse portfolio of approaches: different
+    formulations, invariants, reductions, algebraic viewpoints, structural
+    inductions, decompositions, and computational sanity checks.
+  - Preserve independence in early rounds: do not tell most generators the
+    currently favored approach, so they do not all converge on the same
+    attractive but incomplete reduction.
+  - Maintain an explicit registry of approach families, grouped by the
+    underlying mathematical idea, not by surface wording. If many generators
+    converge on one family, redirect some toward underexplored formulations.
+  - Do not let one approach dominate merely because it yields elegant
+    reductions. A route ending at a lemma equivalent in strength to the
+    original problem is not close to completion.
+  - When a route stalls at a theorem-strength missing lemma, mark it blocked;
+    reopen it only for a materially new mechanism, invariant, or construction.
+  - Keep several incompatible proof routes alive across rounds, and
+    cross-pollinate only after each has developed enough to expose its real
+    strengths and gaps.
+  - Every candidate proof MUST pass adversarial audit before you accept it.
+    Send it to the adversary agent, which must attack edge cases, degenerate
+    inputs, hidden assumptions, circular use of equivalent statements, and
+    gaps papered over as "routine." Iterate: repair, re-audit, repeat. A proof
+    that has not survived an independent adversarial pass does not count.
+  - Require generators to return concrete lemmas, constructions, equations, or
+    counterexamples to proposed sublemmas. Reject status reports, vague
+    optimism, and unproved claims labeled routine.
+  - Synthesize, challenge, redirect, and launch new rounds repeatedly. Do not
+    stop after the first wave fails.
+
+  Return a complete proof only if it survives adversarial audit; otherwise
+  report the strongest rigorously proved derivation and its exact remaining
+  gap. Never return a partial result dressed up as a complete one. Never return
+  a proof that has not passed adversarial audit.
+
+executor:
+  type: omnigent
+  config:
+    harness: claude
+  model: claude-fable-5
+
+os_env:
+  type: caller_process
+  cwd: .
+  sandbox:
+    write_paths: [.]
+    allow_network: true
+
+tools:
+  builtins:
+    - name: web_search
+      search_provider: duckduckgo
+
+  generator:
+    type: agent
+    description: >
+      Independently develop one assigned proof approach; return concrete
+      lemmas, constructions, equations, or counterexamples. Don't return status
+      reports or vague optimism.
+    prompt: |
+      Develop the single assigned proof approach as far as it rigorously
+      goes. Return concrete artifacts: proved lemmas with
+      full proofs, explicit constructions, equations, or counterexamples to
+      proposed sublemmas. State precisely where the approach stalls and why.
+      Do not claim unproved steps are routine. Do not assume the statement
+      being proved or anything equivalent to it.
+    executor:
+      harness: claude-sdk
+      model: claude-sonnet-4-6
+    os_env: inherit
+    tools:
+      builtins:
+        - name: web_search
+          search_provider: duckduckgo
+    max_sessions: 8
+
+  adversary:
+    type: agent
+    description: >
+      Adversarially audit a candidate proof or lemma. Your job is to break the proof.
+    prompt: |
+      Assume the submitted proof is wrong and try to break it: check every definition against degenerate and edge
+      cases, hunt for hidden assumptions, verify each quantifier and each
+      induction base case, detect circular use of statements equivalent to the
+      goal, and flag any step waved off as routine or well-known. Attempt to
+      construct explicit counterexamples to intermediate lemmas. Return either
+      a specific fatal gap (with the exact failing step and, if possible, a
+      counterexample) or a statement that you attacked the proof from these
+      angles and it survived, listing the angles.
+    executor:
+      harness: claude-sdk
+      model: claude-sonnet-4-6
+    os_env: inherit
+    tools:
+      builtins:
+        - name: web_search
+          search_provider: duckduckgo
+    max_sessions: 8
