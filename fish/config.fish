@@ -1,3 +1,15 @@
+# claude desktop's terminal panel does not answer fish's terminal queries, which
+# makes fish stall 10s at startup and print a warning. fish only reads
+# fish_features at startup, so export the flag and re-exec once.
+if status is-interactive; and test "$TERM_PROGRAM" = claude-desktop; and not contains no-query-term $fish_features
+    set -gx fish_features $fish_features no-query-term
+    if status is-login
+        exec fish -l
+    else
+        exec fish
+    end
+end
+
 # local bin
 fish_add_path ~/.local/bin
 
