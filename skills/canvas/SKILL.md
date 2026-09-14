@@ -13,14 +13,15 @@ uv run scripts/canvas_download.py COURSE_ID [--dest DIR] [--cookie VALUE]
 ```
 
 - The course id is in the Canvas URL (e.g. `/courses/22861/modules`).
-- Authentication reuses the browser's `canvas_session` cookie
+- Authentication uses the `canvas_session` cookie
   (Princeton disables API token generation).
-  By default the script reads it from Safari,
-  which requires the terminal to have Full Disk Access; if that fails,
-  ask the user to paste the cookie
-  (Safari Web Inspector Cmd+Opt+I > Storage > Cookies)
+  The script validates it against the API and caches a working cookie in
+  `~/.cache/canvas/`, so later runs need no flags. When there is no valid
+  cached cookie, ask the user to paste a fresh one
+  (Safari Web Inspector Cmd+Opt+I > Storage > Cookies > `canvas_session`)
   and pass it with `--cookie`.
-  It is a session cookie, so it expires on logout.
+- Module items of type File and Assignment are both downloaded
+  (assignment attachments are parsed out of the description HTML).
 - The sandbox network allowlist may not include instructure.com; the script may
   need to run outside the sandbox.
 - Run with `--help` for all options; for other Canvas API needs,
