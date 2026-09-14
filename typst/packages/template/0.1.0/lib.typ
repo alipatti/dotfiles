@@ -78,8 +78,35 @@
     it
   }
 
+  // render title in small caps with a rule, then author | date (from document metadata)
   show title: it => {
-    align(center)[#it]
+    align(right, context {
+      let t = smallcaps(text(weight: "regular", it))
+      t
+      line(
+        length: measure(t).width,
+        stroke: 0.5pt,
+      )
+      set text(size: 11pt, weight: "regular")
+
+      let parts = ()
+      let author = document.author.join(", ")
+      if author != none {
+        parts.push(author)
+      }
+
+      if document.date != none {
+        let format = "[month repr:long] [day], [year]"
+        parts.push(document.date.display(format))
+      }
+
+      if document.description != none {
+        parts.push(document.description)
+      }
+
+      parts.join(parbreak())
+    })
+    v(1em)
   }
 
   // tables
