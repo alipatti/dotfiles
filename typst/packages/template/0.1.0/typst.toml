@@ -1,0 +1,6 @@
+[package]
+name = "template"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Alistair Pattison"]
+description = "personal template for notes and problem sets"
