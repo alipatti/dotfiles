@@ -44,7 +44,7 @@
   show math.equation: set text(font: "New Computer Modern Math")
 
   // spacing
-  set page(paper: "us-letter", margin: 1in)
+  set page(paper: "us-letter", margin: 1in, numbering: "1")
   set list(indent: 1em)
   set enum(indent: 1em)
   show sym.eq: it => h(0.2em) + it + h(0.2em)
