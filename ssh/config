@@ -1,3 +1,5 @@
+Include /Users/ali/.config/colima/ssh_config
+
 Include /Users/ali/.colima/ssh_config
 
 # -- FASRC --

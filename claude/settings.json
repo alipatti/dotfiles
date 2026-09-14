@@ -19,10 +19,11 @@
       "WebFetch(domain:schemastore.org)"
     ]
   },
+  "model": "fable[1m]",
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|MultiEdit|Write",
+        "matcher": "Edit|MultiEdit|Write|Bash",
         "hooks": [
           {
             "type": "command",
@@ -73,5 +74,8 @@
   "awaySummaryEnabled": false,
   "tui": "fullscreen",
   "theme": "dark-ansi",
-  "preferredNotifChannel": "notifications_disabled"
+  "preferredNotifChannel": "notifications_disabled",
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "skipWorkflowUsageWarning": true
 }
