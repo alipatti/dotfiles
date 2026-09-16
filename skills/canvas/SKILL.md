@@ -1,15 +1,15 @@
 ---
 name: canvas
-description: "Use this skill when downloading files, listing modules, or otherwise interacting with Canvas LMS (princeton.instructure.com / canvas.princeton.edu, or other *.instructure.com sites)."
+description: "Use this skill when downloading files, listing modules, submitting assignments, or otherwise interacting with Canvas LMS (princeton.instructure.com / canvas.princeton.edu, or other *.instructure.com sites)."
 ---
 
 # Canvas Skill
 
-Use the premade script `scripts/canvas_download.py`
-(relative to this skill) to download all files from a course's modules:
+Use the premade CLI `scripts/canvas.py` (relative to this skill):
 
 ```bash
-uv run scripts/canvas_download.py COURSE_ID [--dest DIR] [--cookie VALUE]
+uv run scripts/canvas.py download COURSE_ID [--dest DIR] [--cookie VALUE]
+uv run scripts/canvas.py submit COURSE_ID ASSIGNMENT FILE [--name UPLOAD_NAME]
 ```
 
 - The course id is in the Canvas URL (e.g. `/courses/22861/modules`).
@@ -20,12 +20,18 @@ uv run scripts/canvas_download.py COURSE_ID [--dest DIR] [--cookie VALUE]
   cached cookie, ask the user to paste a fresh one
   (Safari Web Inspector Cmd+Opt+I > Storage > Cookies > `canvas_session`)
   and pass it with `--cookie`.
-- Module items of type File and Assignment are both downloaded
+- `download` grabs module items of type File and Assignment
   (assignment attachments are parsed out of the description HTML).
-- The sandbox network allowlist may not include instructure.com; the script may
-  need to run outside the sandbox.
-- Run with `--help` for all options; for other Canvas API needs,
-  adapt the script's `_api` helper
+- `submit` takes an assignment id or a name substring (must match exactly
+  one) and submits FILE as an `online_upload`. Cookie-authed POSTs need the
+  `X-CSRF-Token` header (URL-decoded `_csrf_token` cookie, set by any GET);
+  `_session` handles this. Submitting creates a new attempt and cannot be
+  undone, so confirm with the user before running.
+- The sandbox network allowlist may not include instructure.com, and the
+  cookie cache write needs `~/.cache/canvas/`; the script may need to run
+  outside the sandbox.
+- Run with `--help` for all options; for other Canvas API needs, add a
+  subcommand reusing the `_session`/`_api` helpers
   (cookie auth works on all `/api/v1/` endpoints;
   strip the `while(1);` response prefix, paginate via the `Link` header).
   Do the hacking manually first, and if it works,
