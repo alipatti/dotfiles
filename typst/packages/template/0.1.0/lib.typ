@@ -11,10 +11,11 @@
 #let todo(x) = "TODO: " + x
 #let inner(x, y) = $chevron.l x, y chevron.r$
 #let to = $arrow.r$
-#let of = $circle.small$
+#let of = $med circle.small med$
 #let toto = $arrows.rr$
 #let End = $op("End")$
 #let poly = $op("poly")$
+#let st = $op("s.t.")$
 
 // run-in level-3 headings: show rules can't look ahead, so a flag marks
 // the blank line right after a heading to be dropped instead of starting a new paragraph
@@ -47,7 +48,7 @@
   set page(paper: "us-letter", margin: 1in, numbering: "1")
   set list(indent: 1em)
   set enum(indent: 1em)
-  show sym.eq: it => h(0.2em) + it + h(0.2em)
+  show sym.eq: it => h(0.3em) + it + h(0.3em)
   set par(justify: true, leading: 0.6em, first-line-indent: 0em, spacing: 1em)
 
   // numbering
