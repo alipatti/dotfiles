@@ -27,6 +27,10 @@ uv run scripts/canvas.py submit COURSE_ID ASSIGNMENT FILE [--name UPLOAD_NAME]
   `X-CSRF-Token` header (URL-decoded `_csrf_token` cookie, set by any GET);
   `_session` handles this. Submitting creates a new attempt and cannot be
   undone, so confirm with the user before running.
+  After a successful submit, open the submission page in the browser so the
+  user can verify it:
+  `open "https://princeton.instructure.com/courses/COURSE_ID/assignments/ASSIGNMENT_ID/submissions/self"`
+  (needs to run outside the sandbox).
 - The sandbox network allowlist may not include instructure.com, and the
   cookie cache write needs `~/.cache/canvas/`; the script may need to run
   outside the sandbox.
