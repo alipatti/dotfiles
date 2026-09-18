@@ -22,8 +22,8 @@ Style:
 - Put tables inside floats:
   wrap them in `#figure(...)` with a caption rather than placing them bare in
   the text.
-- Lean towards display math
-  (`$ ... $` with spaces) instead of cramming expressions inline.
+- Lean towards display math with delimiters on their own lines instead of
+  cramming expressions inline.
 - Math is part of the sentence: let prose flow through displays,
   with punctuation inside the math block.
 - Use the template's macros (`to`, `toto`, `inner`, ...) instead of raw symbols.
@@ -36,5 +36,7 @@ Style:
 
 Notation:
 
+- Use parentheses for grouping and function application.
+  Use other groupings (e.g. $[$, $\{$) only when explicitly necessary.
 - Use $EE(...)$ for expectation
   (blackboard + parentheses, not square bracketes).
