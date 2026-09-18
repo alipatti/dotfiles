@@ -7,9 +7,12 @@
 #import "@preview/cetz:0.4.2": canvas, draw
 #import "@preview/fletcher:0.5.8" as fletcher: diagram, edge, node
 
+// grow nested delimiters by depth
+#import "nested-delims.typ": nested-delims
+
 // macros
 #let todo(x) = "TODO: " + x
-#let inner(x, y) = $chevron.l x, y chevron.r$
+#let inner(x, y) = $chevron.l #x, #y chevron.r$
 #let to = $arrow.r$
 #let of = $med circle.small med$
 #let toto = $arrows.rr$
@@ -43,6 +46,7 @@
   // fonts
   set text(font: "New Computer Modern", size: 10pt, lang: "en")
   show math.equation: set text(font: "New Computer Modern Math")
+  show: nested-delims
 
   // spacing
   set page(paper: "us-letter", margin: 1in, numbering: "1")
