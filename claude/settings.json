@@ -19,7 +19,7 @@
       "WebFetch(domain:schemastore.org)"
     ]
   },
-  "model": "fable[1m]",
+  "model": "claude-fable-5-1[1m]",
   "hooks": {
     "PostToolUse": [
       {
@@ -73,9 +73,9 @@
   "effortLevel": "medium",
   "awaySummaryEnabled": false,
   "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
   "theme": "dark-ansi",
   "preferredNotifChannel": "notifications_disabled",
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "skipWorkflowUsageWarning": true
+  "agentPushNotifEnabled": true
 }
