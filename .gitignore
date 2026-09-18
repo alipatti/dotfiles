@@ -17,3 +17,5 @@ ssh
 
 lazy-lock.json
 key
+
+__pycache__
