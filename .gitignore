@@ -21,3 +21,6 @@ key
 __pycache__
 
 skills/synced
+
+# binary spell files from nvim
+*.spl
