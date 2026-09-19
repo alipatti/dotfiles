@@ -33,6 +33,10 @@
       "rev": "221ce6b2d999187044529f49da6554a92f740a96",
       "src": "https://github.com/nvim-lualine/lualine.nvim"
     },
+    "markdown-preview.nvim": {
+      "rev": "a923f5fc5ba36a3b17e289dc35dc17f66d0548ee",
+      "src": "https://github.com/iamcco/markdown-preview.nvim"
+    },
     "mason-lspconfig.nvim": {
       "rev": "49b16d699f9ca83184330c6eb886737a27f23bdd",
       "src": "https://github.com/mason-org/mason-lspconfig.nvim"

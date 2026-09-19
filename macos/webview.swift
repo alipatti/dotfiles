@@ -67,6 +67,9 @@ final class Delegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, WKU
 		return nil
 	}
 
+	// window.close() from the page (e.g. :MarkdownPreviewStop)
+	func webViewDidClose(_ webView: WKWebView) { exit(0) }
+
 	// once loaded, quit when the server goes away (e.g. :TypstPreviewStop)
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		// the error page below also finishes loading, so check the host

@@ -6,7 +6,8 @@ vim.g.maplocalleader = " "
 -- plugins are managed by vim.pack and configured in plugin/*.lua, which nvim
 -- sources alphabetically after this file. update with :lua vim.pack.update()
 
--- plugin build hooks. must be registered before the first vim.pack.add()
+-- plugin build hooks. must be registered before the first vim.pack.add(), which
+-- installs everything missing from the lockfile, not just its own plugins
 vim.api.nvim_create_autocmd("PackChanged", {
 	callback = function(ev)
 		if ev.data.spec.name == "nvim-treesitter" and ev.data.kind == "update" then
@@ -14,6 +15,13 @@ vim.api.nvim_create_autocmd("PackChanged", {
 				vim.cmd.packadd("nvim-treesitter")
 			end
 			vim.cmd("TSUpdate")
+		end
+		if ev.data.spec.name == "markdown-preview.nvim" and ev.data.kind ~= "delete" then
+			if not ev.data.active then
+				vim.cmd.packadd("markdown-preview.nvim")
+			end
+			-- downloads the prebuilt server, skipped if already up to date
+			vim.fn["mkdp#util#install_sync"](true)
 		end
 	end,
 })
