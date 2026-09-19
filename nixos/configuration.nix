@@ -40,6 +40,22 @@
     };
   };
 
+  # https://github.com/alipatti/bot (docker compose stack, cloned to ~/projects/bot)
+  systemd.services.bot = {
+    description = "alipatti-bot docker compose stack";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "docker.service" ];
+    requires = [ "docker.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      WorkingDirectory = "/home/ali/projects/bot";
+      ExecStart = "${pkgs.docker}/bin/docker compose --env-file secrets.env up -d --build";
+      ExecStop = "${pkgs.docker}/bin/docker compose --env-file secrets.env down";
+      TimeoutStartSec = "20min"; # image build can take a while
+    };
+  };
+
   # TODO: setup nginx reverse proxy
 
   time.timeZone = "America/New_York";
