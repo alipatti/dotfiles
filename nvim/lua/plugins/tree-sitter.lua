@@ -1,6 +1,6 @@
 local required_grammars = {
 	-- languages
-	"python", "r", "rust",
+	"python", "rust",
 	"javascript", "typescript", "tsx", "svelte",
 	"lua",
 
@@ -49,14 +49,6 @@ local function prev_textobj(lhs, obj)
 	return { lhs, rhs, desc = "Previous " .. obj }
 end
 
-local function expand_selection()
-	require("vim.treesitter._select").select_parent(vim.v.count1)
-end
-
-local function contract_selection()
-	require("vim.treesitter._select").select_child(vim.v.count1)
-end
-
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -65,8 +57,9 @@ return {
 		},
 		build = ":TSUpdate",
 		keys = {
-			{ "<C-k>", expand_selection,   mode = { "n", "x" }, silent = true, desc = "Expand selection" },
-			{ "<C-j>", contract_selection, mode = "x",          silent = true, desc = "Contract selection" },
+			{ "<C-k>", "van", mode = "n", remap = true, silent = true, desc = "Expand selection" },
+			{ "<C-k>", "an",  mode = "x", remap = true, silent = true, desc = "Expand selection" },
+			{ "<C-j>", "in",  mode = "x", remap = true, silent = true, desc = "Contract selection" },
 		},
 		config = function()
 			require("nvim-treesitter").setup()
@@ -92,9 +85,4 @@ return {
 			move = { set_jumps = true },
 		}
 	},
-
-	-- {
-	-- 	-- auto close/rename html (and other) tags
-	-- 	"windwp/nvim-ts-autotag",
-	-- },
 }

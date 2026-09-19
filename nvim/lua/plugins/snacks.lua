@@ -48,6 +48,15 @@ return {
 			bufdelete = {
 				enabled = true
 			},
+			notifier = {
+				enabled = true
+			},
+			bigfile = {
+				enabled = true
+			},
+			quickfile = {
+				enabled = true
+			},
 			input = {
 				enabled = true
 			},

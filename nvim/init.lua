@@ -5,7 +5,7 @@ vim.g.maplocalleader = " "
 
 -- set up package manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
 		"clone",
@@ -47,8 +47,9 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
--- set completeopt to have a better completion experience
-vim.o.completeopt = "menuone,noselect"
+-- completion menu: always show it, preselect nothing, docs in a popup beside it
+vim.o.completeopt = "menuone,noselect,popup,fuzzy"
+vim.o.pumborder = "rounded"
 
 -- use full terminal colors
 vim.o.termguicolors = true
@@ -95,8 +96,54 @@ vim.api.nvim_create_autocmd("FileType", {
 -- highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
-		vim.highlight.on_yank()
+		vim.hl.on_yank()
 	end,
 	pattern = "*",
 })
 
+-- create missing parent directories on write
+vim.api.nvim_create_autocmd("BufWritePre", {
+	callback = function(ev)
+		local name = vim.api.nvim_buf_get_name(ev.buf)
+		if vim.bo[ev.buf].buftype ~= "" or name == "" or name:match("^%w+://") then
+			return
+		end
+		vim.fn.mkdir(vim.fn.fnamemodify(name, ":p:h"), "p")
+	end,
+})
+
+-- native lsp completion, triggered on every keystroke
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(ev)
+		local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
+		if not client:supports_method("textDocument/completion") then
+			return
+		end
+
+		-- autotrigger only fires on the server's trigger characters, so make
+		-- every printable non-space character one (see :help lsp-autocompletion)
+		local chars = {}
+		for i = 33, 126 do
+			table.insert(chars, string.char(i))
+		end
+		client.server_capabilities.completionProvider.triggerCharacters = chars
+
+		vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
+	end,
+})
+
+-- accept the selected completion item, or the first one if none is selected.
+-- with no menu open, request lsp completion instead
+vim.keymap.set("i", "<C-Space>", function()
+	if vim.fn.pumvisible() == 0 then
+		vim.schedule(vim.lsp.completion.get)
+		return ""
+	end
+	local selected = vim.fn.complete_info({ "selected" }).selected
+	return selected == -1 and "<C-n><C-y>" or "<C-y>"
+end, { expr = true, desc = "accept completion" })
+
+-- dismiss the completion menu
+vim.keymap.set("i", "<C-c>", function()
+	return vim.fn.pumvisible() == 1 and "<C-e>" or "<C-c>"
+end, { expr = true, desc = "dismiss completion" })

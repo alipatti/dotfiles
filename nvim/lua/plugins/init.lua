@@ -59,24 +59,12 @@ return {
 		dependencies = { "nvim-lua/plenary.nvim" },
 	},
 
-
-	-- "gc" to comment visual regions/lines
-	{
-		"numToStr/Comment.nvim",
-		opts = {},
-	},
-
-	-- automatically create necessary parent directories when creating a new file
-	{
-		"mateuszwieloch/automkdir.nvim",
-		opts = {},
-	},
-
-
 	--pop up cmd line
 	{
 		"folke/noice.nvim",
 		opts = {
+			-- leave the completion menu to the builtin popupmenu ('pumborder')
+			-- popupmenu = { enabled = false },
 			routes = {
 				{
 					view = "popup",
@@ -90,7 +78,6 @@ return {
 	"tpope/vim-eunuch",    -- vim wrappers for mkdir, mv, etc.
 	"tpope/vim-sleuth",    -- automatically detect indentation
 	"tpope/vim-surround",  -- surround with quotes, parens, tags, etc.
-	"tpope/vim-surround",  -- support for editing surround quotes, html tags, etc
 
 	-- highlight color codes inline
 	{

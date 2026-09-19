@@ -19,6 +19,10 @@ local lsp_servers = {
 	-- fish
 	fish_lsp      = {},
 
+	-- web
+	svelte        = {},
+	tailwindcss   = {},
+
 	-- markdown
 	rumdl         = {},
 
@@ -75,9 +79,6 @@ return {
 		dependencies = {
 			{ "neovim/nvim-lspconfig", },
 			{ "mason-org/mason.nvim",  opts = {} },
-			{ "j-hui/fidget.nvim",     opts = {}, tag = "legacy" },
-			{ "hrsh7th/cmp-nvim-lsp",  opts = {} },
-
 		},
 		opts = {
 			ensure_installed = vim.tbl_keys(lsp_servers),
