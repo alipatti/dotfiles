@@ -39,7 +39,7 @@ end
 
 # load the automatic venv activation function
 if status is-interactive
-    activate_venv
+    activate_venv --quiet
 end
 
 if command -q fzf

@@ -33,6 +33,6 @@ function activate_venv --on-variable PWD
     end
 
     # activate venv
-    echo "Activating virtual environment at $venv_directory"
+    contains -- --quiet $argv; or echo "Activating virtual environment at $venv_directory"
     source $venv_directory/bin/activate.fish
 end
