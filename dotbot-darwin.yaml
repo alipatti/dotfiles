@@ -88,6 +88,9 @@
         https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh
         | sh
 
+    - description: Build webview
+      command: mkdir -p ~/.local/bin && swiftc -O macos/webview.swift -o ~/.local/bin/webview
+
     - description: Set fish as default shell
       command: |
         bash -c '
