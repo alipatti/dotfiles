@@ -57,6 +57,7 @@ abbr gaa git add --all
 abbr gc git commit
 abbr gcm git commit -m
 abbr gcam git commit -am
+abbr gcanea git commit -a --no-edit --amend
 abbr gp git push
 abbr gl git log
 abbr gb git branch
