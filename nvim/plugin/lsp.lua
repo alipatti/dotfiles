@@ -62,27 +62,21 @@ for server, config in pairs(lsp_servers) do
 	end
 end
 
-return {
-	-- LSP plugins and config
-	{
-		"folke/lazydev.nvim",
-		ft = "lua",
-		opts = {
-			library = {
-				{ path = "snacks.nvim", words = { "Snacks" } },
-			},
-		},
-	},
+vim.pack.add({
+	"https://github.com/neovim/nvim-lspconfig",
+	"https://github.com/mason-org/mason.nvim",
+	"https://github.com/mason-org/mason-lspconfig.nvim",
+	"https://github.com/folke/lazydev.nvim",
+})
 
-	{
-		"mason-org/mason-lspconfig.nvim",
-		dependencies = {
-			{ "neovim/nvim-lspconfig", },
-			{ "mason-org/mason.nvim",  opts = {} },
-		},
-		opts = {
-			ensure_installed = vim.tbl_keys(lsp_servers),
-			automatic_enable = true,
-		},
+require("lazydev").setup({
+	library = {
+		{ path = "snacks.nvim", words = { "Snacks" } },
 	},
-}
+})
+
+require("mason").setup()
+require("mason-lspconfig").setup({
+	ensure_installed = vim.tbl_keys(lsp_servers),
+	automatic_enable = true,
+})

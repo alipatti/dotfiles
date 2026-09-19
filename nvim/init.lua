@@ -3,21 +3,20 @@ vim.keymap.set({ "n", "v" }, "<Space>", "<Nop>", { silent = true })
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- set up package manager
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.uv.fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable", -- latest stable release
-		lazypath,
-	})
-end
+-- plugins are managed by vim.pack and configured in plugin/*.lua, which nvim
+-- sources alphabetically after this file. update with :lua vim.pack.update()
 
-vim.opt.rtp:prepend(lazypath)
-require("lazy").setup("plugins")
+-- plugin build hooks. must be registered before the first vim.pack.add()
+vim.api.nvim_create_autocmd("PackChanged", {
+	callback = function(ev)
+		if ev.data.spec.name == "nvim-treesitter" and ev.data.kind == "update" then
+			if not ev.data.active then
+				vim.cmd.packadd("nvim-treesitter")
+			end
+			vim.cmd("TSUpdate")
+		end
+	end,
+})
 
 -- highlight on search
 vim.o.hlsearch = true
@@ -47,10 +46,6 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
--- completion menu: always show it, preselect nothing, docs in a popup beside it
-vim.o.completeopt = "menuone,noselect,popup,fuzzy"
-vim.o.pumborder = "rounded"
-
 -- use full terminal colors
 vim.o.termguicolors = true
 
@@ -72,9 +67,6 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- load project-local config
 vim.o.exrc = true
-
--- set color scheme
-vim.cmd.colorscheme("catppuccin-frappe")
 
 -- diagnostic virtual text at the of the line
 vim.diagnostic.config({
@@ -111,39 +103,3 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		vim.fn.mkdir(vim.fn.fnamemodify(name, ":p:h"), "p")
 	end,
 })
-
--- native lsp completion, triggered on every keystroke
-vim.api.nvim_create_autocmd("LspAttach", {
-	callback = function(ev)
-		local client = assert(vim.lsp.get_client_by_id(ev.data.client_id))
-		if not client:supports_method("textDocument/completion") then
-			return
-		end
-
-		-- autotrigger only fires on the server's trigger characters, so make
-		-- every printable non-space character one (see :help lsp-autocompletion)
-		local chars = {}
-		for i = 33, 126 do
-			table.insert(chars, string.char(i))
-		end
-		client.server_capabilities.completionProvider.triggerCharacters = chars
-
-		vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
-	end,
-})
-
--- accept the selected completion item, or the first one if none is selected.
--- with no menu open, request lsp completion instead
-vim.keymap.set("i", "<C-Space>", function()
-	if vim.fn.pumvisible() == 0 then
-		vim.schedule(vim.lsp.completion.get)
-		return ""
-	end
-	local selected = vim.fn.complete_info({ "selected" }).selected
-	return selected == -1 and "<C-n><C-y>" or "<C-y>"
-end, { expr = true, desc = "accept completion" })
-
--- dismiss the completion menu
-vim.keymap.set("i", "<C-c>", function()
-	return vim.fn.pumvisible() == 1 and "<C-e>" or "<C-c>"
-end, { expr = true, desc = "dismiss completion" })
