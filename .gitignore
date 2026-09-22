@@ -8,7 +8,9 @@ fish/conf.d
 
 # ipython stuff
 ipython/**
-!ipython/**/ipython_config.py
+# directories must be re-included for the file pattern below to apply
+!ipython/**/
+!ipython/**/*.py
 
 # secrets
 *.local.*
