@@ -5,14 +5,17 @@ kitty's tall/fat layouts fix the split direction, so pick tall (side by
 side) when the tab is wide and fat (stacked) when it is narrow, leaving
 the stack layout if the tab was zoomed. run via
 `remote_control_script` so no remote control permission is needed.
+
+with --layout-only, just pick the layout and launch nothing; nvim uses
+this before showing its terminal windows.
 """
 
 import json
+import sys
 import shutil
 import subprocess
 
 NARROW_WIDE_CUTOFF = 100
-BIAS = 60
 
 # kitty may run this with a minimal path, so fall back to the bundled binary
 KITTEN = shutil.which("kitten") or "/Applications/kitty.app/Contents/MacOS/kitten"
@@ -55,7 +58,12 @@ def main():
     tab = active_tab()
 
     layout = "fat" if tab_columns(tab) < NARROW_WIDE_CUTOFF else "tall"
-    kitten("goto-layout", f"{layout}:bias={BIAS}")
+    # the bias comes from enabled_layouts in kitty.conf; goto-layout ignores
+    # options that are not listed there
+    kitten("goto-layout", layout)
+
+    if "--layout-only" in sys.argv[1:]:
+        return
 
     # pass the cwd explicitly: --cwd=current resolves against the script's own
     # cwd when invoked from remote control, not the focused window's

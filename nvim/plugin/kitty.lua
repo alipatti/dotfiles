@@ -60,9 +60,15 @@ local function ensure(role, cmd, keep_focus)
 	return true
 end
 
--- unzoom so the terminals are visible next to nvim
+-- unzoom so the terminals are visible next to nvim. kitty's split script
+-- picks tall or fat depending on how wide the tab is
+local SPLIT = vim.fn.expand("~/.config/kitty/split.py")
+
 local function show()
-	kitty({ "goto-layout", "tall" })
+	local res = vim.system({ SPLIT, "--layout-only" }, { text = true }):wait()
+	if res.code ~= 0 then
+		vim.notify("kitty split failed: " .. res.stderr, vim.log.levels.ERROR)
+	end
 end
 
 local function focus(role, cmd)
