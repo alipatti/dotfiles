@@ -25,3 +25,6 @@ skills/synced
 
 # binary spell files from nvim
 *.spl
+
+# nix build output
+result
