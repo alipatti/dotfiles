@@ -17,7 +17,8 @@
       "WebFetch(domain:neovim.io)",
       "WebFetch(domain:json.schemastore.org)",
       "WebFetch(domain:schemastore.org)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "model": "claude-fable-5-1[1m]",
   "hooks": {
@@ -76,6 +77,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "dark-ansi",
   "preferredNotifChannel": "notifications_disabled",
+  "autoCompactEnabled": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true
 }
