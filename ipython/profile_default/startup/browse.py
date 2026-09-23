@@ -3,11 +3,11 @@ from IPython.core.magic import register_line_magic
 
 
 def browse(frame) -> None:
-    """Open a native window showing a polars dataframe (see ~/.ipython/dfbrowse.py)."""
+    """Open a native window showing a polars dataframe (see ~/.dotfiles/tools/dfbrowse.py)."""
     import sys
     from pathlib import Path
 
-    library = str(Path.home() / ".ipython")
+    library = str(Path.home() / ".dotfiles" / "tools")
 
     if library not in sys.path:
         sys.path.append(library)

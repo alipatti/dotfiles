@@ -29,7 +29,7 @@ in
 
   # build the webview helper if the source is newer than the binary
   home.activation.webview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    src=${dotfiles}/darwin/webview.swift
+    src=${dotfiles}/tools/webview.swift
     bin=$HOME/.local/bin/webview
     if [ ! "$bin" -nt "$src" ]; then
       run mkdir -p "$HOME/.local/bin"

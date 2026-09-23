@@ -36,7 +36,7 @@
       # sudo darwin-rebuild switch --flake ~/.dotfiles
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
         modules = [
-          ./darwin
+          ./hosts/macbook.nix
           home-manager.darwinModules.home-manager
           (home [ ./home/darwin.nix ])
         ];
@@ -45,7 +45,7 @@
       # sudo nixos-rebuild switch --flake ~/.dotfiles
       nixosConfigurations.fridge = nixpkgs.lib.nixosSystem {
         modules = [
-          ./nixos/configuration.nix
+          ./hosts/fridge
           home-manager.nixosModules.home-manager
           (home [ ])
         ];
