@@ -59,7 +59,6 @@
       "displaylink" # third monitor on mbp
       "tailscale-app"
 
-      "mactex-no-gui" # latex
 
       # quicklook plugins
       "qlmarkdown" # render markdown
