@@ -22,11 +22,6 @@ if [ ! -x /opt/homebrew/bin/brew ]; then
     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# the nix installer edits these, and nix-darwin won't overwrite modified files
-for f in /etc/zshrc /etc/bashrc; do
-    grep -q 'nix-daemon.sh' "$f" 2>/dev/null && sudo mv "$f" "$f.before-nix-darwin"
-done
-
 [ -f flake.nix ] || exit 0
 
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .
