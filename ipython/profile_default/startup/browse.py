@@ -1,9 +1,11 @@
+from IPython.core.getipython import get_ipython
+from IPython.core.magic import register_line_magic
+
+
 def browse(frame) -> None:
     """Open a native window showing a polars dataframe (see ~/.ipython/dfbrowse.py)."""
     import sys
     from pathlib import Path
-
-    from IPython.core.getipython import get_ipython
 
     library = str(Path.home() / ".ipython")
 
@@ -28,3 +30,16 @@ def browse(frame) -> None:
         shell.enable_gui("osx")
 
     dfbrowse.browse(frame, next(names, dfbrowse.DEFAULT_TITLE))
+
+
+@register_line_magic("browse")
+def browse_magic(line: str) -> None:
+    """%browse: open the last result in the browser."""
+    import polars as pl
+
+    last = get_ipython().user_ns.get("_")
+
+    if isinstance(last, (pl.DataFrame, pl.Series)):
+        browse(last)
+    else:
+        print(f"the last result is a {type(last).__name__}, not a polars frame")

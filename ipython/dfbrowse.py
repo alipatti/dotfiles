@@ -1,10 +1,11 @@
 """native macos window for browsing polars dataframes.
 
 mouse
-- left click a column header to sort by it (ascending, descending, off)
+- left click a column header to sort by it (ascending, descending, off).
+  sorting by another column breaks ties in the earlier ones
 - right click a column header to hide it (this also clears its filter); a
   button in the title bar shows the hidden columns again
-- click a cell to select it, and hover one to see its full value
+- click a cell to select it, and hover a truncated one to read all of it
 
 filters
 - type under a header to filter that column. the text is cast to the column's
@@ -22,12 +23,14 @@ keys, with the table focused
 - v starts selecting a block of cells, V a block spanning the whole row and
   cmd-a every cell; o swaps the corner being moved, and v or escape go back
   to a single cell
-- y or cmd-c copies the selection as csv, Y as a markdown table
+- y or cmd-c copies the selection as csv, Y as a markdown table; a single
+  cell is copied as its bare value
 - / edits the selected column's filter; return or escape come back to the table
 - ctrl-f or cmd-f edits the search in the footer, which highlights every cell
   containing the text, ignoring case; n and N step to the next and previous
   one, and * searches for the selected cell's value
-- escape leaves visual mode, then clears the search, then clears every filter
+- escape leaves visual mode, then clears the search, then every filter, then
+  the sort
 - q or cmd-w closes the window, and ? shows this list
 
 the footer's right side counts the matches and sizes the table, or the
@@ -39,6 +42,7 @@ the `browse` function in startup/browse.py takes care of the latter.
 
 import csv
 import io
+import math
 import operator
 from collections.abc import Callable, Iterator
 from functools import cache
@@ -55,7 +59,6 @@ from AppKit import (
     NSBezelStyleRecessed,
     NSBezierPath,
     NSButton,
-    NSCell,
     NSColor,
     NSControlSizeSmall,
     NSDownArrowFunctionKey,
@@ -108,11 +111,11 @@ from AppKit import (
     NSWindowStyleMaskTitled,
     NSWindowZoomButton,
 )
-from Foundation import NSMakePoint, NSMakeRect, NSObject, NSPoint, NSRect
+from Foundation import NSMakePoint, NSMakeRect, NSObject, NSRect
 
 type Comparison = Callable[[pl.Expr, pl.Expr], pl.Expr]
 type Sort = tuple[str, bool]  # column name, descending
-type Browsable = pl.DataFrame | pl.LazyFrame | pl.Series
+type Browsable = pl.DataFrame | pl.Series
 
 DEFAULT_TITLE = "dataframe"
 WINDOW_SIZE = (900, 600)
@@ -124,8 +127,9 @@ TYPING_DELAY = 0.25  # seconds of quiet before a typed filter or search applies
 WIDTH_SAMPLE_ROWS = 100  # rows measured to choose the initial column widths
 MAX_COLUMN_WIDTH = 240  # longer values are truncated; hover to read them
 CELL_PADDING = 24  # room for the cell's margins and the sort arrow
-# six significant digits, switching to scientific notation when that is shorter
-FLOAT_FORMAT = ".6g"
+FLOAT_DECIMALS = 6
+# floats outside this range are shown in scientific notation
+PLAIN_FLOATS = (1e-4, 1e15)
 
 # two character operators first, so ">=" isn't read as ">"
 COMPARISONS: dict[str, Comparison] = {
@@ -252,16 +256,34 @@ def cast_text(text: str, dtype: pl.DataType) -> object:
         raise ValueError(f"{text!r} is not a {dtype}") from error
 
 
-def next_sort(current: Sort | None, clicked: str) -> Sort | None:
-    """Cycle a column through ascending, descending and unsorted."""
-    if current is None or current[0] != clicked:
-        return clicked, False
+def next_sort(current: list[Sort], clicked: str) -> list[Sort]:
+    """Cycle `clicked` through ascending, descending and unsorted.
 
-    return None if current[1] else (clicked, True)
+    A new column sorts after the ones already there, and flipping a column
+    keeps its place.
+
+    Examples
+    --------
+    >>> next_sort([("a", False)], "b")
+    [('a', False), ('b', False)]
+    >>> next_sort([("a", False), ("b", False)], "a")
+    [('a', True), ('b', False)]
+    >>> next_sort([("a", True), ("b", False)], "a")
+    [('b', False)]
+    """
+    descending = dict(current).get(clicked)
+
+    if descending is None:
+        return [*current, (clicked, False)]
+
+    if descending:
+        return [sort for sort in current if sort[0] != clicked]
+
+    return [(name, descending or name == clicked) for name, descending in current]
 
 
 def raw_text(value: object) -> str:
-    """Text copied and shown in tooltips: the whole value at full precision."""
+    """Text copied: the whole value at full precision."""
     if value is None:
         return "null"
 
@@ -329,10 +351,27 @@ def markdown_table(frame: pl.DataFrame) -> str:
     return "\n".join(f"| {' | '.join(row)} |" for row in cells)
 
 
+def display_float(value: float) -> str:
+    """A float rounded to `FLOAT_DECIMALS`, plainly written in the everyday range.
+
+    Examples
+    --------
+    >>> [display_float(v) for v in (1234567.0, 0.1234567891, 2.5e-7, 1e18, 0.0)]
+    ['1234567', '0.123457', '2.5e-07', '1e+18', '0']
+    >>> display_float(float("nan"))
+    'nan'
+    """
+    smallest, largest = PLAIN_FLOATS
+
+    if value == 0 or smallest <= abs(value) < largest:
+        return f"{value:.{FLOAT_DECIMALS}f}".rstrip("0").rstrip(".")
+
+    return f"{value:.{FLOAT_DECIMALS}g}"
+
+
 def display_text(value: object) -> str:
     """Text shown in a cell: `raw_text`, but with floats rounded."""
-    is_float = isinstance(value, float)
-    return format(value, FLOAT_FORMAT) if is_float else raw_text(value)
+    return display_float(value) if isinstance(value, float) else raw_text(value)
 
 
 def dtype_label(dtype: pl.DataType) -> str:
@@ -606,8 +645,10 @@ class CellTableView(NSTableView):
             self.set_anchor(None, None)
         elif key == ESCAPE and browser.search_field.stringValue():
             browser.clear_search()
-        elif key == ESCAPE:
+        elif key == ESCAPE and browser.has_filters():
             browser.clear_filters()
+        elif key == ESCAPE:
+            browser.clear_sort()
         elif key == "?":
             browser.show_help()
         elif key == "q":
@@ -660,11 +701,15 @@ class CellTableView(NSTableView):
 
     @objc.python_method
     def copy_selection(self, render: Callable[[pl.DataFrame], str]) -> None:
-        """Copy the selected block as `render` writes it, and leave visual mode."""
+        """Copy the selected block as `render` writes it, and leave visual mode.
+
+        A single cell is copied as its bare value, without a header.
+        """
         if (block := self.block()) is not None:
             rows, names = block
             frame = self.delegate().visible[rows.start : rows.stop, names]
-            self.copy_text(render(frame))
+            is_cell = frame.shape == (1, 1)
+            self.copy_text(raw_text(frame.item()) if is_cell else render(frame))
 
         self.set_anchor(None, None)
 
@@ -727,7 +772,7 @@ class FrameBrowser(NSObject):
         self.index_name = unused_name("#", frame.columns)
         self.source = frame.with_row_index(self.index_name)
         self.visible = self.source  # filtered and sorted
-        self.sort = None
+        self.sort: list[Sort] = []  # first column sorts first
         self.table = _table_view(self)
         self.show_columns_button = _show_columns_button(self)
         self.search_field = _search_field(self)
@@ -748,11 +793,13 @@ class FrameBrowser(NSObject):
         self, table_view: NSTableView, column: NSTableColumn, row: int
     ) -> str | NSAttributedString:
         value = self.visible[row, column.identifier()]
+        text = display_text(value)
 
-        if value is None:
-            return _null_text(column.dataCell().alignment())
+        # nulls, nans and infinities are drawn faintly
+        if value is None or isinstance(value, float) and not math.isfinite(value):
+            return _dimmed_text(text, column.dataCell().alignment())
 
-        return display_text(value)
+        return text
 
     # table delegate
 
@@ -760,18 +807,6 @@ class FrameBrowser(NSObject):
         self, table_view: NSTableView, column: NSTableColumn
     ) -> None:
         self.sort_by(column.identifier())
-
-    def tableView_toolTipForCell_rect_tableColumn_row_mouseLocation_(
-        self,
-        table_view: NSTableView,
-        cell: NSCell,
-        rect: NSRect,
-        column: NSTableColumn,
-        row: int,
-        location: NSPoint,
-    ) -> tuple[str, NSRect]:
-        # rect is an in/out argument, so pyobjc wants it handed back
-        return raw_text(self.visible[row, column.identifier()]), rect
 
     def tableViewColumnDidResize_(self, notification: NSNotification) -> None:
         self.table.headerView().layout_fields()
@@ -921,6 +956,11 @@ class FrameBrowser(NSObject):
         self.refresh()
 
     @objc.python_method
+    def clear_sort(self) -> None:
+        self.sort = []
+        self.refresh()
+
+    @objc.python_method
     def hide_column(self, column: NSTableColumn) -> None:
         name = column.identifier()
         field = self.table.headerView().fields[name]
@@ -931,9 +971,7 @@ class FrameBrowser(NSObject):
 
         field.setStringValue_("")
 
-        if self.sort is not None and self.sort[0] == name:
-            self.sort = None
-
+        self.sort = [sort for sort in self.sort if sort[0] != name]
         column.setHidden_(True)
         self.hidden_columns_changed()
 
@@ -958,6 +996,11 @@ class FrameBrowser(NSObject):
         alert.setAccessoryView_(reference)
         # a sheet, since a modal alert would stall ipython's event loop
         alert.beginSheetModalForWindow_completionHandler_(self.window, None)
+
+    @objc.python_method
+    def has_filters(self) -> bool:
+        fields = self.table.headerView().fields.values()
+        return any(field.stringValue() for field in fields)
 
     @objc.python_method
     def clear_filters(self) -> None:
@@ -999,9 +1042,9 @@ class FrameBrowser(NSObject):
         selected = self.selected_index()
         visible = self.source.filter(*self.filter_predicates())
 
-        if self.sort is not None:
-            name, descending = self.sort
-            visible = visible.sort(name, descending=descending, nulls_last=True)
+        if self.sort:
+            names, descending = zip(*self.sort)
+            visible = visible.sort(names, descending=descending, nulls_last=True)
 
         self.visible = visible
         self.show_sort_indicator()
@@ -1020,12 +1063,15 @@ class FrameBrowser(NSObject):
 
     @objc.python_method
     def show_sort_indicator(self) -> None:
-        name, descending = self.sort or (None, False)
-        direction = "Descending" if descending else "Ascending"
-        arrow = NSImage.imageNamed_(f"NS{direction}SortIndicator")
+        sorts = dict(self.sort)
 
         for column in self.table.tableColumns():
-            image = arrow if column.identifier() == name else None
+            image = None
+
+            if (descending := sorts.get(column.identifier())) is not None:
+                direction = "Descending" if descending else "Ascending"
+                image = NSImage.imageNamed_(f"NS{direction}SortIndicator")
+
             self.table.setIndicatorImage_inTableColumn_(image, column)
 
     @objc.python_method
@@ -1054,8 +1100,8 @@ def _monospaced_font() -> NSFont:
 
 
 @cache
-def _null_text(alignment: int) -> NSAttributedString:
-    """A dimmed "null", so a missing value doesn't look like the string "null"."""
+def _dimmed_text(text: str, alignment: int) -> NSAttributedString:
+    """Dimmed `text`, so a null or nan doesn't look like a string saying so."""
     # attributed strings ignore the cell's alignment, so they carry their own
     paragraph = NSMutableParagraphStyle.alloc().init()
     paragraph.setAlignment_(alignment)
@@ -1064,7 +1110,7 @@ def _null_text(alignment: int) -> NSAttributedString:
         NSForegroundColorAttributeName: NSColor.tertiaryLabelColor(),
         NSParagraphStyleAttributeName: paragraph,
     }
-    return NSAttributedString.alloc().initWithString_attributes_("null", attributes)
+    return NSAttributedString.alloc().initWithString_attributes_(text, attributes)
 
 
 def _filter_field(placeholder: str, delegate: FrameBrowser) -> FilterField:
@@ -1264,13 +1310,19 @@ def browse(frame: Browsable, title: str = DEFAULT_TITLE) -> None:
     Parameters
     ----------
     frame
-        The data to show. A lazy frame is collected, and a series becomes a
-        frame of one column. The window keeps a reference to the result.
+        The data to show. A series becomes a frame of one column. The window
+        keeps a reference to the result.
     title
         Window title. The footer shows the shape.
+
+    Raises
+    ------
+    TypeError
+        If `frame` is lazy. Collecting is left to the caller, so a slow or
+        large query is never run by surprise.
     """
     if isinstance(frame, pl.LazyFrame):
-        frame = frame.collect()
+        raise TypeError("browse takes a collected frame; call .collect() first")
 
     if isinstance(frame, pl.Series):
         frame = frame.to_frame()
