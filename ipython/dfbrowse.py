@@ -16,6 +16,7 @@ filters
 keys, with the table focused
 - h j k l or the arrows move the selection; g G 0 $ jump to the first and last
   row and column, and ctrl-d ctrl-u move half a page
+- , and . shrink and grow the selected column, and = puts its width back
 - ctrl-, and ctrl-. swap the selected column with the one to its left or right
 - s sorts by the selected column, x hides it, u shows the hidden columns
 - v starts selecting a block of cells, V a block spanning the whole row and
@@ -153,6 +154,8 @@ MOVES = {
 HALF_PAGES = {"d": 1, "u": -1}  # with control held
 SEARCH_STEPS = {"n": 1, "N": -1}
 COLUMN_SWAPS = {",": -1, ".": 1}  # with control held
+COLUMN_RESIZES = {",": -1, ".": 1}  # in steps of this many points
+WIDTH_STEP = 20
 ESCAPE = "\x1b"
 UNBOUND_MODIFIERS = (
     NSEventModifierFlagCommand | NSEventModifierFlagControl | NSEventModifierFlagOption
@@ -400,6 +403,7 @@ class CellTableView(NSTableView):
 
     selected_row = None
     selected_name = None
+    initial_widths: dict[str, float]  # by column name, for = to go back to
     # the other corner of the selected block, set while in visual mode
     anchor_row = None
     anchor_name = None
@@ -564,6 +568,11 @@ class CellTableView(NSTableView):
             browser.sort_by(self.selected_name)
         elif key == "x":
             browser.hide_column(selected)
+        elif key in COLUMN_RESIZES:
+            width = selected.width() + COLUMN_RESIZES[key] * WIDTH_STEP
+            selected.setWidth_(max(width, selected.minWidth()))
+        elif key == "=":
+            selected.setWidth_(self.initial_widths[self.selected_name])
         elif key == "v":
             if self.anchor_row is None:
                 self.set_anchor(self.selected_row, self.selected_name)
@@ -1024,6 +1033,8 @@ def _table_view(browser: FrameBrowser) -> CellTableView:
 
     for sample in shown.head(WIDTH_SAMPLE_ROWS):
         table.addTableColumn_(_table_column(sample))
+
+    table.initial_widths = {c.identifier(): c.width() for c in table.tableColumns()}
 
     fields = {
         name: _filter_field(dtype_label(dtype), browser)
