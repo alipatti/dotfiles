@@ -18,10 +18,13 @@ keys, with the table focused
   row and column, and ctrl-d ctrl-u move half a page
 - ctrl-, and ctrl-. swap the selected column with the one to its left or right
 - s sorts by the selected column, x hides it, u shows the hidden columns
-- v starts selecting a block of cells, V a block spanning the whole row; o
-  swaps the corner being moved, and v or escape go back to a single cell
+- v starts selecting a block of cells, V a block spanning the whole row and
+  cmd-a every cell; o swaps the corner being moved, and v or escape go back
+  to a single cell
 - y or cmd-c copies the selection as csv, Y as a markdown table
 - / edits the selected column's filter; return or escape come back to the table
+- ctrl-f or cmd-f searches every cell for text, ignoring case; n and N step to the
+  next and previous match, and escape in the search field ends the search
 - escape clears every filter, q or cmd-w closes the window, and ? shows this list
 
 needs pyobjc-framework-Cocoa and a running cocoa event loop (`%gui osx`).
@@ -59,6 +62,7 @@ from AppKit import (
     NSImage,
     NSInsetRect,
     NSIntersectionRect,
+    NSLayoutAttributeLeft,
     NSLayoutAttributeRight,
     NSLeftArrowFunctionKey,
     NSMenu,
@@ -139,6 +143,7 @@ MOVES = {
     "$": (0, FAR),
 }
 HALF_PAGES = {"d": 1, "u": -1}  # with control held
+SEARCH_STEPS = {"n": 1, "N": -1}
 COLUMN_SWAPS = {",": -1, ".": 1}  # with control held
 ESCAPE = "\x1b"
 UNBOUND_MODIFIERS = (
@@ -243,6 +248,14 @@ def raw_text(value: object) -> str:
 
     # polars hands back the cells of list and array columns as series
     return str(value.to_list() if isinstance(value, pl.Series) else value)
+
+
+def lowercase_text(series: pl.Series) -> pl.Series:
+    """`series` as lowercase strings, through `raw_text` when polars can't cast."""
+    try:
+        return series.cast(pl.String).str.to_lowercase()
+    except pl.exceptions.PolarsError:
+        return pl.Series([raw_text(value).lower() for value in series])
 
 
 def markdown_table(frame: pl.DataFrame) -> str:
@@ -505,6 +518,8 @@ class CellTableView(NSTableView):
             self.move_selection(HALF_PAGES[key] * self.half_page(), 0)
         elif modifiers == NSEventModifierFlagControl and key in COLUMN_SWAPS:
             self.swap_column(COLUMN_SWAPS[key])
+        elif modifiers == NSEventModifierFlagControl and key == "f":
+            self.delegate().start_search()
         elif modifiers:
             objc.super(CellTableView, self).keyDown_(event)
         elif key in MOVES:
@@ -526,6 +541,8 @@ class CellTableView(NSTableView):
             browser.show_help()
         elif key == "q":
             self.window().performClose_(None)
+        elif key in SEARCH_STEPS:
+            browser.search(SEARCH_STEPS[key])
         elif key == "u":
             browser.showAllColumns_(None)
         elif selected is None or selected.isHidden():
@@ -571,6 +588,13 @@ class CellTableView(NSTableView):
 
         rows, names = block
         return self.delegate().visible[rows.start : rows.stop, names]
+
+    def selectAll_(self, sender: object) -> None:
+        names = self.visible_names()
+
+        if names and self.numberOfRows() > 0:
+            self.set_anchor(0, names[0])
+            self.select(self.numberOfRows() - 1, names[-1])
 
     def copy_(self, sender: object) -> None:
         if self.block() is not None:
@@ -621,6 +645,7 @@ class FrameBrowser(NSObject):
         self.sort = None
         self.table = _table_view(self)
         self.show_columns_button = _show_columns_button(self)
+        self.search_field = _search_field(self)
         self.window = _window(self)
         self.table.headerView().layout_fields()
         self.refresh()
@@ -669,6 +694,9 @@ class FrameBrowser(NSObject):
     # filter field delegate
 
     def controlTextDidChange_(self, notification: NSNotification) -> None:
+        if notification.object() is self.search_field:
+            return
+
         # debounce: restart the countdown on every keystroke
         self.cancel_pending_refresh()
         self.performSelector_withObject_afterDelay_("applyFilters:", None, FILTER_DELAY)
@@ -682,6 +710,18 @@ class FrameBrowser(NSObject):
         # return and escape apply the filter now and hand the keyboard back
         if command not in ("insertNewline:", "cancelOperation:"):
             return False
+
+        if control is self.search_field:
+            # return finds the first match, escape puts the search away
+            self.window.makeFirstResponder_(self.table)
+
+            if command == "insertNewline:":
+                self.search(1)
+            else:
+                self.search_field.setStringValue_("")
+                self.search_field.setHidden_(True)
+
+            return True
 
         self.cancel_pending_refresh()
         self.refresh()
@@ -706,6 +746,52 @@ class FrameBrowser(NSObject):
             column.setHidden_(False)
 
         self.hidden_columns_changed()
+
+    def startSearch_(self, sender: object) -> None:
+        # reached through the window's responder chain by the find menu item
+        self.start_search()
+
+    @objc.python_method
+    def start_search(self) -> None:
+        self.search_field.setHidden_(False)
+        self.window.makeFirstResponder_(self.search_field)
+
+    @objc.python_method
+    def search(self, direction: int) -> None:
+        """Select the next (or previous) cell containing the search text."""
+        term = self.search_field.stringValue().lower()
+        names = self.table.visible_names()
+
+        if not term or not names or self.visible.is_empty():
+            return
+
+        # (row, column position) of every match, in reading order
+        matches = sorted(
+            (row, position)
+            for position, name in enumerate(names)
+            for row in lowercase_text(self.visible[name])
+            .str.contains(term, literal=True)
+            .fill_null(False)
+            .arg_true()
+        )
+
+        if not matches:
+            return
+
+        table = self.table
+        selected = table.selected_row, table.selected_name
+
+        if selected[0] is None or selected[1] not in names:
+            # a first search from nowhere starts at the top, going either way
+            here = (-1, -1) if direction > 0 else (len(self.visible), 0)
+        else:
+            here = selected[0], names.index(selected[1])
+
+        # the nearest match strictly past the selection, wrapping around
+        forward = direction > 0
+        after = [m for m in matches if (m > here if forward else m < here)]
+        row, position = (after or matches)[0 if direction > 0 else -1]
+        table.select(row, names[position])
 
     @objc.python_method
     def cancel_pending_refresh(self) -> None:
@@ -916,6 +1002,15 @@ def _show_columns_button(browser: FrameBrowser) -> NSButton:
     return button
 
 
+def _search_field(browser: FrameBrowser) -> NSTextField:
+    field = NSTextField.alloc().initWithFrame_(NSMakeRect(0, 0, 200, 22))
+    field.setPlaceholderString_("search")
+    field.setControlSize_(NSControlSizeSmall)
+    field.setDelegate_(browser)
+    field.setHidden_(True)
+    return field
+
+
 def _window(browser: FrameBrowser) -> NSWindow:
     style = (
         NSWindowStyleMaskTitled
@@ -944,10 +1039,14 @@ def _window(browser: FrameBrowser) -> NSWindow:
     window.setTitlebarAppearsTransparent_(True)
     window.setBackgroundColor_(NSColor.controlBackgroundColor())
 
-    accessory = NSTitlebarAccessoryViewController.alloc().init()
-    accessory.setView_(browser.show_columns_button)
-    accessory.setLayoutAttribute_(NSLayoutAttributeRight)
-    window.addTitlebarAccessoryViewController_(accessory)
+    for view, side in (
+        (browser.search_field, NSLayoutAttributeLeft),
+        (browser.show_columns_button, NSLayoutAttributeRight),
+    ):
+        accessory = NSTitlebarAccessoryViewController.alloc().init()
+        accessory.setView_(view)
+        accessory.setLayoutAttribute_(side)
+        window.addTitlebarAccessoryViewController_(accessory)
 
     window.setDelegate_(browser)
     # python owns the window through the browser, so appkit must not free it
@@ -977,6 +1076,7 @@ def _install_menu(application: NSApplication) -> None:
 
     shortcuts = {
         "Close": ("performClose:", "w"),
+        "Find": ("startSearch:", "f"),
         "Undo": ("undo:", "z"),
         "Cut": ("cut:", "x"),
         "Copy": ("copy:", "c"),
