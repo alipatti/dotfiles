@@ -18,10 +18,7 @@ in
 
   home.file = {
     # docker cli only looks for plugins here, not in the nix profile
-    ".docker/cli-plugins/docker-compose" = {
-      source = "${pkgs.docker-compose}/bin/docker-compose";
-      force = true; # replace the link the old brew setup left behind
-    };
+    ".docker/cli-plugins/docker-compose".source = "${pkgs.docker-compose}/bin/docker-compose";
 
     "Library/texmf/tex/latex/local".source = link "latex";
     "Library/Application Support/papis/config".source = link "papis/config";
