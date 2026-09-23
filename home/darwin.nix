@@ -25,14 +25,9 @@ in
     "Library/Application Support/typst/packages/ali".source = link "typst/packages";
   };
 
-  # default apps for file types
-  home.activation.duti = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    run ${pkgs.duti}/bin/duti ${dotfiles}/macos/default-apps.duti
-  '';
-
   # build the webview helper if the source is newer than the binary
   home.activation.webview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    src=${dotfiles}/macos/webview.swift
+    src=${dotfiles}/darwin/webview.swift
     bin=$HOME/.local/bin/webview
     if [ ! "$bin" -nt "$src" ]; then
       run mkdir -p "$HOME/.local/bin"
