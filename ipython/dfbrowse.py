@@ -23,9 +23,13 @@ keys, with the table focused
   to a single cell
 - y or cmd-c copies the selection as csv, Y as a markdown table
 - / edits the selected column's filter; return or escape come back to the table
-- ctrl-f or cmd-f searches every cell for text, ignoring case; n and N step to the
-  next and previous match, and escape in the search field ends the search
-- escape clears every filter, q or cmd-w closes the window, and ? shows this list
+- ctrl-f or cmd-f edits the search in the footer, which highlights every cell
+  containing the text, ignoring case; n and N step to the next and previous one
+- escape leaves visual mode, then clears the search, then clears every filter
+- q or cmd-w closes the window, and ? shows this list
+
+the footer's right side counts the matches and sizes the table, or the
+selected block while in visual mode.
 
 needs pyobjc-framework-Cocoa and a running cocoa event loop (`%gui osx`).
 the `browse` function in startup/browse.py takes care of the latter.
@@ -62,7 +66,6 @@ from AppKit import (
     NSImage,
     NSInsetRect,
     NSIntersectionRect,
-    NSLayoutAttributeLeft,
     NSLayoutAttributeRight,
     NSLeftArrowFunctionKey,
     NSMenu,
@@ -88,6 +91,10 @@ from AppKit import (
     NSTitlebarAccessoryViewController,
     NSUpArrowFunctionKey,
     NSView,
+    NSViewHeightSizable,
+    NSViewMaxXMargin,
+    NSViewMinXMargin,
+    NSViewWidthSizable,
     NSWindow,
     NSWindowCloseButton,
     NSWindowMiniaturizeButton,
@@ -107,6 +114,7 @@ DEFAULT_TITLE = "dataframe"
 TITLE_HEIGHT = 24
 FILTER_HEIGHT = 20
 FILTER_MARGIN = 3
+FOOTER_HEIGHT = 32
 FILTER_DELAY = 0.25  # seconds of quiet before a typed filter applies
 WIDTH_SAMPLE_ROWS = 100  # rows measured to choose the initial column widths
 MAX_COLUMN_WIDTH = 240  # longer values are truncated; hover to read them
@@ -408,6 +416,7 @@ class CellTableView(NSTableView):
     def select(self, row: int | None, name: str | None) -> None:
         self.selected_row, self.selected_name = row, name
         self.setNeedsDisplay_(True)
+        self.delegate().update_status()
 
         if row is not None:
             self.scrollRowToVisible_(row)
@@ -432,6 +441,7 @@ class CellTableView(NSTableView):
     def set_anchor(self, row: int | None, name: str | None) -> None:
         self.anchor_row, self.anchor_name = row, name
         self.setNeedsDisplay_(True)
+        self.delegate().update_status()
 
     @objc.python_method
     def move_selection(self, rows: int, columns: int) -> None:
@@ -535,6 +545,8 @@ class CellTableView(NSTableView):
 
         if key == ESCAPE and self.anchor_row is not None:
             self.set_anchor(None, None)
+        elif key == ESCAPE and browser.search_field.stringValue():
+            browser.clear_search()
         elif key == ESCAPE:
             browser.clear_filters()
         elif key == "?":
@@ -600,10 +612,27 @@ class CellTableView(NSTableView):
         if self.block() is not None:
             self.copy_text(self.selected_frame().write_csv())
 
+    @objc.python_method
+    def fill_cells(self, row: int, names: list[str], color: NSColor) -> None:
+        color.setFill()
+
+        for name in names:
+            index = self.columnWithIdentifier_(name)
+            # the whole grid square, where the cell's own frame leaves margins
+            square = NSIntersectionRect(self.rectOfColumn_(index), self.rectOfRow_(row))
+            NSBezierPath.fillRect_(square)
+
     def drawRow_clipRect_(self, row: int, clip: NSRect) -> None:
+        # under the text, which the call to super draws. the selection goes
+        # over the matches
+        matches = self.delegate().matches
+        matched = [name for name in self.visible_names() if (row, name) in matches]
+        self.fill_cells(
+            row, matched, NSColor.systemYellowColor().colorWithAlphaComponent_(0.3)
+        )
+
         block = self.block()
 
-        # under the text, which the call to super draws
         if block is not None and row in block[0]:
             visual = self.anchor_row is not None
             highlight = (
@@ -611,15 +640,7 @@ class CellTableView(NSTableView):
                 if visual
                 else NSColor.selectedContentBackgroundColor()
             )
-            highlight.colorWithAlphaComponent_(0.4).setFill()
-
-            for name in block[1]:
-                index = self.columnWithIdentifier_(name)
-                # the whole grid square, where the cell's own frame leaves margins
-                square = NSIntersectionRect(
-                    self.rectOfColumn_(index), self.rectOfRow_(row)
-                )
-                NSBezierPath.fillRect_(square)
+            self.fill_cells(row, block[1], highlight.colorWithAlphaComponent_(0.4))
 
         objc.super(CellTableView, self).drawRow_clipRect_(row, clip)
 
@@ -646,6 +667,8 @@ class FrameBrowser(NSObject):
         self.table = _table_view(self)
         self.show_columns_button = _show_columns_button(self)
         self.search_field = _search_field(self)
+        self.status_label = _status_label()
+        self.matches: set[tuple[int, str]] = set()  # (row, column name)
         self.window = _window(self)
         self.table.headerView().layout_fields()
         self.refresh()
@@ -695,6 +718,7 @@ class FrameBrowser(NSObject):
 
     def controlTextDidChange_(self, notification: NSNotification) -> None:
         if notification.object() is self.search_field:
+            self.find_matches()
             return
 
         # debounce: restart the countdown on every keystroke
@@ -718,8 +742,7 @@ class FrameBrowser(NSObject):
             if command == "insertNewline:":
                 self.search(1)
             else:
-                self.search_field.setStringValue_("")
-                self.search_field.setHidden_(True)
+                self.clear_search()
 
             return True
 
@@ -753,26 +776,38 @@ class FrameBrowser(NSObject):
 
     @objc.python_method
     def start_search(self) -> None:
-        self.search_field.setHidden_(False)
         self.window.makeFirstResponder_(self.search_field)
 
     @objc.python_method
-    def search(self, direction: int) -> None:
-        """Select the next (or previous) cell containing the search text."""
+    def clear_search(self) -> None:
+        self.search_field.setStringValue_("")
+        self.find_matches()
+
+    @objc.python_method
+    def find_matches(self) -> None:
+        """Recompute which visible cells contain the search text."""
         term = self.search_field.stringValue().lower()
+        self.matches = set()
+
+        if term:
+            for name in self.table.visible_names():
+                hits = lowercase_text(self.visible[name]).str.contains(
+                    term, literal=True
+                )
+                self.matches.update(
+                    (row, name) for row in hits.fill_null(False).arg_true()
+                )
+
+        self.table.setNeedsDisplay_(True)
+        self.update_status()
+
+    @objc.python_method
+    def search(self, direction: int) -> None:
+        """Select the next (or previous) matching cell."""
         names = self.table.visible_names()
-
-        if not term or not names or self.visible.is_empty():
-            return
-
-        # (row, column position) of every match, in reading order
+        # (row, column position) of every match still showing, in reading order
         matches = sorted(
-            (row, position)
-            for position, name in enumerate(names)
-            for row in lowercase_text(self.visible[name])
-            .str.contains(term, literal=True)
-            .fill_null(False)
-            .arg_true()
+            (row, names.index(name)) for row, name in self.matches if name in names
         )
 
         if not matches:
@@ -821,6 +856,7 @@ class FrameBrowser(NSObject):
         self.show_columns_button.setHidden_(hidden == 0)
         self.table.headerView().layout_fields()
         self.table.leave_hidden_column()
+        self.find_matches()
 
     @objc.python_method
     def show_help(self) -> None:
@@ -881,7 +917,8 @@ class FrameBrowser(NSObject):
         self.visible = visible
         self.show_sort_indicator()
         self.table.reloadData()
-        self.window.setTitle_(self.window_title())
+        self.window.setTitle_(self.title)
+        self.find_matches()
 
         if selected is None or visible.is_empty():
             self.table.select(None, None)
@@ -903,12 +940,26 @@ class FrameBrowser(NSObject):
             self.table.setIndicatorImage_inTableColumn_(image, column)
 
     @objc.python_method
-    def window_title(self) -> str:
-        total, columns = self.source.shape
-        shown = self.visible.height
-        rows = f"{total:,}" if shown == total else f"{shown:,} of {total:,}"
-        # less the hidden column of row numbers
-        return f"{self.title} ({rows} x {columns - 1:,})"
+    def update_status(self) -> None:
+        """Refresh the footer's match count and table or block size."""
+        block = self.table.block()
+
+        if self.table.anchor_row is not None and block is not None:
+            size = f"({len(block[0]):,} x {len(block[1]):,})"
+        else:
+            total, columns = self.source.shape
+            shown = self.visible.height
+            rows = f"{total:,}" if shown == total else f"{shown:,} of {total:,}"
+            # less the hidden column of row numbers
+            size = f"({rows} x {columns - 1:,})"
+
+        parts = [size]
+
+        if self.search_field.stringValue():
+            count = len(self.matches)
+            parts.insert(0, f"{count:,} match{'' if count == 1 else 'es'}")
+
+        self.status_label.setStringValue_(" \u00b7 ".join(parts))
 
 
 def _monospaced_font() -> NSFont:
@@ -1003,12 +1054,44 @@ def _show_columns_button(browser: FrameBrowser) -> NSButton:
 
 
 def _search_field(browser: FrameBrowser) -> NSTextField:
-    field = NSTextField.alloc().initWithFrame_(NSMakeRect(0, 0, 200, 22))
+    field = NSTextField.alloc().initWithFrame_(NSMakeRect(8, 8, 220, 20))
     field.setPlaceholderString_("search")
     field.setControlSize_(NSControlSizeSmall)
     field.setDelegate_(browser)
-    field.setHidden_(True)
+    field.setAutoresizingMask_(NSViewMaxXMargin)
     return field
+
+
+def _status_label() -> NSTextField:
+    label = NSTextField.labelWithString_("")
+    label.setFont_(NSFont.systemFontOfSize_(11))
+    label.setTextColor_(NSColor.secondaryLabelColor())
+    label.setAlignment_(NSTextAlignmentRight)
+    label.setAutoresizingMask_(NSViewMinXMargin)
+    return label
+
+
+def _content_view(browser: FrameBrowser) -> NSView:
+    """The table over a footer holding the search field and the status."""
+    width, height = 900, 600
+    content = NSView.alloc().initWithFrame_(NSMakeRect(0, 0, width, height))
+
+    scroll = NSScrollView.alloc().initWithFrame_(
+        NSMakeRect(0, FOOTER_HEIGHT, width, height - FOOTER_HEIGHT)
+    )
+    scroll.setHasVerticalScroller_(True)
+    scroll.setHasHorizontalScroller_(True)
+    scroll.setDocumentView_(browser.table)
+    scroll.setAutoresizingMask_(NSViewWidthSizable | NSViewHeightSizable)
+    content.addSubview_(scroll)
+
+    footer = NSView.alloc().initWithFrame_(NSMakeRect(0, 0, width, FOOTER_HEIGHT))
+    footer.setAutoresizingMask_(NSViewWidthSizable)
+    footer.addSubview_(browser.search_field)
+    browser.status_label.setFrame_(NSMakeRect(width - 8 - 400, 10, 400, 16))
+    footer.addSubview_(browser.status_label)
+    content.addSubview_(footer)
+    return content
 
 
 def _window(browser: FrameBrowser) -> NSWindow:
@@ -1022,11 +1105,7 @@ def _window(browser: FrameBrowser) -> NSWindow:
         NSMakeRect(0, 0, 900, 600), style, NSBackingStoreBuffered, False
     )
 
-    scroll = NSScrollView.alloc().init()
-    scroll.setHasVerticalScroller_(True)
-    scroll.setHasHorizontalScroller_(True)
-    scroll.setDocumentView_(browser.table)
-    window.setContentView_(scroll)
+    window.setContentView_(_content_view(browser))
     # keys reach the table as soon as the window is clicked anywhere
     window.makeFirstResponder_(browser.table)
 
@@ -1039,14 +1118,10 @@ def _window(browser: FrameBrowser) -> NSWindow:
     window.setTitlebarAppearsTransparent_(True)
     window.setBackgroundColor_(NSColor.controlBackgroundColor())
 
-    for view, side in (
-        (browser.search_field, NSLayoutAttributeLeft),
-        (browser.show_columns_button, NSLayoutAttributeRight),
-    ):
-        accessory = NSTitlebarAccessoryViewController.alloc().init()
-        accessory.setView_(view)
-        accessory.setLayoutAttribute_(side)
-        window.addTitlebarAccessoryViewController_(accessory)
+    accessory = NSTitlebarAccessoryViewController.alloc().init()
+    accessory.setView_(browser.show_columns_button)
+    accessory.setLayoutAttribute_(NSLayoutAttributeRight)
+    window.addTitlebarAccessoryViewController_(accessory)
 
     window.setDelegate_(browser)
     # python owns the window through the browser, so appkit must not free it
