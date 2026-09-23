@@ -8,7 +8,7 @@ enabled = true
 python = { format = ["ruff:format"] }
 
 [line-length]
-line-length = 80
+line-length = 75
 reflow = true # fix line lengths
 reflow-mode = "semantic-line-breaks" # break 
 math-blocks = false
