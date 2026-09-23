@@ -1,63 +1,32 @@
 #!/usr/bin/env bash
 
-# one-time bootstrap for a fresh mac. installs the things that have to exist
-# before `darwin-rebuild` can run, then hands off to the flake.
-#
-# after the first run, day-to-day updates are just:
-#   sudo darwin-rebuild switch --flake ~/.dotfiles
+# one-time setup for a fresh mac. installs what has to exist before
+# `darwin-rebuild` can run, then hands off to the flake. after this,
+# updates are just: sudo darwin-rebuild switch --flake ~/.dotfiles
 
 set -euo pipefail
-
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
-
-# xcode command line tools (git, swiftc, etc.)
 if ! xcode-select -p >/dev/null 2>&1; then
-    log "installing xcode command line tools"
     xcode-select --install
-    echo "the install runs in a gui dialog. rerun ./bootstrap once it finishes."
+    echo "rerun ./bootstrap once the command line tools finish installing"
     exit 0
 fi
 
-# nix via the determinate installer. this installs upstream nix (not
-# determinate's fork) so that nix-darwin can manage the daemon and nix.conf.
-# flakes are enabled by default.
-if ! command -v nix >/dev/null 2>&1; then
-    log "installing nix"
+if ! command -v nix >/dev/null; then
     curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
-
-    # pick up the daemon in this shell without restarting
-    # shellcheck disable=SC1091
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 
-# homebrew. nix-darwin manages a brewfile but does not install brew itself.
-if ! command -v brew >/dev/null 2>&1 && [ ! -x /opt/homebrew/bin/brew ]; then
-    log "installing homebrew"
+if [ ! -x /opt/homebrew/bin/brew ]; then
     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
-eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# nix-darwin refuses to overwrite /etc files it doesn't recognise. the nix
-# installer edits these, so move them aside before the first activation.
-if ! command -v darwin-rebuild >/dev/null 2>&1; then
-    for f in /etc/zshrc /etc/bashrc /etc/bash.bashrc; do
-        if [ -f "$f" ] && [ ! -L "$f" ]; then
-            log "moving $f aside for nix-darwin"
-            sudo mv "$f" "$f.before-nix-darwin"
-        fi
-    done
-fi
+# the nix installer edits these, and nix-darwin won't overwrite modified files
+for f in /etc/zshrc /etc/bashrc; do
+    grep -q 'nix-daemon.sh' "$f" 2>/dev/null && sudo mv "$f" "$f.before-nix-darwin"
+done
 
-if [ ! -f flake.nix ]; then
-    log "no flake.nix yet; stopping after installing nix and homebrew"
-    exit 0
-fi
+[ -f flake.nix ] || exit 0
 
-log "activating nix-darwin"
-if command -v darwin-rebuild >/dev/null 2>&1; then
-    sudo darwin-rebuild switch --flake .
-else
-    sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .
-fi
+sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .
