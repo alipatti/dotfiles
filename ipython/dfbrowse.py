@@ -25,7 +25,8 @@ keys, with the table focused
 - y or cmd-c copies the selection as csv, Y as a markdown table
 - / edits the selected column's filter; return or escape come back to the table
 - ctrl-f or cmd-f edits the search in the footer, which highlights every cell
-  containing the text, ignoring case; n and N step to the next and previous one
+  containing the text, ignoring case; n and N step to the next and previous
+  one, and * searches for the selected cell's value
 - escape leaves visual mode, then clears the search, then clears every filter
 - q or cmd-w closes the window, and ? shows this list
 
@@ -592,6 +593,10 @@ class CellTableView(NSTableView):
         elif key == "Y":
             self.copy_text(markdown_table(self.selected_frame()))
             self.set_anchor(None, None)
+        elif key == "*":
+            value = browser.visible[self.selected_row, self.selected_name]
+            browser.search_field.setStringValue_(raw_text(value))
+            browser.find_matches()
         elif key == "/":
             self.window().makeFirstResponder_(
                 self.headerView().fields[self.selected_name]
