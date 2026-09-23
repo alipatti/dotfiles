@@ -22,7 +22,7 @@ keys, with the table focused
   swaps the corner being moved, and v or escape go back to a single cell
 - y or cmd-c copies the selection as csv, with the column names
 - / edits the selected column's filter; return or escape come back to the table
-- escape clears every filter, and ? shows this list
+- escape clears every filter, q or cmd-w closes the window, and ? shows this list
 
 needs pyobjc-framework-Cocoa and a running cocoa event loop (`%gui osx`).
 the `browse` function in startup/browse.py takes care of the latter.
@@ -85,10 +85,13 @@ from AppKit import (
     NSUpArrowFunctionKey,
     NSView,
     NSWindow,
+    NSWindowCloseButton,
+    NSWindowMiniaturizeButton,
     NSWindowStyleMaskClosable,
     NSWindowStyleMaskMiniaturizable,
     NSWindowStyleMaskResizable,
     NSWindowStyleMaskTitled,
+    NSWindowZoomButton,
 )
 from Foundation import NSMakePoint, NSMakeRect, NSObject, NSPoint, NSRect
 
@@ -505,6 +508,8 @@ class CellTableView(NSTableView):
             browser.clear_filters()
         elif key == "?":
             browser.show_help()
+        elif key == "q":
+            self.window().performClose_(None)
         elif key == "u":
             browser.showAllColumns_(None)
         elif selected is None or selected.isHidden():
@@ -904,6 +909,11 @@ def _window(browser: FrameBrowser) -> NSWindow:
     window.setContentView_(scroll)
     # keys reach the table as soon as the window is clicked anywhere
     window.makeFirstResponder_(browser.table)
+
+    # no stoplight buttons: q or cmd-w close the window. the style mask keeps
+    # closable, which performClose: needs
+    for button in (NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton):
+        window.standardWindowButton_(button).setHidden_(True)
 
     # the title bar takes the table's background, so the two read as one surface
     window.setTitlebarAppearsTransparent_(True)
