@@ -1,0 +1,30 @@
+# symlinks from ~ into this repo. read by home-manager (home/*.nix) and, on
+# machines without nix, by ./setup. paths with spaces go under [darwin].
+
+"~/.config/fish" = "fish"
+"~/.config/kitty" = "kitty"
+"~/.config/nvim" = "nvim"
+"~/.config/gh" = "github"
+"~/.config/starship.toml" = "starship/starship.toml"
+"~/.config/rumdl" = "rumdl"
+
+"~/.gitignore" = "git/ignore"
+"~/.gitconfig" = "git/config"
+"~/.git/templates" = "git/templates"
+
+"~/.rprofile" = "r/.rprofile"
+"~/.lintr" = "r/.lintr"
+"~/.radian_profile" = "r/.radian_profile"
+
+"~/.claude" = "claude"
+"~/.codex/AGENTS.md" = "claude/CLAUDE.md"
+"~/.codex/skills" = "skills"
+
+"~/.ipython" = "ipython"
+"~/.latexmkrc" = "latex/.latexmkrc"
+"~/.ssh" = "ssh"
+
+[darwin]
+"~/Library/texmf/tex/latex/local" = "latex"
+"~/Library/Application Support/papis/config" = "papis/config"
+"~/Library/Application Support/typst/packages/ali" = "typst/packages"

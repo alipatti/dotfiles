@@ -7,6 +7,7 @@ let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
   # symlink straight into the repo so configs stay editable in place
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
+  links = builtins.fromTOML (builtins.readFile ../links.toml);
 in
 {
   home.username = "ali";
@@ -58,32 +59,11 @@ in
 
   fonts.fontconfig.enable = true;
 
-  xdg.configFile = {
-    fish.source = link "fish";
-    kitty.source = link "kitty";
-    nvim.source = link "nvim";
-    gh.source = link "github";
-    "starship.toml".source = link "starship/starship.toml";
-    rumdl.source = link "rumdl";
-  };
-
   home.file = {
-    ".gitignore".source = link "git/ignore";
-    ".gitconfig".source = link "git/config";
-    ".git/templates".source = link "git/templates";
-
-    ".rprofile".source = link "r/.rprofile";
-    ".lintr".source = link "r/.lintr";
-    ".radian_profile".source = link "r/.radian_profile";
-
-    ".claude".source = link "claude";
-    ".codex/AGENTS.md".source = link "claude/CLAUDE.md";
-    ".codex/skills".source = link "skills";
-
-    ".ipython".source = link "ipython";
-    ".latexmkrc".source = link "latex/.latexmkrc";
-    ".ssh".source = link "ssh";
-
     ".hushlogin".text = ""; # hide fish "last login" message
-  };
+  }
+  # see ../links.toml; the darwin section is handled in ./darwin.nix
+  // lib.mapAttrs' (
+    target: source: lib.nameValuePair (lib.removePrefix "~/" target) { source = link source; }
+  ) (removeAttrs links [ "darwin" ]);
 }
