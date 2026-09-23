@@ -6,12 +6,6 @@ fish/conf.d
 *.fls
 *.log
 
-# ipython stuff
-ipython/**
-# directories must be re-included for the file pattern below to apply
-!ipython/**/
-!ipython/**/*.py
-
 # secrets
 *.local.*
 github/hosts.yml

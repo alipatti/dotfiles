@@ -46,13 +46,6 @@ in
           end
       end
 
-      # kitty shell integration (cursor shape, prompt marks, etc). loaded by
-      # hand because nix-darwin overwrites XDG_DATA_DIRS, which is how kitty
-      # normally injects it. kitty.conf sets `shell_integration no-rc` to match
-      if set -q KITTY_INSTALLATION_DIR
-          source "$KITTY_INSTALLATION_DIR/shell-integration/fish/vendor_conf.d/kitty-shell-integration.fish"
-      end
-
       # rust
       test -f "$HOME/.cargo/env.fish" && source "$HOME/.cargo/env.fish"
 

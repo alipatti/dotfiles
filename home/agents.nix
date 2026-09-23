@@ -65,7 +65,7 @@ in
 
       statusLine = {
         type = "command";
-        command = "${config.home.homeDirectory}/.dotfiles/claude/prompt.py";
+        command = "${config.home.homeDirectory}/.dotfiles/tools/claude_prompt.py";
       };
 
       enabledPlugins = {

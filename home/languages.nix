@@ -19,7 +19,10 @@ in
 
   home.file = {
     # python
-    ".ipython".source = link "ipython";
+    # link only the config pieces so ipython's runtime files (history,
+    # logs, pid) stay out of the repo
+    ".ipython/profile_default/ipython_config.py".source = link "ipython/ipython_config.py";
+    ".ipython/profile_default/startup".source = link "ipython/startup";
 
     # r
     ".rprofile".source = link "r/.rprofile";

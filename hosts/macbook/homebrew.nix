@@ -10,7 +10,6 @@
 
     casks = [
       # gui apps
-      "kitty"
       "skim"
       "slack"
       "zoom"

@@ -17,8 +17,7 @@ import subprocess
 
 NARROW_WIDE_CUTOFF = 100
 
-# kitty may run this with a minimal path, so fall back to the bundled binary
-KITTEN = shutil.which("kitten") or "/Applications/kitty.app/Contents/MacOS/kitten"
+KITTEN = shutil.which("kitten")
 
 
 def kitten(*args, capture=False):

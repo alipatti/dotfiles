@@ -11,6 +11,7 @@ in
     ./languages.nix
     ./shell.nix
     ./prompt.nix
+    ./kitty.nix
     ./git.nix
     ./ssh.nix
     ./agents.nix
@@ -41,7 +42,6 @@ in
 
   # ~/.config
   xdg.configFile = {
-    "kitty".source = link "kitty";
     "nvim".source = link "nvim";
     "rumdl".source = link "rumdl";
   };

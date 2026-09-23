@@ -48,7 +48,7 @@
       wvous-br-corner = 1;
 
       persistent-apps = [
-        { app = "/Applications/kitty.app"; }
+        { app = "/Users/ali/Applications/Home Manager Apps/kitty.app"; }
         { app = "/Applications/Claude.app"; }
         { app = "/System/Cryptexes/App/System/Applications/Safari.app"; }
         { app = "/System/Applications/Calendar.app"; }
