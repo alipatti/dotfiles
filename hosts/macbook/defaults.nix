@@ -1,78 +1,6 @@
-# machine-wide config for the mac. everything here runs as root at
-# `darwin-rebuild switch`. per-user files live in ../home.
-
-{ pkgs, lib, ... }:
+{ ... }:
 
 {
-  nixpkgs.hostPlatform = "aarch64-darwin";
-  nixpkgs.config.allowUnfree = true;
-  system.stateVersion = 7;
-
-  # the nix fish doesn't run macos's path_helper, so add brew's bin ourselves.
-  # after nix's own paths so nix packages win
-  environment.systemPath = lib.mkAfter [ "/opt/homebrew/bin" ];
-
-  # must match the key in flake.nix for `darwin-rebuild --flake ~/.dotfiles`
-  networking.hostName = "macbook";
-  networking.localHostName = "macbook";
-  networking.computerName = "macbook";
-
-  # determinate nix manages the daemon and /etc/nix/nix.conf, not nix-darwin.
-  # extra settings go in /etc/nix/nix.custom.conf
-  nix.enable = false;
-
-  # user that options like defaults and homebrew apply to
-  system.primaryUser = "ali";
-
-  # nix-darwin has to "own" the user to be allowed to set its shell
-  users.knownUsers = [ "ali" ];
-  users.users.ali = {
-    uid = 501;
-    home = "/Users/ali";
-    shell = pkgs.fish;
-  };
-
-  # installs fish, adds it to /etc/shells, and sets up nix paths in /etc/fish
-  programs.fish.enable = true;
-
-  # gui apps and things that aren't in nixpkgs. nix-darwin generates a
-  # brewfile and runs `brew bundle` on activation; it does not install brew.
-  homebrew = {
-    enable = true;
-    # uninstall anything not listed here
-    onActivation.cleanup = "zap";
-
-    casks = [
-      # gui apps
-      "kitty"
-      "skim"
-      "slack"
-      "zoom"
-      "spotify"
-      "whatsapp"
-      "claude"
-      "chatgpt"
-      "paseo"
-      "sage" # sagemath
-
-      # menu bar apps
-      "stats"
-      "hiddenbar"
-
-      # misc
-      "the-unarchiver"
-      "displaylink" # third monitor on mbp
-      "tailscale-app"
-
-
-      # quicklook plugins
-      "qlmarkdown" # render markdown
-      "syntax-highlight" # syntax highlighting for code
-      "qlcolorcode"
-      "qlstephen" # preview files without an extension
-    ];
-  };
-
   # https://macos-defaults.com/
   # https://nix-darwin.github.io/nix-darwin/manual/index.html#sec-options-system.defaults
   system.defaults = {
@@ -165,20 +93,6 @@
     screensaver = {
       askForPassword = true;
       askForPasswordDelay = 0;
-    };
-
-    # keys nix-darwin has no option for. written with `defaults write` as-is.
-    CustomUserPreferences = {
-      NSGlobalDomain.NSQuitAlwaysKeepsWindow = false;
-      "com.apple.menuextra.clock".DateFormat = "EEE d MMM h:mm:ss";
-      "com.apple.print.PrintingPrefs"."Quit When Finished" = true;
-      "com.apple.CrashReporter".DialogType = "none";
-      "com.apple.ImageCapture".disableHotPlug = false; # don't open photos when plugging in camera
-      # no .DS_Store on drives/network
-      "com.apple.desktopservices" = {
-        DSDontWriteUSBStores = false;
-        DSDontWriteNetworkStores = false;
-      };
     };
   };
 }

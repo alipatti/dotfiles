@@ -36,7 +36,7 @@
       # sudo darwin-rebuild switch --flake ~/.dotfiles
       darwinConfigurations.macbook = nix-darwin.lib.darwinSystem {
         modules = [
-          ./hosts/macbook.nix
+          ./hosts/macbook
           home-manager.darwinModules.home-manager
           (home [ ./home/darwin.nix ])
         ];

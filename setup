@@ -1,19 +1,10 @@
 #!/usr/bin/env bash
 
 # on a fresh mac, installs nix and homebrew. on any machine, applies the flake.
+# needs root: everything is managed by nix-darwin / nixos plus home-manager.
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
-
-# no sudo (e.g. a cluster): skip nix and just make the symlinks
-if ! id -Gn | grep -qwE 'admin|wheel|sudo'; then
-    sed -n '/^\[/q; s/^"\(.*\)" = "\(.*\)"$/\1 \2/p' links.toml | while read -r target source; do
-        target="${target/#\~/$HOME}"
-        mkdir -p "$(dirname "$target")"
-        ln -sfn "$PWD/$source" "$target"
-    done
-    exit 0
-fi
 
 if [ "$(uname)" = Darwin ]; then
     if ! xcode-select -p >/dev/null 2>&1; then
