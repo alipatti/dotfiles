@@ -43,6 +43,12 @@
       "skim"
       "slack"
       "zoom"
+      "spotify"
+      "whatsapp"
+      "claude"
+      "chatgpt"
+      "paseo"
+      "sage" # sagemath
 
       # menu bar apps
       "stats"
@@ -58,6 +64,8 @@
       # quicklook plugins
       "qlmarkdown" # render markdown
       "syntax-highlight" # syntax highlighting for code
+      "qlcolorcode"
+      "qlstephen" # preview files without an extension
     ];
   };
 
