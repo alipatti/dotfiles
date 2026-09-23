@@ -20,7 +20,7 @@ keys, with the table focused
 - s sorts by the selected column, x hides it, u shows the hidden columns
 - v starts selecting a block of cells, V a block spanning the whole row; o
   swaps the corner being moved, and v or escape go back to a single cell
-- y or cmd-c copies the selection as csv, with the column names
+- y or cmd-c copies the selection as csv, Y as a markdown table
 - / edits the selected column's filter; return or escape come back to the table
 - escape clears every filter, q or cmd-w closes the window, and ? shows this list
 
@@ -243,6 +243,22 @@ def raw_text(value: object) -> str:
 
     # polars hands back the cells of list and array columns as series
     return str(value.to_list() if isinstance(value, pl.Series) else value)
+
+
+def markdown_table(frame: pl.DataFrame) -> str:
+    """A markdown table of `frame`, its cells as `raw_text`.
+
+    Examples
+    --------
+    >>> print(markdown_table(pl.DataFrame({"a": [1, None], "b": ["x|y", "z"]})))
+    | a | b |
+    | --- | --- |
+    | 1 | x\\|y |
+    | null | z |
+    """
+    rows = [frame.columns, ["---"] * frame.width, *frame.rows()]
+    cells = ([raw_text(value).replace("|", "\\|") for value in row] for row in rows)
+    return "\n".join(f"| {' | '.join(row)} |" for row in cells)
 
 
 def display_text(value: object) -> str:
@@ -535,6 +551,9 @@ class CellTableView(NSTableView):
         elif key == "y":
             self.copy_(None)
             self.set_anchor(None, None)
+        elif key == "Y":
+            self.copy_text(markdown_table(self.selected_frame()))
+            self.set_anchor(None, None)
         elif key == "/":
             self.window().makeFirstResponder_(
                 self.headerView().fields[self.selected_name]
@@ -544,12 +563,18 @@ class CellTableView(NSTableView):
 
         return True
 
+    @objc.python_method
+    def selected_frame(self) -> pl.DataFrame:
+        """The selected block as a frame, empty with nothing selected."""
+        if (block := self.block()) is None:
+            return pl.DataFrame()
+
+        rows, names = block
+        return self.delegate().visible[rows.start : rows.stop, names]
+
     def copy_(self, sender: object) -> None:
-        if (block := self.block()) is not None:
-            rows, names = block
-            self.copy_text(
-                self.delegate().visible[rows.start : rows.stop, names].write_csv()
-            )
+        if self.block() is not None:
+            self.copy_text(self.selected_frame().write_csv())
 
     def drawRow_clipRect_(self, row: int, clip: NSRect) -> None:
         block = self.block()
