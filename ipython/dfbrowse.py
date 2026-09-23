@@ -16,6 +16,7 @@ filters
 keys, with the table focused
 - h j k l or the arrows move the selection; g G 0 $ jump to the first and last
   row and column, and ctrl-d ctrl-u move half a page
+- ctrl-, and ctrl-. swap the selected column with the one to its left or right
 - s sorts by the selected column, x hides it, u shows the hidden columns
 - y or cmd-c copies the selected value, Y the selected row as a dict
 - / edits the selected column's filter; return or escape come back to the table
@@ -133,6 +134,7 @@ MOVES = {
     "$": (0, FAR),
 }
 HALF_PAGES = {"d": 1, "u": -1}  # with control held
+COLUMN_SWAPS = {",": -1, ".": 1}  # with control held
 ESCAPE = "\x1b"
 UNBOUND_MODIFIERS = (
     NSEventModifierFlagCommand | NSEventModifierFlagControl | NSEventModifierFlagOption
@@ -397,6 +399,23 @@ class CellTableView(NSTableView):
         )
 
     @objc.python_method
+    def swap_column(self, direction: int) -> None:
+        """Swap the selected column with its neighbour that is showing."""
+        names = self.visible_names()
+
+        if self.selected_name not in names:
+            return
+
+        position = names.index(self.selected_name) + direction
+
+        if 0 <= position < len(names):
+            self.moveColumn_toColumn_(
+                self.columnWithIdentifier_(self.selected_name),
+                self.columnWithIdentifier_(names[position]),
+            )
+            self.scrollColumnToVisible_(self.columnWithIdentifier_(self.selected_name))
+
+    @objc.python_method
     def leave_hidden_column(self) -> None:
         """Move the selection to the nearest column that is still showing."""
         if self.selected_name is None or self.selected_name in self.visible_names():
@@ -438,6 +457,8 @@ class CellTableView(NSTableView):
 
         if modifiers == NSEventModifierFlagControl and key in HALF_PAGES:
             self.move_selection(HALF_PAGES[key] * self.half_page(), 0)
+        elif modifiers == NSEventModifierFlagControl and key in COLUMN_SWAPS:
+            self.swap_column(COLUMN_SWAPS[key])
         elif modifiers:
             objc.super(CellTableView, self).keyDown_(event)
         elif key in MOVES:
