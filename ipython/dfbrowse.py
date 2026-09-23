@@ -9,7 +9,7 @@ mouse
 filters
 - type under a header to filter that column. the text is cast to the column's
   dtype, optionally after one of >= <= != > < =
-- string columns match substrings, ignoring case, or exactly after =
+- string columns match substrings, ignoring case, or exactly after = or !=
 - `null` and `!null` match missing values in any column
 - text that doesn't cast outlines the field in red and is ignored
 
@@ -37,8 +37,10 @@ needs pyobjc-framework-Cocoa and a running cocoa event loop (`%gui osx`).
 the `browse` function in startup/browse.py takes care of the latter.
 """
 
+import csv
+import io
 import operator
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from functools import cache
 
 import objc
@@ -113,11 +115,12 @@ type Sort = tuple[str, bool]  # column name, descending
 type Browsable = pl.DataFrame | pl.LazyFrame | pl.Series
 
 DEFAULT_TITLE = "dataframe"
+WINDOW_SIZE = (900, 600)
 TITLE_HEIGHT = 24
 FILTER_HEIGHT = 20
 FILTER_MARGIN = 3
 FOOTER_HEIGHT = 32
-FILTER_DELAY = 0.25  # seconds of quiet before a typed filter applies
+TYPING_DELAY = 0.25  # seconds of quiet before a typed filter or search applies
 WIDTH_SAMPLE_ROWS = 100  # rows measured to choose the initial column widths
 MAX_COLUMN_WIDTH = 240  # longer values are truncated; hover to read them
 CELL_PADDING = 24  # room for the cell's margins and the sort arrow
@@ -154,8 +157,7 @@ MOVES = {
 }
 HALF_PAGES = {"d": 1, "u": -1}  # with control held
 SEARCH_STEPS = {"n": 1, "N": -1}
-COLUMN_SWAPS = {",": -1, ".": 1}  # with control held
-COLUMN_RESIZES = {",": -1, ".": 1}  # in steps of this many points
+COLUMN_STEPS = {",": -1, ".": 1}  # swap with control held, otherwise resize by
 WIDTH_STEP = 20
 ESCAPE = "\x1b"
 UNBOUND_MODIFIERS = (
@@ -188,6 +190,8 @@ def filter_predicate(name: str, dtype: pl.DataType, text: str) -> pl.Expr:
     ['Null']
     >>> frame.filter(filter_predicate("b", pl.String(), "=x"))["b"].to_list()
     ['x']
+    >>> frame.filter(filter_predicate("b", pl.String(), "!=x"))["b"].to_list()
+    ['Null']
     """
     column = pl.col(name)
 
@@ -199,6 +203,9 @@ def filter_predicate(name: str, dtype: pl.DataType, text: str) -> pl.Expr:
 
     if dtype in STRING_DTYPES:
         strings = column.cast(pl.String)
+
+        if text.startswith("!="):
+            return strings != text.removeprefix("!=")
 
         if text.startswith("="):
             return strings == text.removeprefix("=")
@@ -263,11 +270,43 @@ def raw_text(value: object) -> str:
 
 
 def lowercase_text(series: pl.Series) -> pl.Series:
-    """`series` as lowercase strings, through `raw_text` when polars can't cast."""
+    """`series` as lowercase strings, through `raw_text` when polars can't cast.
+
+    Examples
+    --------
+    >>> lowercase_text(pl.Series(["Ab", None])).to_list()
+    ['ab', 'null']
+    """
     try:
-        return series.cast(pl.String).str.to_lowercase()
+        return series.cast(pl.String).fill_null("null").str.to_lowercase()
     except pl.exceptions.PolarsError:
         return pl.Series([raw_text(value).lower() for value in series])
+
+
+def text_rows(frame: pl.DataFrame, null: str = "null") -> Iterator[list[str]]:
+    """The column names, then every row of `frame`, its cells as `raw_text`."""
+    yield frame.columns
+
+    for row in frame.iter_rows():
+        yield [null if value is None else raw_text(value) for value in row]
+
+
+def csv_table(frame: pl.DataFrame) -> str:
+    """`frame` as csv, with nulls empty.
+
+    Unlike `write_csv`, this also takes nested, duration and object columns.
+
+    Examples
+    --------
+    >>> print(csv_table(pl.DataFrame({"a": [[1], None], "b": ["x,y", "z"]})))
+    a,b
+    [1],"x,y"
+    ,z
+    <BLANKLINE>
+    """
+    buffer = io.StringIO()
+    csv.writer(buffer, lineterminator="\n").writerows(text_rows(frame, null=""))
+    return buffer.getvalue()
 
 
 def markdown_table(frame: pl.DataFrame) -> str:
@@ -281,8 +320,12 @@ def markdown_table(frame: pl.DataFrame) -> str:
     | 1 | x\\|y |
     | null | z |
     """
-    rows = [frame.columns, ["---"] * frame.width, *frame.rows()]
-    cells = ([raw_text(value).replace("|", "\\|") for value in row] for row in rows)
+    header, *rows = text_rows(frame)
+    rows = [header, ["---"] * frame.width, *rows]
+    cells = (
+        [value.replace("|", "\\|").replace("\n", "<br>") for value in row]
+        for row in rows
+    )
     return "\n".join(f"| {' | '.join(row)} |" for row in cells)
 
 
@@ -302,6 +345,17 @@ def dtype_label(dtype: pl.DataType) -> str:
     """
     is_wordy = dtype.is_temporal() or dtype == pl.Enum
     return dtype.base_type().__name__ if is_wordy else str(dtype)
+
+
+def shown_of(shown: int, total: int) -> str:
+    """`shown` alone when everything is showing, else "shown of total".
+
+    Examples
+    --------
+    >>> shown_of(1200, 1200), shown_of(3, 1200)
+    ('1,200', '3 of 1,200')
+    """
+    return f"{shown:,}" if shown == total else f"{shown:,} of {total:,}"
 
 
 def unused_name(wanted: str, taken: list[str]) -> str:
@@ -405,7 +459,8 @@ class CellTableView(NSTableView):
     selected_row = None
     selected_name = None
     initial_widths: dict[str, float]  # by column name, for = to go back to
-    # the other corner of the selected block, set while in visual mode
+    # the other corner of the selected block, set while in visual mode. it is
+    # always a showing cell: a refresh clears it, and hiding a column refreshes
     anchor_row = None
     anchor_name = None
 
@@ -435,12 +490,12 @@ class CellTableView(NSTableView):
         if self.selected_row is None or self.selected_name not in names:
             return None
 
-        # an anchor that was hidden or filtered away collapses onto the selection
+        # the anchor is always showing: hiding a column refreshes, which clears it
         row = self.selected_row if self.anchor_row is None else self.anchor_row
-        name = self.anchor_name if self.anchor_name in names else self.selected_name
-        rows = sorted((self.selected_row, min(row, self.numberOfRows() - 1)))
-        columns = sorted((names.index(self.selected_name), names.index(name)))
-        return range(rows[0], rows[1] + 1), names[columns[0] : columns[1] + 1]
+        name = self.selected_name if self.anchor_name is None else self.anchor_name
+        first_row, last_row = sorted((self.selected_row, row))
+        first, last = sorted((names.index(self.selected_name), names.index(name)))
+        return range(first_row, last_row + 1), names[first : last + 1]
 
     @objc.python_method
     def set_anchor(self, row: int | None, name: str | None) -> None:
@@ -459,9 +514,8 @@ class CellTableView(NSTableView):
             # start at the top left of what is on screen. a single step stops
             # there, and only a jump to an edge carries on
             row, position = self.rowsInRect_(self.visibleRect()).location, 0
-            rows, columns = (
-                step if abs(step) == FAR else 0 for step in (rows, columns)
-            )
+            rows = rows if abs(rows) == FAR else 0
+            columns = columns if abs(columns) == FAR else 0
         else:
             row, position = self.selected_row, names.index(self.selected_name)
 
@@ -531,8 +585,8 @@ class CellTableView(NSTableView):
 
         if modifiers == NSEventModifierFlagControl and key in HALF_PAGES:
             self.move_selection(HALF_PAGES[key] * self.half_page(), 0)
-        elif modifiers == NSEventModifierFlagControl and key in COLUMN_SWAPS:
-            self.swap_column(COLUMN_SWAPS[key])
+        elif modifiers == NSEventModifierFlagControl and key in COLUMN_STEPS:
+            self.swap_column(COLUMN_STEPS[key])
         elif modifiers == NSEventModifierFlagControl and key == "f":
             self.delegate().start_search()
         elif modifiers:
@@ -559,7 +613,7 @@ class CellTableView(NSTableView):
         elif key == "q":
             self.window().performClose_(None)
         elif key in SEARCH_STEPS:
-            browser.search(SEARCH_STEPS[key])
+            browser.next_match(SEARCH_STEPS[key])
         elif key == "u":
             browser.showAllColumns_(None)
         elif selected is None or selected.isHidden():
@@ -569,8 +623,8 @@ class CellTableView(NSTableView):
             browser.sort_by(self.selected_name)
         elif key == "x":
             browser.hide_column(selected)
-        elif key in COLUMN_RESIZES:
-            width = selected.width() + COLUMN_RESIZES[key] * WIDTH_STEP
+        elif key in COLUMN_STEPS:
+            width = selected.width() + COLUMN_STEPS[key] * WIDTH_STEP
             selected.setWidth_(max(width, selected.minWidth()))
         elif key == "=":
             selected.setWidth_(self.initial_widths[self.selected_name])
@@ -589,14 +643,12 @@ class CellTableView(NSTableView):
             self.select(row, name)
         elif key == "y":
             self.copy_(None)
-            self.set_anchor(None, None)
         elif key == "Y":
-            self.copy_text(markdown_table(self.selected_frame()))
-            self.set_anchor(None, None)
+            self.copy_selection(markdown_table)
         elif key == "*":
-            value = browser.visible[self.selected_row, self.selected_name]
-            browser.search_field.setStringValue_(raw_text(value))
-            browser.find_matches()
+            # the text the search compares against, so the cell finds itself
+            column = lowercase_text(browser.visible[self.selected_name])
+            browser.search_for(column[self.selected_row])
         elif key == "/":
             self.window().makeFirstResponder_(
                 self.headerView().fields[self.selected_name]
@@ -607,13 +659,14 @@ class CellTableView(NSTableView):
         return True
 
     @objc.python_method
-    def selected_frame(self) -> pl.DataFrame:
-        """The selected block as a frame, empty with nothing selected."""
-        if (block := self.block()) is None:
-            return pl.DataFrame()
+    def copy_selection(self, render: Callable[[pl.DataFrame], str]) -> None:
+        """Copy the selected block as `render` writes it, and leave visual mode."""
+        if (block := self.block()) is not None:
+            rows, names = block
+            frame = self.delegate().visible[rows.start : rows.stop, names]
+            self.copy_text(render(frame))
 
-        rows, names = block
-        return self.delegate().visible[rows.start : rows.stop, names]
+        self.set_anchor(None, None)
 
     def selectAll_(self, sender: object) -> None:
         names = self.visible_names()
@@ -623,8 +676,7 @@ class CellTableView(NSTableView):
             self.select(self.numberOfRows() - 1, names[-1])
 
     def copy_(self, sender: object) -> None:
-        if self.block() is not None:
-            self.copy_text(self.selected_frame().write_csv())
+        self.copy_selection(csv_table)
 
     @objc.python_method
     def fill_cells(self, row: int, names: list[str], color: NSColor) -> None:
@@ -648,10 +700,9 @@ class CellTableView(NSTableView):
         block = self.block()
 
         if block is not None and row in block[0]:
-            visual = self.anchor_row is not None
             highlight = (
                 NSColor.systemOrangeColor()
-                if visual
+                if self.anchor_row is not None
                 else NSColor.selectedContentBackgroundColor()
             )
             self.fill_cells(row, block[1], highlight.colorWithAlphaComponent_(0.4))
@@ -676,7 +727,6 @@ class FrameBrowser(NSObject):
         self.index_name = unused_name("#", frame.columns)
         self.source = frame.with_row_index(self.index_name)
         self.visible = self.source  # filtered and sorted
-        self.title = title
         self.sort = None
         self.table = _table_view(self)
         self.show_columns_button = _show_columns_button(self)
@@ -684,6 +734,7 @@ class FrameBrowser(NSObject):
         self.status_label = _status_label()
         self.matches: set[tuple[int, str]] = set()  # (row, column name)
         self.window = _window(self)
+        self.window.setTitle_(title)
         self.table.headerView().layout_fields()
         self.refresh()
         return self
@@ -731,37 +782,36 @@ class FrameBrowser(NSObject):
     # filter field delegate
 
     def controlTextDidChange_(self, notification: NSNotification) -> None:
-        if notification.object() is self.search_field:
-            self.find_matches()
-            return
-
         # debounce: restart the countdown on every keystroke
-        self.cancel_pending_refresh()
-        self.performSelector_withObject_afterDelay_("applyFilters:", None, FILTER_DELAY)
+        is_search = notification.object() is self.search_field
+        selector = "findMatches:" if is_search else "applyFilters:"
+        self.cancel_pending()
+        self.performSelector_withObject_afterDelay_(selector, None, TYPING_DELAY)
 
     def applyFilters_(self, sender: object) -> None:
         self.refresh()
 
+    def findMatches_(self, sender: object) -> None:
+        self.find_matches()
+
     def control_textView_doCommandBySelector_(
         self, control: NSTextField, text_view: NSTextView, command: str
     ) -> bool:
-        # return and escape apply the filter now and hand the keyboard back
+        # return and escape apply the text now and hand the keyboard back
         if command not in ("insertNewline:", "cancelOperation:"):
             return False
 
-        if control is self.search_field:
+        self.cancel_pending()
+
+        if control is not self.search_field:
+            self.refresh()
+        elif command == "insertNewline:":
             # return finds the first match, escape puts the search away
-            self.window.makeFirstResponder_(self.table)
+            self.find_matches()
+            self.next_match(1)
+        else:
+            self.clear_search()
 
-            if command == "insertNewline:":
-                self.search(1)
-            else:
-                self.clear_search()
-
-            return True
-
-        self.cancel_pending_refresh()
-        self.refresh()
         self.window.makeFirstResponder_(self.table)
         return True
 
@@ -771,11 +821,16 @@ class FrameBrowser(NSObject):
         application = NSApplication.sharedApplication()
 
         # the last window closing hands the keyboard back to whatever was in
-        # front before, usually the terminal
-        if len(_open_browsers) == 1 and application.isActive():
+        # front before, usually the terminal. a process that was already an app
+        # (say through matplotlib) may have other windows, so it is left alone
+        if (
+            len(_open_browsers) == 1
+            and application.isActive()
+            and application.activationPolicy() == NSApplicationActivationPolicyAccessory
+        ):
             application.hide_(None)
 
-        self.cancel_pending_refresh()
+        self.cancel_pending()
         self.table.setDataSource_(None)
         self.table.setDelegate_(None)
         self.source = self.visible = pl.DataFrame()
@@ -800,9 +855,13 @@ class FrameBrowser(NSObject):
         self.window.makeFirstResponder_(self.search_field)
 
     @objc.python_method
-    def clear_search(self) -> None:
-        self.search_field.setStringValue_("")
+    def search_for(self, text: str) -> None:
+        self.search_field.setStringValue_(text)
         self.find_matches()
+
+    @objc.python_method
+    def clear_search(self) -> None:
+        self.search_for("")
 
     @objc.python_method
     def find_matches(self) -> None:
@@ -823,8 +882,8 @@ class FrameBrowser(NSObject):
         self.update_status()
 
     @objc.python_method
-    def search(self, direction: int) -> None:
-        """Select the next (or previous) matching cell."""
+    def next_match(self, direction: int) -> None:
+        """Select the nearest match past the selection, wrapping around."""
         names = self.table.visible_names()
         # (row, column position) of every match still showing, in reading order
         matches = sorted(
@@ -834,40 +893,49 @@ class FrameBrowser(NSObject):
         if not matches:
             return
 
-        table = self.table
-        selected = table.selected_row, table.selected_name
-
-        if selected[0] is None or selected[1] not in names:
-            # a first search from nowhere starts at the top, going either way
-            here = (-1, -1) if direction > 0 else (len(self.visible), 0)
-        else:
-            here = selected[0], names.index(selected[1])
-
-        # the nearest match strictly past the selection, wrapping around
         forward = direction > 0
-        after = [m for m in matches if (m > here if forward else m < here)]
-        row, position = (after or matches)[0 if direction > 0 else -1]
-        table.select(row, names[position])
+        row, name = self.table.selected_row, self.table.selected_name
+
+        if row is None or name not in names:
+            # from nowhere, the first match going down or the last going up
+            after = matches
+        else:
+            here = row, names.index(name)
+            after = [m for m in matches if (m > here if forward else m < here)]
+
+        row, position = (after or matches)[0 if forward else -1]
+        self.table.select(row, names[position])
 
     @objc.python_method
-    def cancel_pending_refresh(self) -> None:
+    def cancel_pending(self) -> None:
+        """Drop a debounced filter or search that hasn't applied yet."""
         NSObject.cancelPreviousPerformRequestsWithTarget_(self)
 
     @objc.python_method
     def sort_by(self, name: str) -> None:
+        # polars can't sort python objects
+        if self.source.schema[name] == pl.Object:
+            return
+
         self.sort = next_sort(self.sort, name)
         self.refresh()
 
     @objc.python_method
     def hide_column(self, column: NSTableColumn) -> None:
+        name = column.identifier()
+        field = self.table.headerView().fields[name]
+
+        # a column that can't be seen shouldn't keep filtering or ordering rows
+        if field.currentEditor() is not None:
+            self.window.makeFirstResponder_(self.table)
+
+        field.setStringValue_("")
+
+        if self.sort is not None and self.sort[0] == name:
+            self.sort = None
+
         column.setHidden_(True)
         self.hidden_columns_changed()
-        field = self.table.headerView().fields[column.identifier()]
-
-        # a filter that can't be seen shouldn't keep hiding rows
-        if field.stringValue():
-            field.setStringValue_("")
-            self.refresh()
 
     @objc.python_method
     def hidden_columns_changed(self) -> None:
@@ -877,7 +945,7 @@ class FrameBrowser(NSObject):
         self.show_columns_button.setHidden_(hidden == 0)
         self.table.headerView().layout_fields()
         self.table.leave_hidden_column()
-        self.find_matches()
+        self.refresh()
 
     @objc.python_method
     def show_help(self) -> None:
@@ -938,8 +1006,9 @@ class FrameBrowser(NSObject):
         self.visible = visible
         self.show_sort_indicator()
         self.table.reloadData()
-        self.window.setTitle_(self.title)
         self.find_matches()
+        # the rows moved, so a block spanning them no longer means anything
+        self.table.set_anchor(None, None)
 
         if selected is None or visible.is_empty():
             self.table.select(None, None)
@@ -951,34 +1020,31 @@ class FrameBrowser(NSObject):
 
     @objc.python_method
     def show_sort_indicator(self) -> None:
+        name, descending = self.sort or (None, False)
+        direction = "Descending" if descending else "Ascending"
+        arrow = NSImage.imageNamed_(f"NS{direction}SortIndicator")
+
         for column in self.table.tableColumns():
-            image = None
-
-            if self.sort is not None and self.sort[0] == column.identifier():
-                direction = "Descending" if self.sort[1] else "Ascending"
-                image = NSImage.imageNamed_(f"NS{direction}SortIndicator")
-
+            image = arrow if column.identifier() == name else None
             self.table.setIndicatorImage_inTableColumn_(image, column)
 
     @objc.python_method
     def update_status(self) -> None:
         """Refresh the footer's match count and table or block size."""
-        block = self.table.block()
-
-        if self.table.anchor_row is not None and block is not None:
-            size = f"({len(block[0]):,} x {len(block[1]):,})"
-        else:
-            total, columns = self.source.shape
-            shown = self.visible.height
-            rows = f"{total:,}" if shown == total else f"{shown:,} of {total:,}"
-            # less the hidden column of row numbers
-            size = f"({rows} x {columns - 1:,})"
-
-        parts = [size]
+        parts = []
 
         if self.search_field.stringValue():
             count = len(self.matches)
-            parts.insert(0, f"{count:,} match{'' if count == 1 else 'es'}")
+            parts.append(f"{count:,} match{'' if count == 1 else 'es'}")
+
+        if self.table.anchor_row is not None:
+            rows, names = self.table.block()
+            parts.append(f"({len(rows):,} x {len(names):,})")
+        else:
+            rows = shown_of(self.visible.height, self.source.height)
+            # less the hidden column of row numbers
+            names = shown_of(len(self.table.visible_names()), self.source.width - 1)
+            parts.append(f"({rows} x {names})")
 
         self.status_label.setStringValue_(" \u00b7 ".join(parts))
 
@@ -1096,7 +1162,7 @@ def _status_label() -> NSTextField:
 
 def _content_view(browser: FrameBrowser) -> NSView:
     """The table over a footer holding the search field and the status."""
-    width, height = 900, 600
+    width, height = WINDOW_SIZE
     content = NSView.alloc().initWithFrame_(NSMakeRect(0, 0, width, height))
 
     scroll = NSScrollView.alloc().initWithFrame_(
@@ -1125,7 +1191,7 @@ def _window(browser: FrameBrowser) -> NSWindow:
         | NSWindowStyleMaskResizable
     )
     window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
-        NSMakeRect(0, 0, 900, 600), style, NSBackingStoreBuffered, False
+        NSMakeRect(0, 0, *WINDOW_SIZE), style, NSBackingStoreBuffered, False
     )
 
     window.setContentView_(_content_view(browser))
@@ -1181,12 +1247,13 @@ def _install_menu(application: NSApplication) -> None:
         "Paste": ("paste:", "v"),
         "Select All": ("selectAll:", "a"),
     }
-    item = NSMenuItem.alloc().init()
-    item.setSubmenu_(NSMenu.alloc().initWithTitle_("Edit"))
+    menu = NSMenu.alloc().initWithTitle_("Edit")
 
     for title, (action, key) in shortcuts.items():
-        item.submenu().addItemWithTitle_action_keyEquivalent_(title, action, key)
+        menu.addItemWithTitle_action_keyEquivalent_(title, action, key)
 
+    item = NSMenuItem.alloc().init()
+    item.setSubmenu_(menu)
     application.setMainMenu_(NSMenu.alloc().init())
     application.mainMenu().addItem_(item)
 
@@ -1200,7 +1267,7 @@ def browse(frame: Browsable, title: str = DEFAULT_TITLE) -> None:
         The data to show. A lazy frame is collected, and a series becomes a
         frame of one column. The window keeps a reference to the result.
     title
-        Window title, to which the shape is appended.
+        Window title. The footer shows the shape.
     """
     if isinstance(frame, pl.LazyFrame):
         frame = frame.collect()
