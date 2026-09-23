@@ -763,6 +763,13 @@ class FrameBrowser(NSObject):
     # window delegate
 
     def windowWillClose_(self, notification: NSNotification) -> None:
+        application = NSApplication.sharedApplication()
+
+        # the last window closing hands the keyboard back to whatever was in
+        # front before, usually the terminal
+        if len(_open_browsers) == 1 and application.isActive():
+            application.hide_(None)
+
         self.cancel_pending_refresh()
         self.table.setDataSource_(None)
         self.table.setDelegate_(None)
@@ -1208,5 +1215,13 @@ def browse(frame: Browsable, title: str = DEFAULT_TITLE) -> None:
     browser = FrameBrowser.alloc().initWithFrame_title_(frame, title)
     _open_browsers.append(browser)
 
-    # show without activating so focus stays in the terminal
-    browser.window.orderFrontRegardless()
+    # take the keyboard from the terminal, so keys work right away. macos 14
+    # made activation cooperative; the older call is kept as a fallback
+    application.unhide_(None)  # hidden again after the last window closed
+
+    if hasattr(application, "activate"):
+        application.activate()
+    else:
+        application.activateIgnoringOtherApps_(True)
+
+    browser.window.makeKeyAndOrderFront_(None)
