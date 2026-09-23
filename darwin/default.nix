@@ -7,6 +7,11 @@
   nixpkgs.hostPlatform = "aarch64-darwin";
   system.stateVersion = 7;
 
+  # must match the key in flake.nix for `darwin-rebuild --flake ~/.dotfiles`
+  networking.hostName = "macbook";
+  networking.localHostName = "macbook";
+  networking.computerName = "macbook";
+
   # determinate nix manages the daemon and /etc/nix/nix.conf, not nix-darwin.
   # extra settings go in /etc/nix/nix.custom.conf
   nix.enable = false;

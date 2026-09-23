@@ -19,13 +19,6 @@ in
     pnpm # js
     rustup # rust
 
-    # docker
-    docker-client
-    docker-compose
-    colima # open source docker runtime
-    lima-additional-guestagents
-    qemu
-
     # tex
     tectonic
 
@@ -80,8 +73,5 @@ in
     ".ssh".source = link "ssh";
 
     ".hushlogin".text = ""; # hide fish "last login" message
-
-    # docker looks for compose here
-    ".docker/cli-plugins/docker-compose".source = "${pkgs.docker-compose}/bin/docker-compose";
   };
 }
