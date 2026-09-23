@@ -39,6 +39,9 @@ in
     neovim
     tree-sitter
 
+    # ai
+    claude-code
+
     # command line tools
     zoxide # cd
     starship # prompt

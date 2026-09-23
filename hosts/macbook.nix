@@ -1,11 +1,16 @@
 # machine-wide config for the mac. everything here runs as root at
 # `darwin-rebuild switch`. per-user files live in ../home.
 
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfree = true;
   system.stateVersion = 7;
+
+  # the nix fish doesn't run macos's path_helper, so add brew's bin ourselves.
+  # after nix's own paths so nix packages win
+  environment.systemPath = lib.mkAfter [ "/opt/homebrew/bin" ];
 
   # must match the key in flake.nix for `darwin-rebuild --flake ~/.dotfiles`
   networking.hostName = "macbook";

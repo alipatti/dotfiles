@@ -106,9 +106,6 @@
     file
     wl-clipboard # clipboard support for tailscale systray
 
-    # ai
-    claude-code
-
     # language tooling
     gcc
     fnm
