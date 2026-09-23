@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 # no sudo (e.g. a cluster): skip nix and just make the symlinks
-if ! sudo -n true 2>/dev/null && ! command -v nix >/dev/null; then
+if ! id -Gn | grep -qwE 'admin|wheel|sudo'; then
     sed -n '/^\[/q; s/^"\(.*\)" = "\(.*\)"$/\1 \2/p' links.toml | while read -r target source; do
         target="${target/#\~/$HOME}"
         mkdir -p "$(dirname "$target")"
