@@ -123,6 +123,7 @@
         { app = "/System/Applications/Reminders.app"; }
         { app = "/System/Applications/Mail.app"; }
         { app = "/Applications/Slack.app"; }
+        { app = "/Applications/WhatsApp.app"; }
         { app = "/System/Applications/Messages.app"; }
       ];
       persistent-others = [
