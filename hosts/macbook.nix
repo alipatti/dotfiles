@@ -117,7 +117,8 @@
 
       persistent-apps = [
         { app = "/Applications/kitty.app"; }
-        { app = "/Applications/Safari.app"; }
+        { app = "/Applications/Claude.app"; }
+        { app = "/System/Cryptexes/App/System/Applications/Safari.app"; }
         { app = "/System/Applications/Calendar.app"; }
         { app = "/System/Applications/Reminders.app"; }
         { app = "/System/Applications/Mail.app"; }

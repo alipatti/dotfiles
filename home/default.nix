@@ -13,6 +13,10 @@ in
   home.username = "ali";
   home.stateVersion = "26.11";
 
+  # the generated home-manager man page trips a nix warning about missing
+  # string context under determinate nix's lazy trees
+  manual.manpages.enable = false;
+
   home.packages = with pkgs; [
     # languages
     uv # python
