@@ -19,8 +19,11 @@ in
     pnpm # js
     rustup # rust
 
-    # tex
+    # documents
     tectonic
+    typst
+    pandoc
+    papis
 
     # git
     git
@@ -44,7 +47,16 @@ in
     watchexec # run command on file change
     poppler-utils # pdf tools
     fzf
+    just
+    wget
+
+    # fonts. home-manager installs these in ~/Library/Fonts on macos and
+    # through fontconfig on linux
+    nerd-fonts.cousine
+    lmodern # latin modern
   ];
+
+  fonts.fontconfig.enable = true;
 
   xdg.configFile = {
     fish.source = link "fish";

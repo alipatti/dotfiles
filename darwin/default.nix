@@ -34,8 +34,8 @@
   # brewfile and runs `brew bundle` on activation; it does not install brew.
   homebrew = {
     enable = true;
-    # TODO: switch to "zap" once the old brew formulae are gone
-    onActivation.cleanup = "none";
+    # uninstall anything not listed here
+    onActivation.cleanup = "zap";
 
     casks = [
       # gui apps
@@ -53,7 +53,6 @@
       "displaylink" # third monitor on mbp
       "tailscale-app"
 
-      "font-cousine-nerd-font" # font for kitty
       "mactex-no-gui" # latex
 
       # quicklook plugins

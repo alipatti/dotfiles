@@ -11,6 +11,7 @@ in
   home.packages = with pkgs; [
     docker-client
     docker-compose
+    docker-buildx
     colima # open source docker runtime
     lima-additional-guestagents
     qemu
@@ -19,6 +20,7 @@ in
   home.file = {
     # docker cli only looks for plugins here, not in the nix profile
     ".docker/cli-plugins/docker-compose".source = "${pkgs.docker-compose}/bin/docker-compose";
+    ".docker/cli-plugins/docker-buildx".source = "${pkgs.docker-buildx}/bin/docker-buildx";
 
     "Library/texmf/tex/latex/local".source = link "latex";
     "Library/Application Support/papis/config".source = link "papis/config";

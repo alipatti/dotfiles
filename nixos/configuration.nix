@@ -132,10 +132,5 @@
     BROWSER = "firefox";
   };
 
-  # fonts
-  fonts.packages = with pkgs; [
-    nerd-fonts.cousine
-  ];
-
   system.stateVersion = "25.11"; # don't change this line
 }
