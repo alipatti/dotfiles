@@ -18,7 +18,9 @@ keys, with the table focused
   row and column, and ctrl-d ctrl-u move half a page
 - ctrl-, and ctrl-. swap the selected column with the one to its left or right
 - s sorts by the selected column, x hides it, u shows the hidden columns
-- y or cmd-c copies the selected value, Y the selected row as a dict
+- v starts selecting a block of cells, V a block spanning the whole row; o
+  swaps the corner being moved, and v or escape go back to a single cell
+- y or cmd-c copies the selection as csv, with the column names
 - / edits the selected column's filter; return or escape come back to the table
 - escape clears every filter, and ? shows this list
 
@@ -358,6 +360,9 @@ class CellTableView(NSTableView):
 
     selected_row = None
     selected_name = None
+    # the other corner of the selected block, set while in visual mode
+    anchor_row = None
+    anchor_name = None
 
     @objc.python_method
     def visible_names(self) -> list[str]:
@@ -375,6 +380,26 @@ class CellTableView(NSTableView):
         if row is not None:
             self.scrollRowToVisible_(row)
             self.scrollColumnToVisible_(self.columnWithIdentifier_(name))
+
+    @objc.python_method
+    def block(self) -> tuple[range, list[str]] | None:
+        """Rows and column names of the selected block, or None with nothing selected."""
+        names = self.visible_names()
+
+        if self.selected_row is None or self.selected_name not in names:
+            return None
+
+        # an anchor that was hidden or filtered away collapses onto the selection
+        row = self.selected_row if self.anchor_row is None else self.anchor_row
+        name = self.anchor_name if self.anchor_name in names else self.selected_name
+        rows = sorted((self.selected_row, min(row, self.numberOfRows() - 1)))
+        columns = sorted((names.index(self.selected_name), names.index(name)))
+        return range(rows[0], rows[1] + 1), names[columns[0] : columns[1] + 1]
+
+    @objc.python_method
+    def set_anchor(self, row: int | None, name: str | None) -> None:
+        self.anchor_row, self.anchor_name = row, name
+        self.setNeedsDisplay_(True)
 
     @objc.python_method
     def move_selection(self, rows: int, columns: int) -> None:
@@ -446,6 +471,8 @@ class CellTableView(NSTableView):
         row, index = self.rowAtPoint_(point), self.columnAtPoint_(point)
         self.window().makeFirstResponder_(self)
 
+        self.set_anchor(None, None)
+
         if min(row, index) < 0:
             self.select(None, None)
         else:
@@ -472,7 +499,9 @@ class CellTableView(NSTableView):
         browser = self.delegate()
         selected = self.tableColumnWithIdentifier_(self.selected_name)
 
-        if key == ESCAPE:
+        if key == ESCAPE and self.anchor_row is not None:
+            self.set_anchor(None, None)
+        elif key == ESCAPE:
             browser.clear_filters()
         elif key == "?":
             browser.show_help()
@@ -485,10 +514,22 @@ class CellTableView(NSTableView):
             browser.sort_by(self.selected_name)
         elif key == "x":
             browser.hide_column(selected)
+        elif key == "v":
+            if self.anchor_row is None:
+                self.set_anchor(self.selected_row, self.selected_name)
+            else:
+                self.set_anchor(None, None)
+        elif key == "V":
+            names = self.visible_names()
+            self.set_anchor(self.selected_row, names[0])
+            self.select(self.selected_row, names[-1])
+        elif key == "o" and self.anchor_row is not None:
+            row, name = self.anchor_row, self.anchor_name
+            self.set_anchor(self.selected_row, self.selected_name)
+            self.select(row, name)
         elif key == "y":
             self.copy_(None)
-        elif key == "Y":
-            self.copy_text(str(browser.shown_row(self.selected_row)))
+            self.set_anchor(None, None)
         elif key == "/":
             self.window().makeFirstResponder_(
                 self.headerView().fields[self.selected_name]
@@ -499,20 +540,32 @@ class CellTableView(NSTableView):
         return True
 
     def copy_(self, sender: object) -> None:
-        if self.selected_row is not None:
-            value = self.delegate().visible[self.selected_row, self.selected_name]
-            self.copy_text(raw_text(value))
+        if (block := self.block()) is not None:
+            rows, names = block
+            self.copy_text(
+                self.delegate().visible[rows.start : rows.stop, names].write_csv()
+            )
 
     def drawRow_clipRect_(self, row: int, clip: NSRect) -> None:
-        index = self.columnWithIdentifier_(self.selected_name)
+        block = self.block()
 
         # under the text, which the call to super draws
-        if row == self.selected_row and index >= 0:
-            highlight = NSColor.selectedContentBackgroundColor()
+        if block is not None and row in block[0]:
+            visual = self.anchor_row is not None
+            highlight = (
+                NSColor.systemOrangeColor()
+                if visual
+                else NSColor.selectedContentBackgroundColor()
+            )
             highlight.colorWithAlphaComponent_(0.4).setFill()
-            # the whole grid square, where the cell's own frame leaves margins
-            square = NSIntersectionRect(self.rectOfColumn_(index), self.rectOfRow_(row))
-            NSBezierPath.fillRect_(square)
+
+            for name in block[1]:
+                index = self.columnWithIdentifier_(name)
+                # the whole grid square, where the cell's own frame leaves margins
+                square = NSIntersectionRect(
+                    self.rectOfColumn_(index), self.rectOfRow_(row)
+                )
+                NSBezierPath.fillRect_(square)
 
         objc.super(CellTableView, self).drawRow_clipRect_(row, clip)
 
@@ -692,13 +745,6 @@ class FrameBrowser(NSObject):
                 field.set_failed(True)
 
         return predicates
-
-    @objc.python_method
-    def shown_row(self, row: int) -> dict[str, object]:
-        values = self.visible.row(row, named=True)
-        return {
-            name: value for name, value in values.items() if name != self.index_name
-        }
 
     @objc.python_method
     def selected_index(self) -> int | None:
