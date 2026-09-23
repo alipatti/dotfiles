@@ -84,12 +84,4 @@ in
     # docker looks for compose here
     ".docker/cli-plugins/docker-compose".source = "${pkgs.docker-compose}/bin/docker-compose";
   };
-
-  # arf isn't in nixpkgs
-  home.activation.arf = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if ! command -v arf >/dev/null && [ ! -x "$HOME/.local/bin/arf" ]; then
-      run /usr/bin/curl --proto '=https' --tlsv1.2 -LsSf \
-        https://github.com/eitsupi/arf/releases/latest/download/arf-console-installer.sh | run sh
-    fi
-  '';
 }
