@@ -9,7 +9,7 @@ local required_grammars = {
 	"latex", "typst",
 
 	-- data
-	"json", "toml", "yaml",
+	"json", "toml", "yaml", "nix",
 
 	-- shell and config
 	"fish",

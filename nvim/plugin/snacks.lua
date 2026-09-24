@@ -25,8 +25,8 @@ require("snacks").setup({
 		}
 	},
 	indent = {
-			only_current = true,
 		indent = {
+			only_current = true,
 			char = "▎",
 		},
 		animate = {
@@ -34,6 +34,7 @@ require("snacks").setup({
 		},
 		scope = {
 			enabled = true,
+			only_current = true,
 			char = "▎",
 			hl = "Comment",
 		},

@@ -11,7 +11,7 @@ require("catppuccin").setup({
 	},
 })
 
-vim.cmd.colorscheme("catppuccin-frappe")
+vim.cmd.colorscheme("catppuccin")
 
 vim.pack.add({
 	"https://github.com/folke/which-key.nvim",
