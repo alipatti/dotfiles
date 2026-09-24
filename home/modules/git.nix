@@ -25,6 +25,7 @@ in
       "*.local.*"
       "**/.claude/.cc-writes/"
       "**/.claude/settings.local.json"
+      ";"
     ];
   };
 
