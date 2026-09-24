@@ -32,26 +32,12 @@ in
     "Library/Application Support/typst/packages/ali".source = link "typst";
   };
 
-  # per-user `defaults write` for keys nix-darwin has no option for
-  # https://macos-defaults.com/
-  targets.darwin.defaults = {
-    NSGlobalDomain.NSQuitAlwaysKeepsWindow = false;
-    "com.apple.menuextra.clock".DateFormat = "EEE d MMM h:mm:ss";
-    "com.apple.print.PrintingPrefs"."Quit When Finished" = true;
-    "com.apple.CrashReporter".DialogType = "none";
-    # no .DS_Store on drives/network
-    "com.apple.desktopservices" = {
-      DSDontWriteUSBStores = true;
-      DSDontWriteNetworkStores = true;
-    };
-  };
-
+  # macos defaults live in ../hosts/macbook/defaults.nix. these two are the
+  # exceptions nix-darwin has no option for
+  targets.darwin.search = "DuckDuckGo";
   # don't open photos when plugging in a camera. a per-host key, so it goes
   # through -currentHost
   targets.darwin.currentHostDefaults."com.apple.ImageCapture".disableHotPlug = true;
-
-  # default safari search engine
-  targets.darwin.search = "DuckDuckGo";
 
   # hidutil remap, reapplied at login by a launchd agent
   services.macos-remap-keys = {

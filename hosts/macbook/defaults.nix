@@ -1,8 +1,9 @@
-{ ... }:
-
+# `defaults write` for the primary user. nix-darwin runs these as ali, so
+# they are per-user settings that happen to be typed here rather than in
+# home-manager's targets.darwin.defaults
+# https://macos-defaults.com/
+# https://nix-darwin.github.io/nix-darwin/manual/index.html#sec-options-system.defaults
 {
-  # https://macos-defaults.com/
-  # https://nix-darwin.github.io/nix-darwin/manual/index.html#sec-options-system.defaults
   system.defaults = {
     NSGlobalDomain = {
       AppleShowAllExtensions = true;
@@ -75,7 +76,14 @@
       show-thumbnail = false;
     };
 
+    menuExtraClock = {
+      ShowDayOfWeek = true;
+      ShowDate = 1; # always
+      ShowSeconds = true;
+    };
+
     finder = {
+      AppleShowAllFiles = true;
       ShowPathbar = true; # /path/to/folder
       ShowStatusBar = false; # xx items, xx gb remaining
       FXPreferredViewStyle = "Nlsv"; # list view
@@ -89,10 +97,16 @@
 
     spaces.spans-displays = false; # displays have separate spaces
 
-    # require pw immediately
-    screensaver = {
-      askForPassword = true;
-      askForPasswordDelay = 0;
+    # keys without a typed option
+    CustomUserPreferences = {
+      NSGlobalDomain.NSQuitAlwaysKeepsWindow = false;
+      "com.apple.print.PrintingPrefs"."Quit When Finished" = true;
+      "com.apple.CrashReporter".DialogType = "none";
+      # no .DS_Store on drives/network
+      "com.apple.desktopservices" = {
+        DSDontWriteUSBStores = true;
+        DSDontWriteNetworkStores = true;
+      };
     };
   };
 }
