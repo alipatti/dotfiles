@@ -1,7 +1,12 @@
 # per-user config shared across machines. platform-specific bits live in
 # ./darwin.nix, and the rest is split by program into the files imported here
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (config.lib.dotfiles) link;
 in

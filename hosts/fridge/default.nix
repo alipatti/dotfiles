@@ -11,7 +11,10 @@
 
   nix = {
     # nixos-rebuild enables flakes for itself only; nix run and direnv need this
-    settings.experimental-features = [ "nix-command" "flakes" ];
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     settings.trusted-users = [ "ali" ];
     gc.automatic = true;
     optimise.automatic = true;

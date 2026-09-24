@@ -1,7 +1,12 @@
 # kitty terminal. on macos the app bundle ends up in
 # ~/Applications/Home Manager Apps. docs: https://sw.kovidgoyal.net/kitty/conf/
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   split = "${config.lib.dotfiles.root}/tools/kitty_split.py";

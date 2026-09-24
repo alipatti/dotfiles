@@ -1,7 +1,12 @@
 # ~/.ssh/config is generated from this. keys and known_hosts are plain files
 # in ~/.ssh that nix doesn't touch
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   programs.ssh = {
     enable = true;

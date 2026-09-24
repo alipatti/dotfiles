@@ -1,6 +1,11 @@
 # per-user config that only makes sense on a mac
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   inherit (config.lib.dotfiles) root link;
 in

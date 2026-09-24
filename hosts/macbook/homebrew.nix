@@ -29,7 +29,6 @@
       "displaylink" # third monitor on mbp
       "tailscale-app"
 
-
       # quicklook plugins
       "qlmarkdown" # render markdown
       "syntax-highlight" # syntax highlighting for code
