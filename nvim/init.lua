@@ -76,12 +76,6 @@ vim.diagnostic.config({
 	virtual_text = {},
 })
 
-vim.filetype.add({
-	extension = {
-		pest = "pest",
-	}
-})
-
 -- enable treesitter highlighting for all filetypes with an installed parser
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "*",
