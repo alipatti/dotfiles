@@ -26,9 +26,6 @@ let
   ];
 in
 {
-  # kitty sets the tab title itself
-  home.sessionVariables.CLAUDE_CODE_DISABLE_TERMINAL_TITLE = 1;
-
   # ~/.claude/settings.json is generated from this. claude code cannot write
   # to it, so toggles made through /config or /plugin have to be added here
   programs.claude-code = {
@@ -82,6 +79,9 @@ in
 
       autoCompactEnabled = true;
       skipWorkflowUsageWarning = true;
+
+      # kitty sets the tab title itself
+      env.CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
     };
   };
 
