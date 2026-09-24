@@ -9,6 +9,14 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
+  nix = {
+    # nixos-rebuild enables flakes for itself only; nix run and direnv need this
+    settings.experimental-features = [ "nix-command" "flakes" ];
+    settings.trusted-users = [ "ali" ];
+    gc.automatic = true;
+    optimise.automatic = true;
+  };
+
   # bootloader
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
