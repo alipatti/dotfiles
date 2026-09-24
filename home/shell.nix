@@ -67,11 +67,22 @@ in
       # replaces the ctrl-r binding from fzf's integration above
       bind \cr search_history
 
-      load_dotenv ${config.home.homeDirectory}/.dotfiles/env/*
+      # secrets are git-crypt encrypted, so skip the file until it is unlocked
+      set -l secrets ${config.home.homeDirectory}/.dotfiles/env/secrets.env
+      if string match -q 'text*' (file -b --mime-type $secrets)
+          direnv dotenv fish $secrets | source
+      end
     '';
   };
 
   programs.zoxide.enable = true;
+
+  # loads .envrc and, with load_dotenv, bare .env files on cd after `direnv allow`
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+    config.global.load_dotenv = true;
+  };
   programs.fzf = {
     enable = true;
     defaultOptions = [

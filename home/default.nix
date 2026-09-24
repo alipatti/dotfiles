@@ -35,7 +35,7 @@ in
   xdg.enable = true;
 
   # exported by the home-manager session vars, which fish sources below.
-  # secrets stay in ../env/secrets.env, loaded by load_dotenv
+  # secrets stay in ../env/secrets.env, sourced via direnv in shell.nix
   home.sessionPath = [ "$HOME/.local/bin" ];
   home.sessionVariables = {
     EDITOR = "nvim";
