@@ -25,8 +25,12 @@ in
     ".ipython/profile_default/startup".source = link "ipython/startup";
 
     # r
-    ".rprofile".source = link "r/.rprofile";
-    ".lintr".source = link "r/.lintr";
-    ".radian_profile".source = link "r/.radian_profile";
+    ".Rprofile".text = ''
+      options(
+        readr.show_col_types = FALSE,
+        repos = c(CRAN = "https://cloud.r-project.org/"),
+        max.print = 500
+      )
+    '';
   };
 }
