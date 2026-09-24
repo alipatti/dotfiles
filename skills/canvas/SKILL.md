@@ -44,9 +44,9 @@ uv run scripts/canvas.py submit COURSE_ID ASSIGNMENT FILE [--name UPLOAD_NAME]
 ## Conventions
 
 - Save files as
-  `handouts/{lecture-notes, slides, etc.}/YYYY-MM-DD-topic-slug.pdf` (dates from
-  the course meeting schedule, slugs from lecture titles), matching the layout
+  `handouts/{lecture-notes, slides, etc.}/N-topic-slug.pdf` (N is the lecture
+  number, slugs from lecture titles), matching the layout
   of the other course directories under `~/Documents/education/classes/`.
-  If in doubt, ask the user for lecture dates.
+  Do not prefix with dates; they are easy to get wrong.
 - Verify downloads with `file *.pdf` —
   an expired cookie yields HTML login pages, not PDFs.
