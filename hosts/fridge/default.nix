@@ -59,6 +59,9 @@
 
   # TODO: setup nginx reverse proxy
 
+  # set system-wide so gnome apps see it too, not just the shell
+  environment.sessionVariables.BROWSER = "firefox";
+
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
 

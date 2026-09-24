@@ -15,7 +15,6 @@ in
     gcc # rustup toolchains and uv sdists need a c compiler
   ];
 
-  home.sessionVariables.BROWSER = "firefox";
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
