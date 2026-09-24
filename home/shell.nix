@@ -49,11 +49,6 @@ in
       # bat as the man pager
       set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 
-      # nixos
-      if command -q nix-your-shell
-          nix-your-shell fish | source
-      end
-
       if command -q tinymist
           tinymist completion | source
       end
@@ -73,6 +68,8 @@ in
   };
 
   programs.zoxide.enable = true;
+  # keep fish as the shell inside nix shell / nix develop
+  programs.nix-your-shell.enable = true;
 
   # loads .envrc and, with load_dotenv, bare .env files on cd after `direnv allow`
   programs.direnv = {

@@ -41,6 +41,7 @@
     poppler-utils # pdf tools
     just
     wget
+    file
 
     # fonts. home-manager installs these in ~/Library/Fonts on macos and
     # through fontconfig on linux
