@@ -85,6 +85,8 @@ in
     };
   };
 
+  programs.codex.enable = true;
+
   home.file = {
     ".claude/CLAUDE.md".source = link "claude/CLAUDE.md";
     ".claude/skills".source = link "skills";
