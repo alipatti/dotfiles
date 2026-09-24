@@ -9,7 +9,7 @@ import time
 
 
 def get_starship_rhs():
-    result = subprocess.run(["starship", "prompt"], capture_output=True, text=True)
+    result = subprocess.run(["starship", "prompt"], capture_output=True, text=True, check=False)
     lines = result.stdout.split("\n")
     line = lines[1] if len(lines) > 1 else (lines[0] if lines else "")
 
@@ -42,7 +42,9 @@ def format_remaining(resets_at: int | None) -> str:
     return f"{minutes}m"
 
 
-def main(context_cutoff: int = 75, five_hour_cutoff: int = 50, week_cutoff: int = 80) -> None:
+def main(
+    context_cutoff: int = 75, five_hour_cutoff: int = 50, week_cutoff: int = 80
+) -> None:
     data_from_claude = json.load(sys.stdin)
 
     model = (data_from_claude.get("model") or {}).get("display_name", "")

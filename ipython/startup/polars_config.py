@@ -1,4 +1,3 @@
-from typing import Any, Mapping
 from IPython.core.magic import register_line_magic
 
 

@@ -57,8 +57,8 @@ import polars_readstat as prs
 stata_lf = prs.scan_readstat(
     "file.dta",
     # set these two parameters by default unless there is a reason not to
-    value_labels_as_strings=True, # load labeled variables as categoricals
-    missing_string_as_null=True, # "" -> null
+    value_labels_as_strings=True,  # load labeled variables as categoricals
+    missing_string_as_null=True,  # "" -> null
 )
 
 sas_lf = prs.scan_readstat(
@@ -80,15 +80,14 @@ polars_again = pl.DataFrame(arrow_table)
 pl.from_pandas(pandas_df)
 
 # use from_records to load from row-wise python objects
-list_of_dicts = [{"col1" : 1, "col2" : 2}, {"col1" : 3, "col2" : 4}, ...]
+list_of_dicts = [{"col1": 1, "col2": 2}, {"col1": 3, "col2": 4}, ...]
 pl.from_records(list_of_records)
 
 list_of_lists = [[1, 2], [3, 4], ...]
 pl.from_records(list_of_lists, schema=["col1", "col2"])
 
 # use the class constructor to load from column-wise representations
-pl.DataFrame({"col1" : [1, 2, 3], "col2" : [4, 5, 6]})
-
+pl.DataFrame({"col1": [1, 2, 3], "col2": [4, 5, 6]})
 ```
 
 ## Lazy Evaluation
@@ -157,7 +156,7 @@ lf.with_columns(
 # add many columns at once by unpacking iterables and mappings
 lf.with_columns(
     *(pl.lit(i).alias(f"x_{i}") for i in range(4)),
-    **{name : pl.lit(name) for name in "asdf"}
+    **{name: pl.lit(name) for name in "asdf"},
 )
 ```
 
@@ -191,8 +190,8 @@ Polars supports the full suite of standard joins.
 ```python
 df1.join(
     df2,
-    on = ["join", "keys"], # arbitrary expressions are also accepted!
-    how ="inner", # "left", "right", "full", "semi", "anti"
+    on=["join", "keys"],  # arbitrary expressions are also accepted!
+    how="inner",  # "left", "right", "full", "semi", "anti"
 )
 ```
 
@@ -248,6 +247,7 @@ def weighted_mean(x: pl.Expr, w: pl.Expr | str):
 
     return x.dot(w) / w.dot(mask)
 
+
 # use .pipe to apply a function in a chain of method calls
 x_bar = pl.col("x").pipe(weighted_mean, "weight").over("group")
 
@@ -275,9 +275,9 @@ cs.matches(r"^wages_\d{4}$").log().name.prefix("log_")
 cs.starts_with("x_").mean()
 
 # selectors can be combined like sets
-cs.contains("_") - cs.string() # columns with an underscore, but not strings
-cs.string() | cs.categorical() # both strings and categoricals
-cs.int() & cs.contains("foo") # integer columns containing the string foo
+cs.contains("_") - cs.string()  # columns with an underscore, but not strings
+cs.string() | cs.categorical()  # both strings and categoricals
+cs.int() & cs.contains("foo")  # integer columns containing the string foo
 ```
 
 When doing the same operation to many columns, prefer selectors
@@ -381,9 +381,7 @@ the output may not appear exactly as you expect.
 
 ```python
 query = (
-    lf.with_columns(y = pl.col("x").pow(2))
-    .inspect()
-    .with_columns(z = pl.col("x").pow(3))
+    lf.with_columns(y=pl.col("x").pow(2)).inspect().with_columns(z=pl.col("x").pow(3))
 )
 
 # when collect is called, prints the df with only y added
@@ -393,8 +391,8 @@ query.collect()
 You can also inspect the query plan.
 
 ```python
-query.explain() # get a text-based representation of the compiled query
-query.show_graph() # show the computational graph (this can be long and complicated)
+query.explain()  # get a text-based representation of the compiled query
+query.show_graph()  # show the computational graph (this can be long and complicated)
 ```
 
 It's also often helpful to break long queries into several steps.

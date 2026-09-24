@@ -33,7 +33,7 @@ def _kitty_png(png, metadata):
     columns = min(IMAGE_COLUMNS, shutil.get_terminal_size().columns - 1)
 
     if not get_ipython().displayhook.is_active:
-        print() # newline for visual space
+        print()  # newline for visual space
 
     print(png_to_kitty_ansi(png).replace("a=T,", f"a=T,c={columns},", 1))
 

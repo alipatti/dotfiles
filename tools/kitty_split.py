@@ -11,9 +11,9 @@ this before showing its terminal windows.
 """
 
 import json
-import sys
 import shutil
 import subprocess
+import sys
 
 NARROW_WIDE_CUTOFF = 100
 

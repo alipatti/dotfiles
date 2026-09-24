@@ -10,12 +10,13 @@ from __future__ import annotations
 
 import subprocess
 import sys
+
 import tomllib
 
 
 def git(*args: str) -> str | None:
     """run a git command and return its stdout, or None if it fails."""
-    result = subprocess.run(["git", *args], capture_output=True, text=True)
+    result = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
     if result.returncode != 0:
         return None
     return result.stdout.strip()
@@ -51,10 +52,14 @@ def main() -> int:
 
     tag = f"v{current_version}"
     if git("rev-parse", "--verify", "--quiet", f"refs/tags/{tag}") is not None:
-        print(f"version changed ({old_version or 'none'} -> {current_version}) but tag {tag} already exists")
+        print(
+            f"version changed ({old_version or 'none'} -> {current_version}) but tag {tag} already exists"
+        )
         return 0
 
-    print(f"version changed ({old_version or 'none'} -> {current_version}), tagging {tag}")
+    print(
+        f"version changed ({old_version or 'none'} -> {current_version}), tagging {tag}"
+    )
     subprocess.check_call(["git", "tag", "--annotate", "--message", tag, tag])
     return 0
 
