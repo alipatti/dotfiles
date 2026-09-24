@@ -68,7 +68,7 @@ in
       bind \cr search_history
 
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
-      set -l secrets ${config.home.homeDirectory}/.dotfiles/env/secrets.env
+      set -l secrets ${config.home.homeDirectory}/.dotfiles/secrets.env
       if string match -q 'text*' (file -b --mime-type $secrets)
           direnv dotenv fish $secrets | source
       end
