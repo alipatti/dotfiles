@@ -82,6 +82,9 @@ in
 
       # kitty sets the tab title itself
       env.CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
+      # nvim's default log dir isn't writable in the sandbox, so it falls
+      # back to ./nvim.log in whatever directory it was run from
+      env.NVIM_LOG_FILE = "/tmp/claude/nvim.log";
     };
   };
 
