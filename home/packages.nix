@@ -28,7 +28,7 @@
     tailwindcss-language-server
     tinymist
     rust-analyzer
-    texlab
+    texlivePackages.digestif # latex
 
     # command line tools
     eza # better ls

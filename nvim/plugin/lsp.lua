@@ -19,23 +19,7 @@ local lsp_servers = {
 			},
 		},
 	},
-	texlab        = {
-		settings = {
-			texlab = {
-				forwardSearch = {
-					executable = "/Applications/Skim.app/Contents/SharedSupport/displayline",
-					args = { "-background", "%l", "%p" },
-				},
-				build = {
-					onSave = false,
-					args = { "%f" },
-				},
-				latexindent = {
-					modifyLineBreaks = true,
-				},
-			},
-		},
-	},
+	digestif      = {},
 }
 
 vim.pack.add({
