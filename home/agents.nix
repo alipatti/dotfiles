@@ -3,7 +3,7 @@
 
 { config, ... }:
 let
-  inherit (config.lib.dotfiles) link;
+  inherit (config.lib.dotfiles) root link;
 
   # hosts claude code may reach, both from the sandbox and through WebFetch
   allowedDomains = [
@@ -65,7 +65,7 @@ in
 
       statusLine = {
         type = "command";
-        command = "${config.home.homeDirectory}/.dotfiles/tools/claude_prompt.py";
+        command = "${root}/tools/claude_prompt.py";
       };
 
       enabledPlugins = {

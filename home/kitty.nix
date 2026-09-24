@@ -4,7 +4,7 @@
 { config, pkgs, lib, ... }:
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-  split = "${config.home.homeDirectory}/.dotfiles/tools/kitty_split.py";
+  split = "${config.lib.dotfiles.root}/tools/kitty_split.py";
 in
 {
   programs.kitty = {

@@ -2,7 +2,7 @@
 
 { config, pkgs, lib, ... }:
 let
-  inherit (config.lib.dotfiles) link;
+  inherit (config.lib.dotfiles) root link;
 in
 {
   home.packages = with pkgs; [
@@ -54,7 +54,7 @@ in
 
   # build the webview helper if the source is newer than the binary
   home.activation.webview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    src=${config.home.homeDirectory}/.dotfiles/tools/webview.swift
+    src=${root}/tools/webview.swift
     bin=$HOME/.local/bin/webview
     if [ ! "$bin" -nt "$src" ]; then
       run mkdir -p "$HOME/.local/bin"

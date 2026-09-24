@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  dotfiles = "${config.home.homeDirectory}/.dotfiles";
+  inherit (config.lib.dotfiles) root;
 in
 {
   programs.git = {
@@ -48,7 +48,7 @@ in
     executable = true;
     text = ''
       #!/bin/sh
-      exec ${pkgs.python3}/bin/python3 ${dotfiles}/tools/git_tag_version.py "$@"
+      exec ${pkgs.python3}/bin/python3 ${root}/tools/git_tag_version.py "$@"
     '';
   };
 }

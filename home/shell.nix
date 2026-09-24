@@ -2,7 +2,7 @@
 
 { config, lib, ... }:
 let
-  inherit (config.lib.dotfiles) link;
+  inherit (config.lib.dotfiles) root link;
 in
 {
   # home-manager generates ~/.config/fish/config.fish. functions and
@@ -65,7 +65,7 @@ in
       bind \cr search_history
 
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
-      set -l secrets ${config.home.homeDirectory}/.dotfiles/secrets.env
+      set -l secrets ${root}/secrets.env
       if string match -q 'text*' (file -b --mime-type $secrets)
           direnv dotenv fish $secrets | source
       end

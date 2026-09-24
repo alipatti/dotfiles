@@ -19,10 +19,10 @@ in
     ./rumdl.nix
   ];
 
-  # shared by the modules above: symlink straight into the repo so configs
-  # stay editable in place
-  lib.dotfiles.link =
-    path: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.dotfiles/${path}";
+  # shared by the modules above. `link` symlinks straight into the repo so
+  # configs stay editable in place
+  lib.dotfiles.root = "${config.home.homeDirectory}/.dotfiles";
+  lib.dotfiles.link = path: config.lib.file.mkOutOfStoreSymlink "${config.lib.dotfiles.root}/${path}";
 
   home.username = "ali";
   home.stateVersion = "26.11";
