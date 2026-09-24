@@ -77,6 +77,12 @@ in
       agentPushNotifEnabled = true;
       awaySummaryEnabled = false;
 
+      # no co-authored-by trailer on commits or footer on prs
+      attribution = {
+        commit = "";
+        pr = "";
+      };
+
       autoCompactEnabled = true;
       skipWorkflowUsageWarning = true;
 

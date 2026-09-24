@@ -7,7 +7,6 @@
 ## Git
 
 - Write concise and imperative git commit messages.
-- Do not sign commits as a coding agent.
 
 ## Coding
 
