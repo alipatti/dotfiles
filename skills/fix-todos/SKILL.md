@@ -17,8 +17,8 @@ create a summary table and prompt the user for confirmation
 that the todo items have been correctly interpreted.
 
 After confirmation, dispatch sub-agents to execute each task.
-Dispatch agents in paralell when the tasks are unrelated.
-For example, writing tests and writing documetation are separable tasks.
+Dispatch agents in parallel when the tasks are unrelated.
+For example, writing tests and writing documentation are separable tasks.
 Use sequential dispatch when tasks touch the same files or have dependencies
 (for example, implementing and then testing a feature).
 If there are very few tasks or the tasks are simple,
