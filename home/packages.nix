@@ -27,6 +27,7 @@
     svelte-language-server
     tailwindcss-language-server
     tinymist
+    nixd # nix
     rust-analyzer
     texlivePackages.digestif # latex
 

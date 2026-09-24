@@ -12,6 +12,7 @@ local lsp_servers = {
 	tailwindcss   = {},
 	rumdl         = {},
 	tinymist      = {},
+	nixd          = {},
 	rust_analyzer = {
 		settings = {
 			["rust-analyzer"] = {
