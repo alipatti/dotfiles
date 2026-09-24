@@ -5,21 +5,28 @@ let
   inherit (config.lib.dotfiles) root link;
 in
 {
+  # on nixos this docker stuff is handled by virtualisation.docker
   home.packages = with pkgs; [
-    # on nixos this docker stuff is handled by virtualisation.docker
     docker-client
     docker-compose
     docker-buildx
-    colima
     lima-additional-guestagents
     qemu
   ];
 
-  home.file = {
-    # docker cli only looks for plugins here, not in the nix profile
-    ".docker/cli-plugins/docker-compose".source = "${pkgs.docker-compose}/bin/docker-compose";
-    ".docker/cli-plugins/docker-buildx".source = "${pkgs.docker-buildx}/bin/docker-buildx";
+  # sets DOCKER_CONFIG and writes the config.json there
+  programs.docker-cli = {
+    enable = true;
+    settings.cliPluginsExtraDirs = [
+      "${pkgs.docker-compose}/libexec/docker/cli-plugins"
+      "${pkgs.docker-buildx}/libexec/docker/cli-plugins"
+    ];
+  };
 
+  # runs the vm as a launchd agent and sets the docker context
+  services.colima.enable = true;
+
+  home.file = {
     # mac-specific config locations
     "Library/texmf/tex/latex/local".source = link "latex";
     "Library/Application Support/typst/packages/ali".source = link "typst";
