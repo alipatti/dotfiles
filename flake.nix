@@ -47,7 +47,7 @@
         modules = [
           ./hosts/fridge
           home-manager.nixosModules.home-manager
-          (home [ ])
+          (home [ ./home/linux.nix ])
         ];
       };
     };

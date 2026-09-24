@@ -31,17 +31,6 @@
     useRoutingFeatures = "both";
     extraSetFlags = [ "--ssh" ]; # enable tailscale ssh
   };
-  # tailscale systray
-  systemd.user.services.tailscale-systray = {
-    description = "Tailscale systray application";
-    wantedBy = [ "graphical-session.target" ];
-    after = [ "graphical-session.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.tailscale}/bin/tailscale systray";
-      Restart = "on-failure";
-    };
-  };
-
   # https://github.com/alipatti/bot (docker compose stack, cloned to ~/projects/bot)
   systemd.services.bot = {
     description = "alipatti-bot docker compose stack";
@@ -89,27 +78,9 @@
   virtualisation.docker.enable = true;
   programs.steam.enable = true;
 
-  # packages
+  # the rest of the desktop is user config in ../../home/linux.nix
   environment.systemPackages = with pkgs; [
-    # gui apps
-    nautilus # files
-    firefox # browser
-    kitty # terminal
-    prismlauncher
-    spotify
-    slack
-
-    # cli tools (shared ones live in ../home)
-    git-lfs
-    nix-your-shell # use fish by default for nix-shell etc.
-    trashy
-    file
-    wl-clipboard # clipboard support for tailscale systray
-
-    # language tooling
-    gcc
-
-    # gnome extensions
+    nautilus
     gnomeExtensions.appindicator # systray support for gnome
   ];
 
@@ -122,11 +93,5 @@
       "docker"
     ];
   };
-  
-  # env vars
-  environment.sessionVariables = {
-    BROWSER = "firefox";
-  };
-
   system.stateVersion = "25.11"; # don't change this line
 }
