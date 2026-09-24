@@ -28,8 +28,12 @@ in
     ];
   };
 
-  # runs the vm as a launchd agent and sets the docker context
-  services.colima.enable = true;
+  # sets the docker context and DOCKER_HOST. the vm is started by hand with
+  # `colima start` rather than at login, since it holds its memory while up
+  services.colima = {
+    enable = true;
+    profiles.default.isService = false;
+  };
 
   home.file = {
     # mac-specific config locations
