@@ -39,8 +39,9 @@ in
     };
   };
 
-  # sets core.hooksPath, so these apply to every repo. tags python package
-  # version bumps; the script needs python 3.11+, which the system python isn't
+  # sets core.hooksPath, so these apply to every repo and per-repo .git/hooks
+  # (and `pre-commit install`) stop working. tags python package version
+  # bumps; the script needs python 3.11+, which the system python isn't
   programs.git.hooks.post-commit = pkgs.writeShellScript "post-commit" ''
     exec ${pkgs.python3}/bin/python3 ${root}/tools/git_tag_version.py "$@"
   '';
