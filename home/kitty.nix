@@ -59,7 +59,6 @@ in
     }
     // lib.optionalAttrs (!isDarwin) {
       hide_window_decorations = true;
-      wayland_titlebar_color = "background";
     };
 
     keybindings = {

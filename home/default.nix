@@ -29,7 +29,6 @@ in
   lib.dotfiles.root = "${config.home.homeDirectory}/.dotfiles";
   lib.dotfiles.link = path: config.lib.file.mkOutOfStoreSymlink "${config.lib.dotfiles.root}/${path}";
 
-  home.username = "ali";
   home.stateVersion = "26.11";
 
   # the generated home-manager man page trips a nix warning about missing
@@ -39,12 +38,9 @@ in
   # sets XDG_{CONFIG,DATA,CACHE,STATE}_HOME and lets modules use xdg.configFile
   xdg.enable = true;
 
-  # secrets stay in ../secrets.env, sourced via direnv in shell.nix
-  # ~/.cargo/bin holds `cargo install` binaries; rustup itself comes from nix
-  home.sessionPath = [
-    "$HOME/.local/bin"
-    "$HOME/.cargo/bin"
-  ];
+  xdg.localBinInPath = true;
+  # `cargo install` binaries; rustup itself comes from nix
+  home.sessionPath = [ "$HOME/.cargo/bin" ];
   home.sessionVariables = {
     EDITOR = "nvim";
     TERMINAL = "kitty";

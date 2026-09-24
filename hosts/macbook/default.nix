@@ -10,7 +10,6 @@
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
-  nixpkgs.config.allowUnfree = true;
   system.stateVersion = 7;
 
   # the nix fish doesn't run macos's path_helper, so add brew's bin ourselves.
@@ -19,7 +18,6 @@
 
   # must match the key in flake.nix for `darwin-rebuild --flake ~/.dotfiles`
   networking.hostName = "macbook";
-  networking.localHostName = "macbook";
   networking.computerName = "macbook";
 
   # determinate nix manages the daemon and /etc/nix/nix.conf, not nix-darwin.

@@ -62,7 +62,6 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   # graphics
-  nixpkgs.config.allowUnfree = true;
   hardware.graphics.enable = true;
   hardware.nvidia = {
     open = true; # recommended for Turing onwards

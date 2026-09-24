@@ -24,8 +24,10 @@
       ...
     }:
     let
-      # per-user config shared by both hosts; see ./home
-      home = extra: {
+      # shared by both hosts. per-user config is in ./home
+      common = extra: {
+        nixpkgs.config.allowUnfree = true;
+
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         # move files home-manager wants to own out of the way instead of failing
@@ -55,7 +57,7 @@
         modules = [
           ./hosts/macbook
           home-manager.darwinModules.home-manager
-          (home [ ./home/darwin.nix ])
+          (common [ ./home/darwin.nix ])
         ];
       };
 
@@ -64,7 +66,7 @@
         modules = [
           ./hosts/fridge
           home-manager.nixosModules.home-manager
-          (home [ ./home/linux.nix ])
+          (common [ ./home/linux.nix ])
         ];
       };
     };

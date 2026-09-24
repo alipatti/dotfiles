@@ -7,7 +7,6 @@
   system.defaults = {
     NSGlobalDomain = {
       AppleShowAllExtensions = true;
-      AppleShowAllFiles = true;
       AppleSpacesSwitchOnActivate = true;
       AppleFontSmoothing = 1;
 

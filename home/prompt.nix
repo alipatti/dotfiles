@@ -22,7 +22,6 @@
         "$battery"
         "$status"
         "$container"
-        "$shell"
         "$character"
       ];
 
@@ -39,13 +38,10 @@
       };
 
       hostname = {
-        ssh_only = true;
         format = "[@$hostname](bright-white) ";
       };
 
       username = {
-        disabled = false;
-        show_always = false;
         format = "[– $user](bright-white)";
       };
 

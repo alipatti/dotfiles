@@ -48,6 +48,4 @@
     # through fontconfig on linux. the terminal font is set in kitty.nix
     lmodern # latin modern
   ];
-
-  fonts.fontconfig.enable = true;
 }
