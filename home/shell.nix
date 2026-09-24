@@ -46,10 +46,6 @@ in
           end
       end
 
-      if command -q tinymist
-          tinymist completion | source
-      end
-
       # automatic venv activation
       activate_venv --quiet
 
