@@ -13,8 +13,6 @@ in
       };
 
       init.defaultBranch = "main";
-      # applies to every repo. replaces per-repo .git/hooks, which i don't use
-      core.hooksPath = "${config.xdg.configHome}/git/hooks";
       push = {
         autoSetupRemote = true;
         followTags = true;
@@ -42,13 +40,9 @@ in
     };
   };
 
-  # tag python package version bumps. the script needs python 3.11+, which
-  # the system python isn't, so run it with the nix one
-  xdg.configFile."git/hooks/post-commit" = {
-    executable = true;
-    text = ''
-      #!/bin/sh
-      exec ${pkgs.python3}/bin/python3 ${root}/tools/git_tag_version.py "$@"
-    '';
-  };
+  # sets core.hooksPath, so these apply to every repo. tags python package
+  # version bumps; the script needs python 3.11+, which the system python isn't
+  programs.git.hooks.post-commit = pkgs.writeShellScript "post-commit" ''
+    exec ${pkgs.python3}/bin/python3 ${root}/tools/git_tag_version.py "$@"
+  '';
 }
