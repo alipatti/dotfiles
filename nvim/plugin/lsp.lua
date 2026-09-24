@@ -1,71 +1,45 @@
--- LSPs to be installed
+-- the servers themselves are installed by nix (see home/packages.nix). the
+-- keys are lspconfig names; values override lspconfig's default config
 local lsp_servers = {
-	-- python
 	pyright       = {},
 	ruff          = {},
-
-	-- lua
 	lua_ls        = {},
-
-	-- yaml
 	yamlls        = {},
-
-	-- toml
-	taplo         = {}, --
-
-	-- json
+	taplo         = {},
 	jsonls        = {},
-
-	-- fish
 	fish_lsp      = {},
-
-	-- web
 	svelte        = {},
 	tailwindcss   = {},
-
-	-- markdown
 	rumdl         = {},
-
-	-- typst
-	tinymist      = {
-		rootPath = vim.fn.getcwd(),
-	},
-
-	-- rust
+	tinymist      = {},
 	rust_analyzer = {
-		['rust-analyzer'] = {
-			cargo = { targetDir = true }
-		}
+		settings = {
+			["rust-analyzer"] = {
+				cargo = { targetDir = true },
+			},
+		},
 	},
-
-	-- latex
 	texlab        = {
-		texlab = {
-			forwardSearch = {
-				executable = '/Applications/Skim.app/Contents/SharedSupport/displayline',
-				args = { "-background", '%l', '%p', },
+		settings = {
+			texlab = {
+				forwardSearch = {
+					executable = "/Applications/Skim.app/Contents/SharedSupport/displayline",
+					args = { "-background", "%l", "%p" },
+				},
+				build = {
+					onSave = false,
+					args = { "%f" },
+				},
+				latexindent = {
+					modifyLineBreaks = true,
+				},
 			},
-			build = {
-				onSave = false,
-				args = { "%f" }
-			},
-			latexindent = {
-				modifyLineBreaks = true
-			}
-		}
-	}
+		},
+	},
 }
-
-for server, config in pairs(lsp_servers) do
-	if next(config) then
-		vim.lsp.config(server, { settings = config })
-	end
-end
 
 vim.pack.add({
 	"https://github.com/neovim/nvim-lspconfig",
-	"https://github.com/mason-org/mason.nvim",
-	"https://github.com/mason-org/mason-lspconfig.nvim",
 	"https://github.com/folke/lazydev.nvim",
 })
 
@@ -75,8 +49,7 @@ require("lazydev").setup({
 	},
 })
 
-require("mason").setup()
-require("mason-lspconfig").setup({
-	ensure_installed = vim.tbl_keys(lsp_servers),
-	automatic_enable = true,
-})
+for server, config in pairs(lsp_servers) do
+	vim.lsp.config(server, config)
+end
+vim.lsp.enable(vim.tbl_keys(lsp_servers))

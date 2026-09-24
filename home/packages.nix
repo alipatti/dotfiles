@@ -16,6 +16,20 @@
     neovim
     tree-sitter
 
+    # language servers, enabled in nvim/plugin/lsp.lua
+    pyright
+    ruff
+    lua-language-server
+    yaml-language-server
+    taplo
+    vscode-langservers-extracted # json
+    fish-lsp
+    svelte-language-server
+    tailwindcss-language-server
+    tinymist
+    rust-analyzer
+    texlab
+
     # command line tools
     eza # better ls
     fd # better find
