@@ -90,6 +90,15 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	pattern = "*",
 })
 
+-- `nvim` with no arguments acts like `nvim .`. the empty buffer check skips
+-- stdin (e.g. `nvim +Man!`). nested so the explorer sees the directory buffer
+vim.api.nvim_create_autocmd("VimEnter", {
+	nested = true,
+	callback = function()
+		if vim.fn.argc() == 0 and vim.fn.line2byte("$") == -1 then vim.cmd.edit(".") end
+	end,
+})
+
 -- create missing parent directories on write
 vim.api.nvim_create_autocmd("BufWritePre", {
 	callback = function(ev)
