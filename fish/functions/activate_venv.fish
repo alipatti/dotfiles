@@ -16,7 +16,7 @@ function activate_venv --on-variable PWD
     end
 
     set -l venv $dir/.venv
-    test (command -v python3) = $venv/bin/python3; and return
+    test "$VIRTUAL_ENV" = $venv; and return
 
     contains -- --quiet $argv; or echo "activating virtual environment at $venv"
     source $venv/bin/activate.fish
