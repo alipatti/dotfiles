@@ -62,7 +62,7 @@ end
 
 -- unzoom so the terminals are visible next to nvim. kitty's split script
 -- picks tall or fat depending on how wide the tab is
-local SPLIT = vim.fn.expand("~/.config/kitty/split.py")
+local SPLIT = vim.fn.expand("~/.dotfiles/tools/kitty_split.py")
 
 local function show()
 	local res = vim.system({ SPLIT, "--layout-only" }, { text = true }):wait()

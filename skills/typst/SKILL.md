@@ -12,7 +12,7 @@ Start every new document with the personal template:
 #show: template
 ```
 
-It lives in `~/.dotfiles/typst/packages/template/`
+It lives in `~/.dotfiles/typst/template/`
 and provides theorem environments (theorion), cetz/fletcher/subpar, math macros
 (`inner`, `to`, `toto`, ...), and all document styling.
 Do not re-add set/show rules the template already handles.
@@ -39,4 +39,4 @@ Notation:
 - Use parentheses for grouping and function application.
   Use other groupings (e.g. $[$, $\{$) only when explicitly necessary.
 - Use $EE(...)$ for expectation
-  (blackboard + parentheses, not square bracketes).
+  (blackboard + parentheses, not square brackets).

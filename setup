@@ -1,27 +1,34 @@
 #!/usr/bin/env bash
 
-set -e
+# usage: ./setup <host>  (e.g. ./setup macbook)
+# on a fresh mac, installs nix and homebrew. on any machine, applies the flake.
+# run as yourself (the homebrew installer refuses root); it sudos as needed.
 
-TEMPFILE="$(mktemp)"
-DOTBOT_DIR=".dotbot"
-DOTBOT_BIN="bin/dotbot"
-BASEDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")"
+host=${1:?usage: ./setup <host>}
 
-cd "${BASEDIR}"
-# git -C "${DOTBOT_DIR}" submodule sync --quiet --recursive
-git submodule update --init --recursive ".dotbot"
+if [ "$(uname)" = Darwin ]; then
+    if ! xcode-select -p >/dev/null 2>&1; then
+        xcode-select --install
+        echo "rerun ./setup once the command line tools finish installing"
+        exit 0
+    fi
 
-# concatenate all config files into one
-if [ "$(uname)" = "Darwin" ]; then
-	cat dotbot-darwin.yaml >> "$TEMPFILE"
+    if ! command -v nix >/dev/null; then
+        curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    fi
+
+    if [ ! -x /opt/homebrew/bin/brew ]; then
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+
+    if command -v darwin-rebuild >/dev/null; then
+        sudo darwin-rebuild switch --flake ".#$host"
+    else
+        sudo nix run --inputs-from . nix-darwin#darwin-rebuild -- switch --flake ".#$host"
+    fi
+elif [ -f /etc/NIXOS ]; then
+    sudo nixos-rebuild switch --flake ".#$host"
 fi
-
-cat dotbot.yaml >> "$TEMPFILE"
-
-"${BASEDIR}/${DOTBOT_DIR}/dotbot/${DOTBOT_BIN}" -d "${BASEDIR}" \
-	--plugin-dir .dotbot/dotbot-brew \
-	--exit-on-failure \
-	-c "${TEMPFILE}" \
-	"${@}"
-
-rm "${TEMPFILE}"

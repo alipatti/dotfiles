@@ -3,5 +3,5 @@
 ![the general problem](https://imgs.xkcd.com/comics/the_general_problem.png)
 
 ```bash
-./setup
+./setup macbook # or fridge
 ```

@@ -1,5 +1,5 @@
 ---
-name: pr-review
+name: review-pr
 description: "Use this skill when the user asks to review a pull request, check a PR, audit a diff, or do a code review. Triggers include: 'review this PR', 'check the diff', 'look at my changes', 'is this PR ready to merge'. Requires being run inside a git repository with a configured GitHub remote."
 context: fork
 ---
@@ -47,7 +47,7 @@ for reference to any automated checking
 (for example, a list of linters/formatters or a script that will run all
 automated checks).
 
-If no guideance is provided and this is a Python repository,
+If no guidance is provided and this is a Python repository,
 use the following tools:
 
 ```fish
