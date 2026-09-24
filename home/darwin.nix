@@ -37,7 +37,6 @@ in
 
   home.file = {
     # mac-specific config locations
-    "Library/texmf/tex/latex/local".source = link "latex";
     "Library/Application Support/typst/packages/ali".source = link "typst";
   };
 

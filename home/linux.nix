@@ -32,7 +32,6 @@ in
     "org/gnome/shell".enabled-extensions = [ "appindicatorsupport@rgcjonas.gmail.com" ];
   };
 
-  # linux locations for the mac ones in darwin.nix
-  home.file."texmf/tex/latex/local".source = link "latex";
+  # linux location for the mac one in darwin.nix
   xdg.dataFile."typst/packages/ali".source = link "typst";
 }

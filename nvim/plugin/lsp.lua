@@ -25,7 +25,8 @@ local lsp_servers = {
 			texlab = {
 				build = {
 					onSave = false,
-					args = { "%f" },
+					executable = "tectonic",
+					args = { "-X", "compile", "%f", "--synctex", "--keep-logs", "--keep-intermediates" },
 				},
 				latexindent = {
 					modifyLineBreaks = true,
