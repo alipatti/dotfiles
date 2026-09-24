@@ -2,7 +2,7 @@
 
 # usage: ./setup <host>  (e.g. ./setup macbook)
 # on a fresh mac, installs nix and homebrew. on any machine, applies the flake.
-# needs root: everything is managed by nix-darwin / nixos plus home-manager.
+# run as yourself (the homebrew installer refuses root); it sudos as needed.
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -27,7 +27,7 @@ if [ "$(uname)" = Darwin ]; then
     if command -v darwin-rebuild >/dev/null; then
         sudo darwin-rebuild switch --flake ".#$host"
     else
-        sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ".#$host"
+        sudo nix run --inputs-from . nix-darwin#darwin-rebuild -- switch --flake ".#$host"
     fi
 elif [ -f /etc/NIXOS ]; then
     sudo nixos-rebuild switch --flake ".#$host"
