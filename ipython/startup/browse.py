@@ -1,14 +1,25 @@
+from pathlib import Path
+
 from IPython.core.getipython import get_ipython
 from IPython.core.magic import register_line_magic
 
 
+def tools_dir() -> Path:
+    """The dotfiles tools directory, found relative to this startup file.
+
+    ipython execs startup files without setting __file__, so the location comes
+    from the profile's startup directory. resolving follows the home-manager
+    symlinks back into the repo checkout, wherever it happens to live.
+    """
+    startup = Path(get_ipython().profile_dir.startup_dir).resolve()
+    return startup.parents[1] / "tools"
+
+
 def browse(frame) -> None:
-    """Open a native window showing a polars dataframe (see ~/.dotfiles/tools/dfbrowse.py)."""
+    """Open a native window showing a polars dataframe (see tools/dfbrowse.py)."""
     import sys
-    from pathlib import Path
 
-    library = str(Path.home() / ".dotfiles" / "tools")
-
+    library = str(tools_dir())
     if library not in sys.path:
         sys.path.append(library)
 
