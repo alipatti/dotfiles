@@ -1,38 +1,23 @@
 function activate_venv --on-variable PWD
-    if not status --is-interactive
-        exit
-    end
+    status is-interactive; or return
 
-    # search up directory tree for a .venv
-    set cur (readlink -f (pwd))
-    while true
-        if [ -z $cur ]
-            # no venv found
-
+    # walk up from the cwd looking for a .venv
+    set -l dir (path resolve $PWD)
+    while not test -d $dir/.venv
+        if test $dir = /
+            # none found: leave one that was activated further down
             if type -q deactivate
-                echo "Deactivating virtual environment"
+                echo "deactivating virtual environment"
                 deactivate
             end
-
             return
         end
-
-        if [ -d $cur/.venv ]
-            # venv found
-            set venv_directory $cur/.venv
-            break
-        end
-
-        # strip off last path segment (i.e. move up tree)
-        set cur (echo $cur | sed 's/\/[^\/]*$//')
+        set dir (path dirname $dir)
     end
 
-    if [ (which python3) = $venv_directory/bin/python3 ]
-        # venv is already active!
-        return 0
-    end
+    set -l venv $dir/.venv
+    test (command -v python3) = $venv/bin/python3; and return
 
-    # activate venv
-    contains -- --quiet $argv; or echo "Activating virtual environment at $venv_directory"
-    source $venv_directory/bin/activate.fish
+    contains -- --quiet $argv; or echo "activating virtual environment at $venv"
+    source $venv/bin/activate.fish
 end
