@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+# usage: ./setup <host>  (e.g. ./setup macbook)
 # on a fresh mac, installs nix and homebrew. on any machine, applies the flake.
 # needs root: everything is managed by nix-darwin / nixos plus home-manager.
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
+host=${1:?usage: ./setup <host>}
 
 if [ "$(uname)" = Darwin ]; then
     if ! xcode-select -p >/dev/null 2>&1; then
@@ -23,10 +25,10 @@ if [ "$(uname)" = Darwin ]; then
     fi
 
     if command -v darwin-rebuild >/dev/null; then
-        sudo darwin-rebuild switch --flake .
+        sudo darwin-rebuild switch --flake ".#$host"
     else
-        sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake .#macbook
+        sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ".#$host"
     fi
-else
-    sudo nixos-rebuild switch --flake .
+elif [ -f /etc/NIXOS ]; then
+    sudo nixos-rebuild switch --flake ".#$host"
 fi
