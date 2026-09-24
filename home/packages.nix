@@ -29,7 +29,7 @@
     tinymist
     nixd # nix
     rust-analyzer
-    texlivePackages.digestif # latex
+    texlab
 
     # command line tools
     eza # better ls

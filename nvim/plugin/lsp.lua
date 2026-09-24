@@ -20,7 +20,19 @@ local lsp_servers = {
 			},
 		},
 	},
-	digestif      = {},
+	texlab        = {
+		settings = {
+			texlab = {
+				build = {
+					onSave = false,
+					args = { "%f" },
+				},
+				latexindent = {
+					modifyLineBreaks = true,
+				},
+			},
+		},
+	},
 }
 
 vim.pack.add({
