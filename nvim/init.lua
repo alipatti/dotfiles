@@ -68,11 +68,6 @@ vim.o.spell = false
 vim.o.spelllang = "en"
 vim.o.spellfile = vim.fn.stdpath("config") .. "/spell/en.utf-8.add"
 
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "tex", "markdown", "typst" },
-    callback = function() vim.opt_local.spell = true end,
-})
-
 -- load project-local config
 vim.o.exrc = true
 
