@@ -88,9 +88,9 @@ in
   programs.codex.enable = true;
 
   home.file = {
-    ".claude/CLAUDE.md".source = link "claude/CLAUDE.md";
+    ".claude/CLAUDE.md".source = link "home/agents.md";
     ".claude/skills".source = link "skills";
-    ".codex/AGENTS.md".source = link "claude/CLAUDE.md";
+    ".codex/AGENTS.md".source = link "home/agents.md";
     ".codex/skills".source = link "skills";
   };
 }
