@@ -5,8 +5,8 @@ let
   inherit (config.lib.dotfiles) root link;
 in
 {
-  # home-manager generates ~/.config/fish/config.fish. functions and
-  # completions are symlinked from ../fish below
+  # home-manager generates ~/.config/fish/config.fish. functions are
+  # symlinked from ../fish below
   programs.fish = {
     enable = true;
 
@@ -97,7 +97,6 @@ in
 
   xdg.configFile = {
     "fish/functions".source = link "fish/functions";
-    "fish/completions".source = link "fish/completions";
   };
 
   home.file.".hushlogin".text = ""; # no "last login" line from login(1)
