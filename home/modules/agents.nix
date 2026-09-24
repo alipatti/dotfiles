@@ -31,7 +31,7 @@ in
   programs.claude-code = {
     enable = true;
     settings = {
-      model = "claude-fable-5-1[1m]";
+      model = "claude-opus-5-5[1m]";
       effortLevel = "medium";
       theme = "dark-ansi";
       tui = "fullscreen";
