@@ -1,20 +1,7 @@
-fish/fish_variables
-fish/conf.d
-
-*.aux
-*.fdb_latexmk
-*.fls
-*.log
-
-# secrets
 *.local.*
-github/hosts.yml
-ssh
-
-key
-
 __pycache__
 
+# claude's synced skills
 skills/synced
 
 # binary spell files from nvim
