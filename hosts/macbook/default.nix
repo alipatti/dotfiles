@@ -36,5 +36,10 @@
   };
 
   # installs fish, adds it to /etc/shells, and sets up nix paths in /etc/fish
-  programs.fish.enable = true;
+  programs.fish = {
+    enable = true;
+    # translate the bash init snippets to fish at build time instead of
+    # spawning bash three times on every shell start
+    useBabelfish = true;
+  };
 }

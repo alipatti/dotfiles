@@ -86,7 +86,12 @@
 
   # misc
   programs.nix-ld.enable = true; # needed for uv
-  programs.fish.enable = true;
+  programs.fish = {
+    enable = true;
+    # translate the bash init snippets to fish at build time instead of
+    # spawning bash three times on every shell start
+    useBabelfish = true;
+  };
   virtualisation.docker.enable = true;
   programs.steam.enable = true;
 
