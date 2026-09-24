@@ -15,6 +15,8 @@ in
     ./git.nix
     ./ssh.nix
     ./agents.nix
+    ./papis.nix
+    ./rumdl.nix
   ];
 
   # shared by the modules above: symlink straight into the repo so configs
@@ -43,7 +45,6 @@ in
   # ~/.config
   xdg.configFile = {
     "nvim".source = link "nvim";
-    "rumdl".source = link "rumdl";
   };
 
   # ~

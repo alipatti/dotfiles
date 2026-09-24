@@ -22,7 +22,6 @@ in
 
     # mac-specific config locations
     "Library/texmf/tex/latex/local".source = link "latex";
-    "Library/Application Support/papis/config".source = link "papis/config";
     "Library/Application Support/typst/packages/ali".source = link "typst";
   };
 

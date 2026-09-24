@@ -8,7 +8,6 @@
     tectonic
     typst
     pandoc
-    papis
 
     # git
     git-crypt # encryption
