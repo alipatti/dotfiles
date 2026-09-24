@@ -21,10 +21,6 @@ in
     settings = {
       use-git = true;
 
-      # tools
-      opentool = "open";
-      file-browser = "open";
-
       # naming
       ref-word-separator = "-";
       ref-format = key;
