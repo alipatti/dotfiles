@@ -3,7 +3,7 @@
 
 { config, pkgs, ... }:
 let
-  # tectonic has no TEXINPUTS, so always search ../latex for the classes and
+  # tectonic has no TEXINPUTS, so always search ../../latex for the classes and
   # packages there. -Z is only accepted by the compile subcommand (or the v1
   # cli, which is compile)
   tectonic = pkgs.writeShellScriptBin "tectonic" ''

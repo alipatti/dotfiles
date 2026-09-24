@@ -1,5 +1,5 @@
 # per-user config shared across machines. platform-specific bits live in
-# ./darwin.nix, and the rest is split by program into the files imported here
+# ./darwin.nix, and the rest is split by program into the files in ./modules
 
 {
   config,
@@ -11,17 +11,11 @@ let
   inherit (config.lib.dotfiles) link;
 in
 {
-  imports = [
-    ./packages.nix
-    ./languages.nix
-    ./shell.nix
-    ./prompt.nix
-    ./kitty.nix
-    ./git.nix
-    ./ssh.nix
-    ./agents.nix
-    ./papis.nix
-    ./rumdl.nix
+  # every .nix file in ./modules is a program's config
+  imports = lib.pipe (builtins.readDir ./modules) [
+    (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
+    builtins.attrNames
+    (map (name: ./modules + "/${name}"))
   ];
 
   # shared by the modules above. `link` symlinks straight into the repo so

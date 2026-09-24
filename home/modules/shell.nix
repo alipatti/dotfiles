@@ -6,7 +6,7 @@ let
 in
 {
   # home-manager generates ~/.config/fish/config.fish. functions are
-  # symlinked from ../fish below
+  # symlinked from ../../fish below
   programs.fish = {
     enable = true;
 
