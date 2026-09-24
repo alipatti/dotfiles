@@ -9,7 +9,7 @@ in
     uv # python
     nodejs # js
     pnpm # js
-    rustup # rust
+    rustup # rust; also provides rust-analyzer via `rustup component add rust-analyzer`
   ];
 
   home.sessionVariables.POLARS_ENGINE_AFFINITY = "streaming";
