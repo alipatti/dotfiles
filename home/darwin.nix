@@ -32,13 +32,16 @@ in
     "com.apple.menuextra.clock".DateFormat = "EEE d MMM h:mm:ss";
     "com.apple.print.PrintingPrefs"."Quit When Finished" = true;
     "com.apple.CrashReporter".DialogType = "none";
-    "com.apple.ImageCapture".disableHotPlug = false; # don't open photos when plugging in camera
     # no .DS_Store on drives/network
     "com.apple.desktopservices" = {
       DSDontWriteUSBStores = true;
       DSDontWriteNetworkStores = true;
     };
   };
+
+  # don't open photos when plugging in a camera. a per-host key, so it goes
+  # through -currentHost
+  targets.darwin.currentHostDefaults."com.apple.ImageCapture".disableHotPlug = true;
 
   # default safari search engine
   targets.darwin.search = "DuckDuckGo";
