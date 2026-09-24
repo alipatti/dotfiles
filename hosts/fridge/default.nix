@@ -17,6 +17,7 @@
     ];
     settings.trusted-users = [ "ali" ];
     gc.automatic = true;
+    gc.options = "--delete-older-than 30d";
     optimise.automatic = true;
   };
 
