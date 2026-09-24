@@ -20,7 +20,6 @@ in
       pull.rebase = "merges";
     };
 
-    # written to ~/.config/git/ignore, which git reads by default
     ignores = [
       ".DS_Store"
       "*.local.*"

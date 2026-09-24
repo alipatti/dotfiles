@@ -1329,7 +1329,7 @@ def browse(frame: Browsable, title: str = DEFAULT_TITLE) -> None:
 
     application = NSApplication.sharedApplication()
 
-    # no dock icon or cmd-tab entry, like macos/webview.swift. a process that is
+    # no dock icon or cmd-tab entry, like tools/webview.swift. a process that is
     # already an app, say through matplotlib's macosx backend, is left as it is
     if application.activationPolicy() == NSApplicationActivationPolicyProhibited:
         application.setActivationPolicy_(NSApplicationActivationPolicyAccessory)

@@ -2,7 +2,7 @@ vim.pack.add({
 	{ src = "https://github.com/chomosuke/typst-preview.nvim", version = vim.version.range("1") },
 })
 
--- see macos/webview.swift
+-- see tools/webview.swift
 local webview = vim.fn.executable("webview") == 1
 
 require("typst-preview").setup({

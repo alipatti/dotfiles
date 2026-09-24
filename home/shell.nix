@@ -1,4 +1,4 @@
-# fish and the tools wired into its prompt
+# fish and the shell tools it uses. the prompt is in prompt.nix
 
 { config, lib, ... }:
 let
@@ -100,5 +100,5 @@ in
     "fish/completions".source = link "fish/completions";
   };
 
-  home.file.".hushlogin".text = ""; # hide fish "last login" message
+  home.file.".hushlogin".text = ""; # no "last login" line from login(1)
 }

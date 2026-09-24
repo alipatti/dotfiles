@@ -1,5 +1,3 @@
-# see `nixos-help`
-
 { pkgs, ... }:
 
 {
@@ -11,7 +9,7 @@
 
   nixpkgs.hostPlatform = "x86_64-linux";
 
-  # bootloader (don't touch these)
+  # bootloader
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
 
@@ -22,14 +20,14 @@
   # firewall
   networking.firewall = {
     enable = true;
-    trustedInterfaces = [ "tailscale0" ]; # allow all traffic on tailscale
+    trustedInterfaces = [ "tailscale0" ];
   };
 
   # tailscale
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "both";
-    extraSetFlags = [ "--ssh" ]; # enable tailscale ssh
+    extraSetFlags = [ "--ssh" ];
   };
   # https://github.com/alipatti/bot (docker compose stack, cloned to ~/projects/bot)
   systemd.services.bot = {
@@ -53,8 +51,8 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   # graphics
-  nixpkgs.config.allowUnfree = true; # allow non open source
-  hardware.graphics.enable = true; # use hardware graphics card
+  nixpkgs.config.allowUnfree = true;
+  hardware.graphics.enable = true;
   hardware.nvidia = {
     open = true; # recommended for Turing onwards
     powerManagement.enable = true; # fixes broken graphics after sleep

@@ -5,7 +5,7 @@
   # brewfile and runs `brew bundle` on activation; it does not install brew.
   homebrew = {
     enable = true;
-    # uninstall anything not listed here
+    # uninstall anything not listed here, along with its data
     onActivation.cleanup = "zap";
 
     casks = [

@@ -34,7 +34,6 @@ in
   # sets XDG_{CONFIG,DATA,CACHE,STATE}_HOME and lets modules use xdg.configFile
   xdg.enable = true;
 
-  # exported by the home-manager session vars, which fish sources below.
   # secrets stay in ../secrets.env, sourced via direnv in shell.nix
   # ~/.cargo/bin holds `cargo install` binaries; rustup itself comes from nix
   home.sessionPath = [

@@ -1,7 +1,7 @@
 // minimal webkit window for local preview servers (typst-preview, notebooks, ...)
 //
 // usage: webview <url>
-// build: swiftc -O macos/webview.swift -o ~/.local/bin/webview
+// built into ~/.local/bin by the activation script in home/darwin.nix
 
 import AppKit
 import WebKit
