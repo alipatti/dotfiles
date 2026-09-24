@@ -56,9 +56,6 @@ in
       # automatic venv activation
       activate_venv --quiet
 
-      # replaces the ctrl-r binding from fzf's integration above
-      bind \cr search_history
-
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
       set -l secrets ${root}/secrets.env
       if string match -q 'text*' (file -b --mime-type $secrets)
@@ -79,6 +76,8 @@ in
   };
   programs.fzf = {
     enable = true;
+    # most recent first, like fish's own history
+    historyWidget.options = [ "--no-sort" ];
     defaultOptions = [
       "--border"
       "--height 40%"
