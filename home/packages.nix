@@ -44,8 +44,7 @@
     file
 
     # fonts. home-manager installs these in ~/Library/Fonts on macos and
-    # through fontconfig on linux
-    nerd-fonts.cousine
+    # through fontconfig on linux. the terminal font is set in kitty.nix
     lmodern # latin modern
   ];
 

@@ -11,18 +11,18 @@ in
     enable = true;
 
     font = {
+      package = pkgs.nerd-fonts.cousine;
       name = "Cousine Nerd Font Mono";
       size = 14;
     };
     themeFile = "Catppuccin-Frappe";
 
-    # no-rc: fish sources the integration itself (programs.kitty adds that
-    # to config.fish), since nix-darwin overwrites XDG_DATA_DIRS
-    shellIntegration.mode = "no-rc no-title";
+    # fish sources the integration itself; the title comes from fish_title
+    shellIntegration.mode = "no-title";
 
     settings = {
       # tab bar
-      tab_bar_min_tabs = if isDarwin then 1 else 0;
+      tab_bar_min_tabs = 1;
       tab_bar_margin_width = 5;
       tab_bar_margin_height = "15 10";
       tab_fade = 0;

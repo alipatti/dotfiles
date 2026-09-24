@@ -46,9 +46,6 @@ in
           end
       end
 
-      # bat as the man pager
-      set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
-
       if command -q tinymist
           tinymist completion | source
       end
@@ -96,6 +93,7 @@ in
     enable = true;
     config.theme = "Coldark-Dark";
   };
+  home.sessionVariables.MANPAGER = "sh -c 'col -bx | bat -l man -p'";
 
   xdg.configFile = {
     "fish/functions".source = link "fish/functions";
