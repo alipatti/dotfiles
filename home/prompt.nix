@@ -70,7 +70,6 @@
         ignore_submodules = true;
         disabled = false;
       };
-
     };
   };
 }

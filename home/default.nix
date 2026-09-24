@@ -36,7 +36,11 @@ in
 
   # exported by the home-manager session vars, which fish sources below.
   # secrets stay in ../secrets.env, sourced via direnv in shell.nix
-  home.sessionPath = [ "$HOME/.local/bin" ];
+  # ~/.cargo/bin holds `cargo install` binaries; rustup itself comes from nix
+  home.sessionPath = [
+    "$HOME/.local/bin"
+    "$HOME/.cargo/bin"
+  ];
   home.sessionVariables = {
     EDITOR = "nvim";
     TERMINAL = "kitty";

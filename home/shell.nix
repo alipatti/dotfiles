@@ -46,9 +46,6 @@ in
           end
       end
 
-      # rust
-      test -f "$HOME/.cargo/env.fish" && source "$HOME/.cargo/env.fish"
-
       # bat as the man pager
       set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
 
