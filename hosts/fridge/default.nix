@@ -108,7 +108,6 @@
 
     # language tooling
     gcc
-    fnm
 
     # gnome extensions
     gnomeExtensions.appindicator # systray support for gnome

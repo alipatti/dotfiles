@@ -46,9 +46,4 @@ in
   xdg.configFile = {
     "nvim".source = link "nvim";
   };
-
-  # ~
-  home.file = {
-    ".latexmkrc".source = link "latex/.latexmkrc";
-  };
 }

@@ -12,10 +12,7 @@ in
     rustup # rust
   ];
 
-  home.sessionVariables = {
-    N_PREFIX = "$HOME/.n";
-    POLARS_ENGINE_AFFINITY = "streaming";
-  };
+  home.sessionVariables.POLARS_ENGINE_AFFINITY = "streaming";
 
   home.file = {
     # python

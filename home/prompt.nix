@@ -71,13 +71,6 @@
         disabled = false;
       };
 
-      custom.system_icons = {
-        command = "echo $(uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin//g' | sed 's/linux/󰌽/g')";
-        format = "[$output]($style)";
-        style = "bright-white";
-        shell = [ "bash" "--noprofile" "--norc" ];
-        when = "true";
-      };
     };
   };
 }
