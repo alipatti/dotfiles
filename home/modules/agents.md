@@ -15,6 +15,11 @@
   etc files if such a skill exists.
 - Search documentation when encountering unfamiliar libraries or APIs.
 
+## Shell tools
+
+- Use `rg` instead of `grep -r` and `fd` instead of `find`.
+  Both respect `.gitignore` by default and are faster.
+
 ## Code Review
 
 If asked to review code or other material
