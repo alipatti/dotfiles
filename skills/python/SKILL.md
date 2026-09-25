@@ -64,7 +64,15 @@ In particular:
 - Extract type aliases when types are complex and/or appear in many places.
   For example `type OutputType = Literal["json", "txt", "csv"]`,
   `type InnerFunction = Callable[[pl.DataFrame, int], float]`.
-- Import from `collections.abc` rather than `typing`.
+- Don't use strings for type hints (`"MyClass"`).
+  Use `Self` for the enclosing class,
+  or reorder definitions / use `from __future__ import annotations` if needed.
+- Use `typing` exports to express intent precisely:
+  `Self` for methods returning their own class,
+  `@override` on overridden methods, `Final`/`ClassVar` for constants,
+  `Never` for functions that never return, `TypeIs` for type guards.
+- Import abstract containers and callables (`Iterable`, `Sequence`, `Callable`, …)
+  from `collections.abc` rather than `typing`.
 
 ## Testing
 
