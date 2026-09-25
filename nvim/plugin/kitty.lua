@@ -115,7 +115,7 @@ vim.keymap.set({ "n", "x" }, string.upper(SEND), "<Nop>")
 -- terminals to create
 local targets = {
 	{ key = "t", role = "terminal", submit = true,       advance = true },
-	{ key = "p", role = "ipython",  cmd = { "uv", "run", "--with", "ipython", "ipython" }, submit = true, advance = true },
+	{ key = "p", role = "ipython",  cmd = { "uv", "run", "--with", "ipython", "--with", "git+https://github.com/alipatti/browse", "ipython" }, submit = true, advance = true },
 	{ key = "c", role = "claude",   cmd = { "claude" } },
 }
 

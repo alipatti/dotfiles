@@ -1,5 +1,6 @@
 # type: ignore
 
+import importlib.util
 import os
 
 from IPython.terminal.prompts import Prompts
@@ -59,3 +60,8 @@ c.InteractiveShellApp.exec_lines = [
 ]
 c.TerminalInteractiveShell.confirm_exit = False
 c.TerminalIPythonApp.display_banner = False
+
+# dataframe browser (github.com/alipatti/browse). only when installed, so
+# sessions without it don't print an extension-load traceback
+if importlib.util.find_spec("dfbrowse"):
+    c.InteractiveShellApp.extensions.append("dfbrowse")
