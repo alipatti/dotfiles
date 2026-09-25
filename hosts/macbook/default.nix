@@ -24,6 +24,13 @@
   # extra settings go in /etc/nix/nix.custom.conf
   nix.enable = false;
 
+  # touch id for sudo, written to /etc/pam.d/sudo_local so macos updates
+  # don't wipe it. reattach makes it work inside tmux/screen too
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    reattach = true;
+  };
+
   # user that options like defaults and homebrew apply to
   system.primaryUser = "ali";
 
