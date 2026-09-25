@@ -19,7 +19,6 @@ in
     qemu
   ];
 
-  # sets DOCKER_CONFIG and writes the config.json there
   programs.docker-cli = {
     enable = true;
     settings.cliPluginsExtraDirs = [
@@ -28,10 +27,9 @@ in
     ];
   };
 
-  # sets the docker context and DOCKER_HOST. the vm is started by hand with
-  # `colima start` rather than at login, since it holds its memory while up
   services.colima = {
     enable = true;
+    # don't start vm at launch. hogs memory.
     profiles.default.isService = false;
   };
 
@@ -40,18 +38,26 @@ in
     "Library/Application Support/typst/packages/ali".source = link "typst";
   };
 
-  # macos defaults live in ../hosts/macbook/defaults.nix. these two are the
-  # exceptions nix-darwin has no option for
   targets.darwin.search = "DuckDuckGo";
-  # don't open photos when plugging in a camera. a per-host key, so it goes
-  # through -currentHost
-  targets.darwin.currentHostDefaults."com.apple.ImageCapture".disableHotPlug = true;
 
   # hidutil remap, reapplied at login by a launchd agent
   services.macos-remap-keys = {
     enable = true;
     keyboard.Capslock = "Escape";
   };
+
+  # use textedit to open text files instead of xcode
+  home.activation.fileHandlers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    for uti in \
+      public.source-code public.script public.python-script public.shell-script \
+      net.daringfireball.markdown public.json public.yaml public.xml \
+      public.swift-source public.c-source public.c-header public.c-plus-plus-source \
+      com.netscape.javascript-source; do
+      if [ "$(${pkgs.duti}/bin/duti -d "$uti")" != com.apple.TextEdit ]; then
+        run ${pkgs.duti}/bin/duti -s com.apple.TextEdit "$uti" all
+      fi
+    done
+  '';
 
   # build the webview helper if the source is newer than the binary
   home.activation.webview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
