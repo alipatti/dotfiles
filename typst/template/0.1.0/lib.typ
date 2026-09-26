@@ -52,8 +52,25 @@
   set page(paper: "us-letter", margin: 1in, numbering: "1")
   set list(indent: 1em)
   set enum(indent: 1em)
-  show sym.eq: it => h(0.3em) + it + h(0.3em)
   set par(justify: true, leading: 0.6em, first-line-indent: 0em, spacing: 1em)
+
+  // add extra space around relations in display math
+  let relations = (
+    sym.eq,
+    sym.eq.not,
+    sym.lt,
+    sym.gt,
+    sym.lt.eq,
+    sym.gt.eq,
+    sym.tilde.op,
+    sym.approx,
+    sym.equiv,
+    sym.prop,
+  )
+  show math.equation.where(block: true): eq => relations.fold(eq, (acc, rel) => {
+    show rel: it => h(0.4em) + it + h(0.4em)
+    acc
+  })
 
   // numbering
   set enum(numbering: "(a)")
