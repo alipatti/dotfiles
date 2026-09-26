@@ -71,6 +71,10 @@
     show rel: it => h(0.4em) + it + h(0.4em)
     acc
   })
+  show math.equation.where(block: true): eq => {
+    show sym.slash: it => h(0.15em) + it + h(0.15em)
+    eq
+  }
 
   // numbering
   set enum(numbering: "(a)")
