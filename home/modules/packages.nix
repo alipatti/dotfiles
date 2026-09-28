@@ -40,6 +40,7 @@ in
     tailwindcss-language-server
     tinymist
     nixd # nix
+    nixfmt # used by nixd for formatting
     texlab
 
     # command line tools
