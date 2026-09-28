@@ -43,6 +43,14 @@ in
       permissions = {
         defaultMode = "auto";
         allow = map (d: "WebFetch(domain:${d})") allowedDomains;
+        # local history is fair game (the reflog keeps it recoverable) but
+        # pushed history isn't. deny rules are checked before the sandbox
+        # auto-allow; --force also covers --force-with-lease
+        deny = map (c: "Bash(git ${c})") [
+          "push*--force*"
+          "push* -f*"
+          "push* +*"
+        ];
       };
 
       sandbox = {
