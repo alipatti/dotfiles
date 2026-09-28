@@ -58,5 +58,6 @@ in
     # fonts. home-manager installs these in ~/Library/Fonts on macos and
     # through fontconfig on linux. the terminal font is set in kitty.nix
     lmodern # latin modern
+    newcomputermodern # typst's default text font
   ];
 }
