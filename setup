@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-# usage: ./setup <host>  (e.g. ./setup macbook)
+# usage: ./setup [host]  (e.g. ./setup macbook; defaults to the hostname)
 # on a fresh mac, installs nix and homebrew. on any machine, applies the flake.
 # run as yourself (the homebrew installer refuses root); it sudos as needed.
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
-host=${1:?usage: ./setup <host>}
+host=${1:-$(hostname -s)}
 
 if [ "$(uname)" = Darwin ]; then
     if ! xcode-select -p >/dev/null 2>&1; then
