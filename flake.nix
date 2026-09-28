@@ -33,7 +33,11 @@
         # move files home-manager wants to own out of the way instead of failing
         home-manager.backupFileExtension = "bak";
         home-manager.overwriteBackup = true;
-        home-manager.users.ali.imports = [ ./home ] ++ extra;
+        home-manager.users.ali.imports = [
+          ./home
+          ./home/modules
+        ]
+        ++ extra;
       };
 
       forEachSystem =
@@ -67,6 +71,18 @@
           ./hosts/fridge
           home-manager.nixosModules.home-manager
           (common [ ./home/linux.nix ])
+        ];
+      };
+
+      # standalone home-manager for clusters without root. see ./setup
+      homeConfigurations.cluster = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        modules = [
+          ./home
+          ./home/cluster.nix
         ];
       };
     };

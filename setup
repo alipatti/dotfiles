@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 # usage: ./setup [host]  (e.g. ./setup macbook; defaults to the hostname)
-# on a fresh mac, installs nix and homebrew. on any machine, applies the flake.
-# run as yourself (the homebrew installer refuses root); it sudos as needed.
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 host=${1:-$(hostname -s)}
+
+# hostnames that get the rootless cluster config. matches on regex.
+clusters='cluster|adroit'
 
 if [ "$(uname)" = Darwin ]; then
     if ! xcode-select -p >/dev/null 2>&1; then
@@ -29,6 +30,46 @@ if [ "$(uname)" = Darwin ]; then
     else
         sudo nix run --inputs-from . nix-darwin#darwin-rebuild -- switch --flake ".#$host"
     fi
+
 elif [ -f /etc/NIXOS ]; then
     sudo nixos-rebuild switch --flake ".#$host"
+
+elif [[ $(hostname) =~ $clusters ]]; then
+    chroot=$HOME/.local/bin/nix-user-chroot
+    store=$HOME/.cache/nix
+
+    if [ ! -x "$chroot" ]; then
+        mkdir -p "$(dirname "$chroot")"
+        curl -fsSL -o "$chroot" https://github.com/nix-community/nix-user-chroot/releases/download/2.1.1/nix-user-chroot-bin-2.1.1-x86_64-unknown-linux-musl
+        chmod +x "$chroot"
+    fi
+
+    # already inside the chroot when rerun from the fish it starts
+    in_chroot() {
+        if [ -n "${NIX_CHROOT:-}" ]; then bash -c "$1"; else "$chroot" "$store" bash -c "$1"; fi
+    }
+
+    if [ ! -d "$store/store" ]; then
+        mkdir -p "$store"
+        in_chroot 'curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon --no-modify-profile'
+    fi
+
+    in_chroot '. ~/.nix-profile/etc/profile.d/nix.sh &&
+        nix --extra-experimental-features "nix-command flakes" \
+            run home-manager -- switch -b bak --impure --flake .#cluster'
+
+    # login shells enter the chroot and start fish. this has to be a real file:
+    # anything home-manager writes is a symlink into /nix, which doesn't exist
+    # until the chroot is entered
+    if ! grep -q NIX_CHROOT ~/.bash_profile 2>/dev/null; then
+        cat >>~/.bash_profile <<EOF
+
+# enter the nix chroot (see ~/.dotfiles/setup). interactive logins only, so
+# scp and batch jobs keep the plain system shell
+if [ -z "\$NIX_CHROOT" ] && [[ \$- == *i* ]]; then
+    export NIX_CHROOT=1
+    exec $chroot $store ~/.nix-profile/bin/fish -l
+fi
+EOF
+    fi
 fi

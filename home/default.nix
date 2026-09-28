@@ -1,23 +1,11 @@
 # per-user config shared across machines. platform-specific bits live in
-# ./darwin.nix, and the rest is split by program into the files in ./modules
+# this folder, and shared content is split by program in ./modules
 
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ config, ... }:
 let
   inherit (config.lib.dotfiles) link;
 in
 {
-  # every .nix file in ./modules is a program's config
-  imports = lib.pipe (builtins.readDir ./modules) [
-    (lib.filterAttrs (name: type: type == "regular" && lib.hasSuffix ".nix" name))
-    builtins.attrNames
-    (map (name: ./modules + "/${name}"))
-  ];
-
   # shared by the modules above. `link` symlinks straight into the repo so
   # configs stay editable in place
   lib.dotfiles.root = "${config.home.homeDirectory}/.dotfiles";
