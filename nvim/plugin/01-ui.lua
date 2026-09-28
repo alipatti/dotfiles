@@ -63,6 +63,11 @@ require("todo-comments").setup({
 
 -- pop up cmd line
 require("noice").setup({
+	-- leave signature help to neovim's builtin float (<C-i>); noice's version
+	-- auto-opens on every "(" or ","
+	lsp = {
+		signature = { enabled = false },
+	},
 	routes = {
 		{
 			view = "popup",
