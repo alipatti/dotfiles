@@ -10,6 +10,17 @@
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   split = "${config.lib.dotfiles.root}/tools/kitty_split.py";
+
+  # tab templates are python f-strings, so remote tabs can use different
+  # colors. fish_title prefixes {host} when $SSH_TTY is set; the ssh check
+  # covers hosts without this config. `sshOr yes no` takes a layer (fg/bg)
+  remote = "title.startswith('{') or tab.active_exe == 'ssh'";
+  sshOr =
+    yes: no: layer:
+    "{fmt.${layer}.${yes} if ${remote} else fmt.${layer}.${no}}";
+  pill =
+    color: text:
+    ''"{fmt.bg._303446}${color "fg"}${text "fg"}${color "bg"} {title} {fmt.bg._303446}${color "fg"}"'';
 in
 {
   programs.kitty = {
@@ -31,8 +42,8 @@ in
       tab_bar_margin_width = 5;
       tab_bar_margin_height = "15 10";
       tab_fade = 0;
-      tab_title_template = ''"{fmt.bg._303446}{fmt.fg.color8}{fmt.fg.default}{fmt.bg.color8} {title} {fmt.bg._303446}{fmt.fg.color8}"'';
-      active_tab_title_template = ''"{fmt.bg._303446}{fmt.fg._ca9ee6}{fmt.fg.tab}{fmt.bg._ca9ee6} {title} {fmt.bg._303446}{fmt.fg._ca9ee6}"'';
+      tab_title_template = pill (sshOr "color8" "color8") (sshOr "_ef9f76" "default");
+      active_tab_title_template = pill (sshOr "_ef9f76" "_ca9ee6") (sshOr "tab" "tab");
       active_tab_font_style = "bold";
       tab_bar_background = "none";
 
