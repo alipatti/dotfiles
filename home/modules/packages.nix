@@ -29,7 +29,7 @@ in
     tree-sitter
 
     # language servers, enabled in nvim/plugin/lsp.lua
-    pyright
+    ty
     ruff
     lua-language-server
     yaml-language-server

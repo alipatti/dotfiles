@@ -71,7 +71,6 @@ in
 
       enabledPlugins = {
         "github@claude-plugins-official" = true;
-        "pyright-lsp@claude-plugins-official" = true;
         "lua-lsp@claude-plugins-official" = true;
       };
 

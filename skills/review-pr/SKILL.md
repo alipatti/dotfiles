@@ -53,7 +53,7 @@ use the following tools:
 ```fish
 ruff format --check
 ruff check
-pyright
+ty check
 pytest
 ```
 

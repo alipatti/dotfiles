@@ -1,7 +1,7 @@
 -- the servers themselves are installed by nix (see home/packages.nix). the
 -- keys are lspconfig names; values override lspconfig's default config
 local lsp_servers = {
-	pyright       = {},
+	ty            = {},
 	ruff          = {},
 	lua_ls        = {},
 	yamlls        = {},
