@@ -37,6 +37,8 @@ in
       tui = "fullscreen";
       # don't auto-open the diff panel on the right; /diff still toggles it
       diffSidebarOpen = false;
+      # skills come from ./skills; don't pull claude.ai's into it
+      syncClaudeAiSkills = false;
 
       permissions = {
         defaultMode = "auto";

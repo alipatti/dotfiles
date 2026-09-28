@@ -1,8 +1,9 @@
 *.local.*
 __pycache__
 
-# claude's synced skills
+# claude's synced skills, and where they go once syncing is disabled
 skills/synced
+skills/.trash
 
 # binary spell files from nvim
 *.spl
