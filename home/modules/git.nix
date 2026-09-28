@@ -22,6 +22,7 @@ in
 
     ignores = [
       ".DS_Store"
+      "__pycache__/"
       "*.local.*"
       "**/.claude/.cc-writes/"
       "**/.claude/settings.local.json"
