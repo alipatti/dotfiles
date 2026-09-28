@@ -25,6 +25,8 @@
 
   # xdg paths, locale and terminfo for nix programs on a non-nixos distro
   targets.genericLinux.enable = true;
+  # driver setup needs sudo. gpu work uses module/pip cuda, not nix
+  targets.genericLinux.gpu.enable = false;
 
   nix.package = pkgs.nix;
   nix.settings.experimental-features = [
