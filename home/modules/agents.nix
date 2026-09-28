@@ -35,6 +35,8 @@ in
       effortLevel = "medium";
       theme = "dark-ansi";
       tui = "fullscreen";
+      # don't auto-open the diff panel on the right; /diff still toggles it
+      diffSidebarOpen = false;
 
       permissions = {
         defaultMode = "auto";
