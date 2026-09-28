@@ -19,5 +19,9 @@
       HostName = "login.rc.fas.harvard.edu";
       User = "alipatti";
     };
+    settings.adroit = {
+      HostName = "adroit.princeton.edu";
+      User = "ap1741";
+    };
   };
 }
