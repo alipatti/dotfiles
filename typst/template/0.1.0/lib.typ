@@ -143,10 +143,19 @@
 
   // figures
   set figure(gap: 2em, placement: top)
+  // space between floating figures and the body text (default 1.5em)
+  set place(clearance: 2.5em)
+  // inset captions by 1em per side; center single-line captions,
+  // otherwise justify with a flush-left last line
   show figure.caption: it => {
-    smallcaps[#it.supplement #context it.counter.display(it.numbering)]
-    it.separator
-    it.body
+    let caption = {
+      smallcaps[#it.supplement #context it.counter.display(it.numbering)]
+      it.separator
+      it.body
+    }
+    pad(x: 1em, layout(size => {
+      if measure(caption).width <= size.width { align(center, caption) } else { align(left, caption) }
+    }))
   }
 
   body
