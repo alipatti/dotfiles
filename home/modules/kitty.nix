@@ -47,6 +47,10 @@ in
       active_tab_font_style = "bold";
       tab_bar_background = "none";
 
+      # the default shape, so it also applies over ssh where kitty's shell
+      # integration isn't loaded
+      cursor_shape = "beam";
+
       # dim inactive windows
       inactive_text_alpha = 0.45;
 
