@@ -54,9 +54,10 @@ elif [[ $(hostname) =~ $clusters ]]; then
         in_chroot 'curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon --no-modify-profile'
     fi
 
+    # env var rather than a flag so home-manager's inner nix build sees it too
     in_chroot '. ~/.nix-profile/etc/profile.d/nix.sh &&
-        nix --extra-experimental-features "nix-command flakes" \
-            run home-manager -- switch -b bak --impure --flake .#cluster'
+        export NIX_CONFIG="experimental-features = nix-command flakes" &&
+        nix run home-manager -- switch -b bak --impure --flake .#cluster'
 
     # login shells enter the chroot and start fish. this has to be a real file:
     # anything home-manager writes is a symlink into /nix, which doesn't exist
