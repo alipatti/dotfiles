@@ -39,12 +39,17 @@ def math_font(font: str = FONT) -> Iterator[None]:
     Matplotlib's settings are restored on exit, so nothing leaks into later
     figures.
     """
+    # every custom slot is set, since the default cal (cursive) resolves to
+    # apple chancery on macos and warns about its weight
     with mpl.rc_context(
         {
             "mathtext.fontset": "custom",
             "mathtext.rm": font,
             "mathtext.it": f"{font}:italic",
             "mathtext.bf": f"{font}:bold",
+            "mathtext.sf": font,
+            "mathtext.tt": font,
+            "mathtext.cal": font,
         }
     ):
         yield
