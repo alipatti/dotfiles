@@ -56,7 +56,12 @@ in
       sandbox = {
         enabled = true;
         network.allowedDomains = allowedDomains;
-        filesystem.allowWrite = [ "~/.cache/" ];
+        # uv keeps managed pythons and tools in ~/.local/share/uv and writes
+        # temp files there even for `uv run`
+        filesystem.allowWrite = [
+          "~/.cache/"
+          "~/.local/share/uv/"
+        ];
       };
 
       hooks.PostToolUse = [
