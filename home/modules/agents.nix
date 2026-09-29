@@ -56,7 +56,7 @@ in
       sandbox = {
         enabled = true;
         network.allowedDomains = allowedDomains;
-        filesystem.allowWrite = [ "~/.cache/uv/" ];
+        filesystem.allowWrite = [ "~/.cache/" ];
       };
 
       hooks.PostToolUse = [
