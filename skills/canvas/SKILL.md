@@ -48,5 +48,8 @@ uv run scripts/canvas.py submit COURSE_ID ASSIGNMENT FILE [--name UPLOAD_NAME]
   number, slugs from lecture titles), matching the layout
   of the other course directories under `~/Documents/education/classes/`.
   Do not prefix with dates; they are easy to get wrong.
+- Problem sets go in `psets/N/`: the assignment as `problems.pdf` and
+  instructor solutions as `solutions.pdf` (plus any starter code).
+  The user's own writeup is `submission.*` (e.g. `submission.typ`).
 - Verify downloads with `file *.pdf` —
   an expired cookie yields HTML login pages, not PDFs.
