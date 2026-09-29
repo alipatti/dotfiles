@@ -12,6 +12,10 @@ plot = [
     "matplotlib>=3.10",
     "plotnine>=0.15",
 ]
+cache = [
+    "joblib>=1.6.0",
+    "polars>=1.44.2",
+]
 
 [build-system]
 requires = ["uv_build>=0.12,<0.13"]
