@@ -158,5 +158,8 @@
     }))
   }
 
+  // citations
+  set bibliography(style: "chicago-author-date")
+
   body
 }
