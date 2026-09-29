@@ -21,6 +21,12 @@
 #let var = $op("Var")$
 #let st = $op("s.t.")$
 
+// equivalent of latex's \clearpage: place pending floats, then start a new page
+#let clearpage() = {
+  place.flush()
+  pagebreak(weak: true)
+}
+
 // run-in level-3 headings: show rules can't look ahead, so a flag marks
 // the blank line right after a heading to be dropped instead of starting a new paragraph
 #let after-runin = state("after-runin", false)
