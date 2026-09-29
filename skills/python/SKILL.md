@@ -27,6 +27,17 @@ In addition:
   Group blocks of code into paragraphs separated by whitespace.
   Start a paragraph with a descriptive comment only
   if its purpose isn't obvious from the code itself.
+- Split function signatures (and other calls with many arguments)
+  one argument per line, with a trailing comma
+  so `ruff format` keeps them split:
+
+  ```python
+  def around_steady_state(
+      n_points: int = 6,
+      r: float = 0.05,
+  ) -> tuple[np.ndarray, np.ndarray]:
+  ```
+
 - Don't add defensive error handling
   (`try`/`except`, input validation) for cases that can't occur.
   Only guard system boundaries: user input, network calls, file I/O.
@@ -45,11 +56,13 @@ In addition:
 
 - Parameter and function names should be self-documentating
   and one should ideally not need the docstring to figure out what code does.
-- Public functions/classes should have full Numpydoc-style docstrings
-  (Parameters, Returns, Raises, Examples, as applicable).
-  Nontrivial functions should have complete, testable examples.
-- Internal functions should have short, descriptive docstrings.
+- Default to short, descriptive docstrings without Parameters, Examples, etc.
   A single line is often sufficient.
+- Reserve full Numpydoc-style docstrings
+  (Parameters, Returns, Raises, Examples, as applicable)
+  for public APIs of libraries meant to be used by others,
+  or functions whose behavior isn't clear from the signature and a short summary.
+  When examples are included, they should be complete and testable.
 
 ## Types
 
