@@ -1,27 +1,37 @@
 import os
+import threading
 import time
 import warnings
-from collections.abc import Mapping
+from collections import defaultdict
+from collections.abc import Iterator, Mapping
+from functools import partial
 from pathlib import Path
 from typing import Any, Literal, override
 
 import polars as pl
 from joblib import Memory, register_store_backend
-from joblib._store_backends import CacheWarning
+from joblib._store_backends import CacheWarning, concurrency_safe_write
+from joblib.backports import concurrency_safe_rename
 from joblib.logger import format_time
 from joblib.memory import FileSystemStoreBackend
+from polars.io.plugins import register_io_source
 
 BACKEND_NAME = "com.alipatti.parquet"
 PARQUET_FILENAME = "output.parquet"
+LAZY_PARQUET_FILENAME = "output.lazy.parquet"
 
 type MmapMode = Literal["r+", "r", "w+", "c"]
 
+# serializes writing each deferred LazyFrame's cache within this process
+_WRITE_LOCKS: defaultdict[Path, threading.Lock] = defaultdict(threading.Lock)
+
 
 class ParquetStoreBackend(FileSystemStoreBackend):
-    """A local store backend that stores DataFrames as Parquets."""
+    """A local store backend that stores DataFrames and LazyFrames as Parquets."""
 
     location: str
     parquet_options: dict[str, Any]
+    _pending: dict[Path, pl.LazyFrame]
 
     @override
     def configure(
@@ -32,6 +42,7 @@ class ParquetStoreBackend(FileSystemStoreBackend):
     ) -> None:
         options = dict(backend_options or {})
         self.parquet_options = dict(options.pop("parquet_options", None) or {})
+        self._pending = {}
 
         super().configure(location, verbose, options)
 
@@ -42,14 +53,18 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         item: Any,
         verbose: int = 1,
     ) -> None:
+        if isinstance(item, pl.LazyFrame):
+            return self._defer_lazy_item(call_id, item)
+
         if not isinstance(item, pl.DataFrame):
             return super().dump_item(call_id, item, verbose=verbose)
 
-        parquet_path = self._parquet_path(call_id)
-        parquet_path.parent.mkdir(parents=True, exist_ok=True)
-
         try:
-            self._concurrency_safe_write(item, str(parquet_path), self._write_parquet)
+            _write_parquet_atomic(
+                item,
+                self._parquet_path(call_id),
+                self.parquet_options,
+            )
 
         except (pl.exceptions.PolarsError, OSError) as e:
             warnings.warn(
@@ -61,7 +76,11 @@ class ParquetStoreBackend(FileSystemStoreBackend):
 
     @override
     def contains_item(self, call_id: list[str]) -> bool:
-        return self._parquet_path(call_id).exists() or super().contains_item(call_id)
+        return (
+            self._parquet_path(call_id).exists()
+            or self._lazy_parquet_path(call_id).exists()
+            or super().contains_item(call_id)
+        )
 
     @override
     def load_item(
@@ -72,8 +91,14 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         metadata: dict[str, Any] | None = None,
     ) -> Any:
         parquet_path = self._parquet_path(call_id)
+        lazy_parquet_path = self._lazy_parquet_path(call_id)
 
-        if not parquet_path.exists():
+        # joblib reloads right after the call when mmap_mode is set,
+        # before a deferred LazyFrame has been collected and written
+        if lazy_parquet_path in self._pending:
+            return self._pending.pop(lazy_parquet_path)
+
+        if not (parquet_path.exists() or lazy_parquet_path.exists()):
             return super().load_item(
                 call_id,
                 verbose=verbose,
@@ -83,24 +108,114 @@ class ParquetStoreBackend(FileSystemStoreBackend):
 
         if verbose > 1:
             _print_load_message(
-                call_id, parquet_path.parent, verbose, timestamp, metadata
+                call_id,
+                parquet_path.parent,
+                verbose,
+                timestamp,
+                metadata,
             )
 
-        return pl.read_parquet(parquet_path)
+        return (
+            pl.scan_parquet(lazy_parquet_path)
+            if lazy_parquet_path.exists()
+            else pl.read_parquet(parquet_path)
+        )
+
+    def _defer_lazy_item(self, call_id: list[str], lf: pl.LazyFrame) -> None:
+        """Swap `lf`'s plan in place for one that caches its result on collect.
+
+        joblib returns the same object it passes to `dump_item`,
+        so the caller receives the deferred LazyFrame.
+        """
+        path = self._lazy_parquet_path(call_id)
+        query = pl.LazyFrame._from_pyldf(lf._ldf)
+
+        # the source must not reference `self` so the frame stays picklable
+        deferred = register_io_source(
+            partial(_scan_cached, query, path, self.parquet_options),
+            schema=query.collect_schema,
+            is_pure=True,
+        )
+        lf._ldf = deferred._ldf
+
+        if self.mmap_mode is not None:
+            self._pending[path] = lf
 
     def _parquet_path(self, call_id: list[str]) -> Path:
         return Path(self.location, *call_id, PARQUET_FILENAME)
 
-    def _write_parquet(self, df: pl.DataFrame, filename: str) -> None:
-        # write through our own handle (polars can create the path after raising)
-        # and remove the partial temp file so failed writes leave no trace
-        try:
-            with open(filename, "wb") as f:
-                df.write_parquet(f, **self.parquet_options)
+    def _lazy_parquet_path(self, call_id: list[str]) -> Path:
+        return Path(self.location, *call_id, LAZY_PARQUET_FILENAME)
 
-        except (pl.exceptions.PolarsError, OSError):
-            Path(filename).unlink(missing_ok=True)
-            raise
+
+def _scan_cached(
+    query: pl.LazyFrame,
+    path: Path,
+    parquet_options: dict[str, Any],
+    with_columns: list[str] | None,
+    predicate: pl.Expr | None,
+    n_rows: int | None,
+    batch_size: int | None,
+) -> Iterator[pl.DataFrame]:
+    """Stream `query` to the parquet at `path` if needed, then yield batches from it."""
+    with _WRITE_LOCKS[path]:
+        if not path.exists():
+            try:
+                _write_parquet_atomic(query, path, parquet_options)
+
+            except (pl.exceptions.PolarsError, OSError) as e:
+                warnings.warn(
+                    f"Unable to cache LazyFrame result as parquet. Exception: {e}.",
+                    CacheWarning,
+                )
+
+    source = pl.scan_parquet(path) if path.exists() else query
+
+    if with_columns is not None:
+        source = source.select(with_columns)
+
+    if predicate is not None:
+        source = source.filter(predicate)
+
+    if n_rows is not None:
+        source = source.head(n_rows)
+
+    yield from source.collect_batches(chunk_size=batch_size)
+
+
+def _write_parquet_atomic(
+    frame: pl.DataFrame | pl.LazyFrame,
+    path: Path,
+    parquet_options: dict[str, Any],
+) -> None:
+    """Write to a temporary file and rename it so readers never see partial files."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    temporary_path = concurrency_safe_write(
+        frame,
+        str(path),
+        partial(_write_parquet, parquet_options=parquet_options),
+    )
+    concurrency_safe_rename(temporary_path, str(path))
+
+
+def _write_parquet(
+    frame: pl.DataFrame | pl.LazyFrame,
+    filename: str,
+    parquet_options: dict[str, Any],
+) -> None:
+    # write through our own handle (polars can create the path after raising)
+    # and remove the partial file so failed writes leave no trace
+    try:
+        with open(filename, "wb") as f:
+            if isinstance(frame, pl.LazyFrame):
+                frame.sink_parquet(f, **parquet_options)
+            else:
+                frame.write_parquet(f, **parquet_options)
+
+    except (pl.exceptions.PolarsError, OSError):
+        Path(filename).unlink(missing_ok=True)
+        raise
 
 
 def _print_load_message(
@@ -127,8 +242,11 @@ register_store_backend(BACKEND_NAME, ParquetStoreBackend)
 
 class ParquetCache(Memory):
     """A thin wrapper around :class:`joblib.Memory` that caches
-    :class:`polars.DataFrame` results as parquets.
+    :class:`polars.DataFrame` and :class:`polars.LazyFrame` results as parquets.
 
+    LazyFrame results stay lazy: nothing executes until the returned frame is
+    collected, at which point the result is written to the cache. Subsequent calls
+    return a :func:`polars.scan_parquet` of the cached file.
     Other return types fall back to joblib's pickle-based storage.
     See the `joblib documentation <https://joblib.readthedocs.io/en/stable/memory.html>`_
     for more.
@@ -184,6 +302,18 @@ class ParquetCache(Memory):
     │ 2   │
     │ 3   │
     └─────┘
+
+    Functions returning a LazyFrame are only executed when the result is collected:
+
+    >>> @CACHE.cache()
+    ... def lazy_query() -> pl.LazyFrame:
+    ...     return pl.LazyFrame({"x": [1, 2, 3]}).with_columns(y=pl.col.x * 2)
+    >>>
+    >>> lf = lazy_query()  # nothing is computed yet
+    >>> lf.select(pl.col.y.sum()).collect().item()  # computes and caches
+    12
+    >>> lazy_query().select(pl.col.y.sum()).collect().item()  # reads the cache
+    12
 
     The backend can also be used directly from :class:`joblib.Memory`:
 
