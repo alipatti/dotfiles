@@ -21,9 +21,13 @@ In addition:
   or a name would clarify intent that inline code doesn't convey.
 - Use lowercase for comments.
   Include comments iff functionality is not obvious.
-  Prefer extracting descriptively named helper functions to extensive comments.
+  Prefer extracting descriptively named constants
+  (if short and used only once)
+  or helper functions (if long or used multiple times) to extensive
+  comments.
 - Use ample whitespace.
-  For example, include a blank line between `if` blocks and surrounding code.
+  For example, include a blank line between `if` blocks
+  and surrounding code.
   Group blocks of code into paragraphs separated by whitespace.
   Start a paragraph with a descriptive comment only
   if its purpose isn't obvious from the code itself.
@@ -49,19 +53,23 @@ In addition:
 - Format with `uvx ruff format`, lint with `uvx ruff check --fix`,
   type-check with `uvx ty check`.
   Run all three after any substantive change — don't wait to be asked.
-- Define CLI entrypoints as `[project.scripts]` in `pyproject.toml` pointing at
-  a cyclopts `App` instance, e.g. `mytool = "mytool.cli:app"`.
+- Define CLI entrypoints
+  as `[project.scripts]` in `pyproject.toml` pointing at a cyclopts `App`
+  instance, e.g. `mytool = "mytool.cli:app"`.
 
 ## Documentation
 
 - Parameter and function names should be self-documentating
-  and one should ideally not need the docstring to figure out what code does.
-- Default to short, descriptive docstrings without Parameters, Examples, etc.
+  and one should ideally not need the docstring to figure out what code
+  does.
+- Default to short, descriptive docstrings without Parameters, Examples,
+  etc.
   A single line is often sufficient.
 - Reserve full Numpydoc-style docstrings
   (Parameters, Returns, Raises, Examples, as applicable)
   for public APIs of libraries meant to be used by others,
-  or functions whose behavior isn't clear from the signature and a short summary.
+  or functions whose behavior isn't clear from the signature
+  and a short summary.
   When examples are included, they should be complete and testable.
 
 ## Types
@@ -72,25 +80,28 @@ In particular:
 - Prefer modern syntax if the python version supports it:
   `str | None` not `Optional[str]`, `list[int]` not `List[int]`,
   generics as `def first[T](items: list[T]) -> T`.
-- Use string literals `Literal["option1", "option2"]` for function arguments
-  that can take multiple values.
+- Use string literals `Literal["option1", "option2"]`
+  for function arguments that can take multiple values.
 - Extract type aliases when types are complex and/or appear in many places.
   For example `type OutputType = Literal["json", "txt", "csv"]`,
   `type InnerFunction = Callable[[pl.DataFrame, int], float]`.
 - Don't use strings for type hints (`"MyClass"`).
   Use `Self` for the enclosing class,
-  or reorder definitions / use `from __future__ import annotations` if needed.
+  or reorder definitions / use `from __future__ import annotations`
+  if needed.
 - Use `typing` exports to express intent precisely:
   `Self` for methods returning their own class,
   `@override` on overridden methods, `Final`/`ClassVar` for constants,
   `Never` for functions that never return, `TypeIs` for type guards.
-- Import abstract containers and callables (`Iterable`, `Sequence`, `Callable`, …)
+- Import abstract containers and callables
+  (`Iterable`, `Sequence`, `Callable`, …)
   from `collections.abc` rather than `typing`.
 
 ## Testing
 
 - Use `pytest`.
-- Use plain `assert` statements rather than `unittest`-style assertion methods.
+- Use plain `assert` statements rather than `unittest`-style assertion
+  methods.
 - Each test should test one specific behavior.
 - Use descriptive test names and include a short,
   imperative docstring describing the intended functionality.
@@ -110,25 +121,18 @@ Ask before installing things not on this list.
 
 Some of these libraries have their own skills.
 Load them when appropriate.
-When there's no skill, refer to the sections below
-and use `context7` to search documentation with the provided key.
+When there's no skill, refer to the sections below.
 
 | Purpose         | Use                     | Not                     | Documentation                                                    |
 | --------------- | ----------------------- | ----------------------- | ---------------------------------------------------------------- |
 | Tabular data    | polars                  | pandas                  | See skill.                                                       |
 | CLI             | cyclopts                | argparse, click, typer  | <https://cyclopts.readthedocs.io/en/stable/getting_started.html> |
-| Figures         | plotnine                | matplotlib, seaborn     | <https://plotnine.org/guide/overview.html>                       |
+| Figures         | plotnine                | matplotlib, seaborn     | See skill.                                                       |
 | HTTP            | httpx (sync by default) | requests, urllib        | <https://www.python-httpx.org/quickstart/>                       |
 | HTML parsing    | parsel                  | BeautifulSoup, lxml     | <https://parsel.readthedocs.io/en/latest/usage.html>             |
 | Structured data | pydantic or dataclasses | TypedDict, manual dicts | <https://docs.pydantic.dev/latest/>                              |
 | Logging         | loguru                  | stdlib logging          | <https://loguru.readthedocs.io/en/stable/overview.html>          |
 | Testing         | pytest                  | unittest                | <https://docs.pytest.org/en/stable/>                             |
-
-### plotnine
-
-Python clone of ggplot from R. Prefer this for figures
-unless doing something very bespoke
-where the full power of matplotlib is required.
 
 ### httpx
 
@@ -146,3 +150,13 @@ for the case (e.g. text-content ancestor lookups).
 Reach for `BaseModel` any time data crosses a boundary
 (API responses, config, CLI-adjacent structured input)
 instead of raw dicts or dataclasses.
+
+### alipatti
+
+The user's personal helper package
+(private repo <https://github.com/alipatti/alipatti.py>),
+with optional extras per submodule (e.g. `alipatti[plot]`).
+Before writing a generic helper, check whether the package already has one,
+and import it rather than copying its code into the project.
+If you have an idea for a new helper or for changes to an existing helper,
+suggest it to the user.
