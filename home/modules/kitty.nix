@@ -68,6 +68,11 @@ in
       listen_on = "unix:/tmp/kitty-{kitty_pid}";
     }
     // lib.optionalAttrs isDarwin {
+      # kitty starts from launchd with a bare PATH. programs it runs directly,
+      # without a shell in between (e.g. `kitten @ launch claude` from nvim),
+      # would otherwise miss the nix profile paths that fish sets up
+      env = "read_from_shell=PATH";
+
       macos_quit_when_last_window_closed = true;
       macos_show_window_title_in = "none";
       macos_titlebar_color = "background";
