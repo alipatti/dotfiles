@@ -49,6 +49,9 @@
   show math.equation: set text(font: "New Computer Modern Math")
   show: nested-delims
 
+  // links (including references and citations)
+  show link: set text(fill: rgb("#1f4e9c"))
+
   // spacing
   set page(paper: "us-letter", margin: 1in, numbering: "1")
   set list(indent: 1em)
