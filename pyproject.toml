@@ -1,0 +1,18 @@
+[project]
+name = "alipatti"
+version = "0.1.0"
+description = "Personal Python helpers"
+readme = "README.md"
+authors = [{ name = "Alistair Pattison" }]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+plot = [
+    "matplotlib>=3.10",
+    "plotnine>=0.15",
+]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
