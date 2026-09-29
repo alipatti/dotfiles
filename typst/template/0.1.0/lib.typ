@@ -18,6 +18,7 @@
 #let toto = $arrows.rr$
 #let End = $op("End")$
 #let poly = $op("poly")$
+#let var = $op("Var")$
 #let st = $op("s.t.")$
 
 // run-in level-3 headings: show rules can't look ahead, so a flag marks
