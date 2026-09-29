@@ -3,6 +3,7 @@ import threading
 import time
 import uuid
 import warnings
+import weakref
 from collections import defaultdict
 from collections.abc import Iterator, Mapping
 from datetime import datetime
@@ -38,7 +39,7 @@ class ParquetStoreBackend(FileSystemStoreBackend):
 
     location: str
     parquet_options: dict[str, Any]
-    _pending: dict[Path, pl.LazyFrame]
+    _pending: weakref.WeakValueDictionary[Path, pl.LazyFrame]
 
     @override
     def configure(
@@ -49,7 +50,7 @@ class ParquetStoreBackend(FileSystemStoreBackend):
     ) -> None:
         options = dict(backend_options or {})
         self.parquet_options = dict(options.pop("parquet_options", None) or {})
-        self._pending = {}
+        self._pending = weakref.WeakValueDictionary()
 
         super().configure(location, verbose, options)
 
@@ -60,8 +61,11 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         item: Any,
         verbose: int = 1,
     ) -> None:
+        # outputs only exist here when joblib forces a recompute via `.call`
+        replaced = self._remove_outputs(call_id)
+
         if isinstance(item, pl.LazyFrame):
-            return self._defer_lazy_item(call_id, item)
+            return self._defer_lazy_item(call_id, item, replaced=replaced)
 
         if not isinstance(item, pl.DataFrame):
             return super().dump_item(call_id, item, verbose=verbose)
@@ -72,7 +76,7 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         try:
             _write_parquet_atomic(item, parquet_path, self.parquet_options)
 
-        except (pl.exceptions.PolarsError, OSError) as e:
+        except Exception as e:  # noqa: BLE001 (matches joblib's own dump_item)
             warnings.warn(
                 f"Unable to cache DataFrame as parquet, falling back to pickle. "
                 f"Exception: {e}.",
@@ -101,8 +105,14 @@ class ParquetStoreBackend(FileSystemStoreBackend):
 
         # joblib reloads right after the call when mmap_mode is set,
         # before a deferred LazyFrame has been collected and written
-        if lazy_parquet_path in self._pending:
-            return self._pending.pop(lazy_parquet_path)
+        pending = (
+            None
+            if lazy_parquet_path.exists()
+            else self._pending.pop(lazy_parquet_path, None)
+        )
+
+        if pending is not None:
+            return pending
 
         if not (parquet_path.exists() or lazy_parquet_path.exists()):
             return super().load_item(
@@ -121,18 +131,26 @@ class ParquetStoreBackend(FileSystemStoreBackend):
                 metadata,
             )
 
-        return (
-            pl.scan_parquet(lazy_parquet_path)
-            if lazy_parquet_path.exists()
-            else pl.read_parquet(parquet_path)
-        )
+        if not lazy_parquet_path.exists():
+            return pl.read_parquet(parquet_path)
+
+        # read the footer now so joblib can recompute a corrupt entry
+        lf = pl.scan_parquet(lazy_parquet_path)
+        lf.collect_schema()
+        return lf
 
     @override
     def get_items(self) -> list[CacheItemInfo]:
         # joblib only checks output.pkl for last access, so use the parquet's instead
         return [_with_output_access_time(item) for item in super().get_items()]
 
-    def _defer_lazy_item(self, call_id: list[str], lf: pl.LazyFrame) -> None:
+    def _defer_lazy_item(
+        self,
+        call_id: list[str],
+        lf: pl.LazyFrame,
+        *,
+        replaced: bool,
+    ) -> None:
         """Swap `lf`'s plan in place for one that caches its result on collect.
 
         joblib returns the same object it passes to `dump_item`,
@@ -140,7 +158,7 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         """
         path = self._lazy_parquet_path(call_id)
         query = pl.LazyFrame._from_pyldf(lf._ldf)
-        token = _claim_token(path.with_name(LAZY_TOKEN_FILENAME))
+        token = _claim_token(path.with_name(LAZY_TOKEN_FILENAME), rotate=replaced)
 
         # the source must not reference `self` so the frame stays picklable
         deferred = register_io_source(
@@ -150,8 +168,21 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         )
         lf._ldf = deferred._ldf
 
-        if self.mmap_mode is not None:
-            self._pending[path] = lf
+        self._pending[path] = lf
+
+    def _remove_outputs(self, call_id: list[str]) -> bool:
+        """Remove any cached outputs for `call_id`, returning whether there were any."""
+        outputs = [
+            self._parquet_path(call_id),
+            self._lazy_parquet_path(call_id),
+            Path(self.location, *call_id, "output.pkl"),
+        ]
+        existing = [output for output in outputs if output.exists()]
+
+        for output in existing:
+            output.unlink(missing_ok=True)
+
+        return bool(existing)
 
     def _parquet_path(self, call_id: list[str]) -> Path:
         return Path(self.location, *call_id, PARQUET_FILENAME)
@@ -173,8 +204,8 @@ def _with_output_access_time(item: CacheItemInfo) -> CacheItemInfo:
     return item
 
 
-def _claim_token(token_path: Path) -> str:
-    """Return the cache entry's token, creating it if this is the entry's first call.
+def _claim_token(token_path: Path, *, rotate: bool) -> str:
+    """Return the cache entry's token, creating a new one if absent or `rotate`.
 
     Deferred frames only write the cache while the token they were created with is
     still on disk, so frames that outlive a `clear()` or a change to the cached
@@ -182,7 +213,7 @@ def _claim_token(token_path: Path) -> str:
     """
     token_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if not token_path.exists():
+    if rotate or not token_path.exists():
         token_path.write_text(uuid.uuid4().hex)
 
     return token_path.read_text()
@@ -205,15 +236,16 @@ def _scan_cached(
 
     source = pl.scan_parquet(path) if path.exists() else query
 
-    # polars expects the row limit to apply before the predicate
-    if with_columns is not None:
-        source = source.select(with_columns)
-
+    # polars expects the row limit to apply before the predicate,
+    # and the predicate may reference columns outside the projection
     if n_rows is not None:
         source = source.head(n_rows)
 
     if predicate is not None:
         source = source.filter(predicate)
+
+    if with_columns is not None:
+        source = source.select(with_columns)
 
     yield from source.collect_batches(chunk_size=batch_size)
 
@@ -273,7 +305,9 @@ def _write_parquet(
     try:
         with open(filename, "wb") as f:
             if isinstance(frame, pl.LazyFrame):
-                frame.sink_parquet(f, **parquet_options)
+                # a lazy sink would never run, leaving an empty file
+                options = {k: v for k, v in parquet_options.items() if k != "lazy"}
+                frame.sink_parquet(f, **options, lazy=False)
             else:
                 frame.write_parquet(f, **parquet_options)
 

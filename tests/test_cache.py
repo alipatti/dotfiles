@@ -298,3 +298,31 @@ def test_failing_query_runs_once_and_leaves_no_files(cache: ParquetCache):
 
     assert len(calls) == 1
     assert cached_files(cache, "output.lazy.parquet*") == []
+
+
+def test_forced_recompute_replaces_lazy_output(cache: ParquetCache, counter: Counter):
+    """Recompute and overwrite the cached result when forced with `.call`."""
+    query = cache.cache(counter.query)
+    query(3).collect()
+
+    lf, _ = query.call(3)
+    lf.collect()
+
+    assert counter.n == 2
+
+
+def test_function_level_mmap_mode(cache: ParquetCache, counter: Counter):
+    """Support mmap_mode set on an individual cached function."""
+    query = cache.cache(counter.query, mmap_mode="r")
+
+    assert query(3).collect()["b"].to_list() == [0, 10, 20]
+
+
+def test_corrupt_lazy_parquet_is_recomputed(cache: ParquetCache, counter: Counter):
+    """Recompute rather than return a scan of a corrupt cached parquet."""
+    query = cache.cache(counter.query)
+    query(3).collect()
+    (parquet,) = Path(str(cache.location)).rglob(LAZY_PARQUET_FILENAME)
+    parquet.write_bytes(b"not a parquet file")
+
+    assert query(3).collect()["b"].to_list() == [0, 10, 20]
