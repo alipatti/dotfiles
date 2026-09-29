@@ -5,13 +5,18 @@ import uuid
 import warnings
 from collections import defaultdict
 from collections.abc import Iterator, Mapping
+from datetime import datetime
 from functools import partial
 from pathlib import Path
 from typing import Any, Literal, override
 
 import polars as pl
 from joblib import Memory, register_store_backend
-from joblib._store_backends import CacheWarning, concurrency_safe_write
+from joblib._store_backends import (
+    CacheItemInfo,
+    CacheWarning,
+    concurrency_safe_write,
+)
 from joblib.backports import concurrency_safe_rename
 from joblib.logger import format_time
 from joblib.memory import FileSystemStoreBackend
@@ -122,6 +127,11 @@ class ParquetStoreBackend(FileSystemStoreBackend):
             else pl.read_parquet(parquet_path)
         )
 
+    @override
+    def get_items(self) -> list[CacheItemInfo]:
+        # joblib only checks output.pkl for last access, so use the parquet's instead
+        return [_with_output_access_time(item) for item in super().get_items()]
+
     def _defer_lazy_item(self, call_id: list[str], lf: pl.LazyFrame) -> None:
         """Swap `lf`'s plan in place for one that caches its result on collect.
 
@@ -148,6 +158,19 @@ class ParquetStoreBackend(FileSystemStoreBackend):
 
     def _lazy_parquet_path(self, call_id: list[str]) -> Path:
         return Path(self.location, *call_id, LAZY_PARQUET_FILENAME)
+
+
+def _with_output_access_time(item: CacheItemInfo) -> CacheItemInfo:
+    for filename in (PARQUET_FILENAME, LAZY_PARQUET_FILENAME):
+        output = Path(item.path, filename)
+
+        if output.exists():
+            # naive to match joblib, which compares against datetime.now()
+            access_time = output.stat().st_atime
+            last_access = datetime.fromtimestamp(access_time)  # noqa: DTZ006
+            return item._replace(last_access=last_access)
+
+    return item
 
 
 def _claim_token(token_path: Path) -> str:

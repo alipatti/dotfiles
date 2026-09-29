@@ -1,6 +1,8 @@
+import os
 import pickle
 import warnings
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -121,6 +123,17 @@ def test_parquet_options_are_applied(tmp_path: Path):
         return path.stat().st_size
 
     assert cached_size("uncompressed") > cached_size("zstd")
+
+
+def test_items_report_parquet_access_time(cache: ParquetCache):
+    """Report the parquet output's access time so LRU eviction works."""
+    cache.cache(lambda: pl.DataFrame({"a": [1]}))()
+    (parquet,) = Path(str(cache.location)).rglob(PARQUET_FILENAME)
+    os.utime(parquet, (0, 0))
+
+    (item,) = cache.store_backend.get_items()
+
+    assert item.last_access == datetime.fromtimestamp(0)  # noqa: DTZ006
 
 
 def test_load_message_is_printed(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
