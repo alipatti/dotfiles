@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import uuid
 import warnings
 from collections import defaultdict
 from collections.abc import Iterator, Mapping
@@ -19,6 +20,7 @@ from polars.io.plugins import register_io_source
 BACKEND_NAME = "com.alipatti.parquet"
 PARQUET_FILENAME = "output.parquet"
 LAZY_PARQUET_FILENAME = "output.lazy.parquet"
+LAZY_TOKEN_FILENAME = "output.lazy.token"
 
 type MmapMode = Literal["r+", "r", "w+", "c"]
 
@@ -59,12 +61,11 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         if not isinstance(item, pl.DataFrame):
             return super().dump_item(call_id, item, verbose=verbose)
 
+        parquet_path = self._parquet_path(call_id)
+        parquet_path.parent.mkdir(parents=True, exist_ok=True)
+
         try:
-            _write_parquet_atomic(
-                item,
-                self._parquet_path(call_id),
-                self.parquet_options,
-            )
+            _write_parquet_atomic(item, parquet_path, self.parquet_options)
 
         except (pl.exceptions.PolarsError, OSError) as e:
             warnings.warn(
@@ -129,10 +130,11 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         """
         path = self._lazy_parquet_path(call_id)
         query = pl.LazyFrame._from_pyldf(lf._ldf)
+        token = _claim_token(path.with_name(LAZY_TOKEN_FILENAME))
 
         # the source must not reference `self` so the frame stays picklable
         deferred = register_io_source(
-            partial(_scan_cached, query, path, self.parquet_options),
+            partial(_scan_cached, query, path, token, self.parquet_options),
             schema=query.collect_schema,
             is_pure=True,
         )
@@ -148,9 +150,25 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         return Path(self.location, *call_id, LAZY_PARQUET_FILENAME)
 
 
+def _claim_token(token_path: Path) -> str:
+    """Return the cache entry's token, creating it if this is the entry's first call.
+
+    Deferred frames only write the cache while the token they were created with is
+    still on disk, so frames that outlive a `clear()` or a change to the cached
+    function don't populate the new entry with stale results.
+    """
+    token_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not token_path.exists():
+        token_path.write_text(uuid.uuid4().hex)
+
+    return token_path.read_text()
+
+
 def _scan_cached(
     query: pl.LazyFrame,
     path: Path,
+    token: str,
     parquet_options: dict[str, Any],
     with_columns: list[str] | None,
     predicate: pl.Expr | None,
@@ -159,28 +177,53 @@ def _scan_cached(
 ) -> Iterator[pl.DataFrame]:
     """Stream `query` to the parquet at `path` if needed, then yield batches from it."""
     with _WRITE_LOCKS[path]:
-        if not path.exists():
-            try:
-                _write_parquet_atomic(query, path, parquet_options)
-
-            except (pl.exceptions.PolarsError, OSError) as e:
-                warnings.warn(
-                    f"Unable to cache LazyFrame result as parquet. Exception: {e}.",
-                    CacheWarning,
-                )
+        if not path.exists() and _token_matches(path, token):
+            _try_write_lazy(query, path, parquet_options)
 
     source = pl.scan_parquet(path) if path.exists() else query
 
+    # polars expects the row limit to apply before the predicate
     if with_columns is not None:
         source = source.select(with_columns)
-
-    if predicate is not None:
-        source = source.filter(predicate)
 
     if n_rows is not None:
         source = source.head(n_rows)
 
+    if predicate is not None:
+        source = source.filter(predicate)
+
     yield from source.collect_batches(chunk_size=batch_size)
+
+
+def _token_matches(path: Path, token: str) -> bool:
+    token_path = path.with_name(LAZY_TOKEN_FILENAME)
+    return token_path.exists() and token_path.read_text() == token
+
+
+def _try_write_lazy(
+    query: pl.LazyFrame,
+    path: Path,
+    parquet_options: dict[str, Any],
+) -> None:
+    """Sink `query` to `path`, warning instead of raising if it can't be stored.
+
+    Errors from the query itself propagate so a failing query isn't run twice.
+    """
+    if pl.Object in query.collect_schema().dtypes():
+        warnings.warn(
+            "Unable to cache LazyFrame result with Object columns as parquet.",
+            CacheWarning,
+        )
+        return
+
+    try:
+        _write_parquet_atomic(query, path, parquet_options)
+
+    except OSError as e:
+        warnings.warn(
+            f"Unable to cache LazyFrame result as parquet. Exception: {e}.",
+            CacheWarning,
+        )
 
 
 def _write_parquet_atomic(
@@ -189,8 +232,6 @@ def _write_parquet_atomic(
     parquet_options: dict[str, Any],
 ) -> None:
     """Write to a temporary file and rename it so readers never see partial files."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-
     temporary_path = concurrency_safe_write(
         frame,
         str(path),
@@ -213,7 +254,7 @@ def _write_parquet(
             else:
                 frame.write_parquet(f, **parquet_options)
 
-    except (pl.exceptions.PolarsError, OSError):
+    except BaseException:
         Path(filename).unlink(missing_ok=True)
         raise
 

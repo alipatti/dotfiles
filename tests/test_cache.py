@@ -175,7 +175,7 @@ def test_lazyframe_cache_hit_scans_parquet(cache: ParquetCache, counter: Counter
     hit = query(5)
 
     assert "Parquet SCAN" in hit.explain()
-    assert cached_files(cache) == [LAZY_PARQUET_FILENAME]
+    assert cached_files(cache, "*.parquet") == [LAZY_PARQUET_FILENAME]
 
 
 @pytest.mark.parametrize(
@@ -185,8 +185,15 @@ def test_lazyframe_cache_hit_scans_parquet(cache: ParquetCache, counter: Counter
         lambda lf: lf.filter(pl.col.b > 10).head(2),
         lambda lf: lf.select(pl.col.b.sum()),
         lambda lf: lf.head(1),
+        lambda lf: lf.head(2).filter(pl.col.b > 5),
     ],
-    ids=["filter-other-column", "filter-then-head", "aggregate", "head"],
+    ids=[
+        "filter-other-column",
+        "filter-then-head",
+        "aggregate",
+        "head",
+        "head-then-filter",
+    ],
 )
 @pytest.mark.parametrize("hit", [False, True], ids=["miss", "hit"])
 def test_lazyframe_results_match_uncached(
@@ -220,4 +227,61 @@ def test_unwritable_lazyframe_warns_and_returns_data(cache: ParquetCache):
         result = lf.collect()
 
     assert result.shape == (1, 1)
+    assert cached_files(cache, "output.lazy.parquet*") == []
+
+
+def test_clear_before_collect_does_not_populate_cache(
+    cache: ParquetCache,
+    counter: Counter,
+):
+    """Skip writing the cache for frames created before the cache was cleared."""
+    query = cache.cache(counter.query)
+    lf = query(3)
+    cache.clear(warn=False)
+
+    lf.collect()
+    query(3).collect()
+
+    assert counter.n == 2
+
+
+@pytest.mark.filterwarnings("ignore::joblib.memory.JobLibCollisionWarning")
+def test_stale_frame_does_not_populate_new_function_version(cache: ParquetCache):
+    """Skip writing the cache for frames returned by an outdated function version."""
+
+    @cache.cache
+    def version(x: int) -> pl.LazyFrame:
+        return pl.LazyFrame({"v": [1]})
+
+    old = version(0)
+
+    @cache.cache
+    def version(x: int) -> pl.LazyFrame:
+        return pl.LazyFrame({"v": [2]})
+
+    new = version(0)
+    old.collect()
+
+    assert new.collect()["v"].item() == 2
+    assert version(0).collect()["v"].item() == 2
+
+
+def test_failing_query_runs_once_and_leaves_no_files(cache: ParquetCache):
+    """Propagate query errors without rerunning the query or leaving temp files."""
+    calls = []
+
+    def fail(s: pl.Series) -> pl.Series:
+        calls.append(1)
+        raise ValueError("boom")
+
+    lf = cache.cache(
+        lambda: pl.LazyFrame({"a": [1]}).select(
+            pl.col.a.map_batches(fail, return_dtype=pl.Int64)
+        )
+    )()
+
+    with pytest.raises(Exception, match="boom"):
+        lf.collect()
+
+    assert len(calls) == 1
     assert cached_files(cache, "output.lazy.parquet*") == []
