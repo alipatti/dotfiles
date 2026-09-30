@@ -118,5 +118,11 @@ in
   '';
   xdg.configFile."kitty/ssh.conf".text = ''
     env KITTY_BRIDGE_SECRET=_kitty_copy_env_var_
+
+    # the cluster's own login shell is bash outside the nix chroot, so
+    # commands run over ssh (e.g. windows opened by the bridge) wouldn't find
+    # anything. this wrapper enters the chroot first (see ../../setup)
+    hostname adroit
+    login_shell /home/ap1741/.local/bin/fish
   '';
 }

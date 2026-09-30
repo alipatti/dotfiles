@@ -59,9 +59,24 @@ elif [[ $(hostname) =~ $clusters ]]; then
         export NIX_CONFIG="experimental-features = nix-command flakes" &&
         nix run home-manager -- switch -b bak --impure --flake .#cluster'
 
-    # login shells enter the chroot and start fish. this has to be a real file:
-    # anything home-manager writes is a symlink into /nix, which doesn't exist
-    # until the chroot is entered
+    # fish inside the chroot. these have to be real files: anything
+    # home-manager writes is a symlink into /nix, which doesn't exist until the
+    # chroot is entered. kitten ssh also uses this as the login shell (see
+    # home/modules/kitty.nix), so commands it runs get the nix environment
+    cat >~/.local/bin/fish <<EOF
+#!/bin/sh
+# fish inside the nix chroot (see ~/.dotfiles/setup). a leading dash in \$0
+# marks a login shell
+case "\$0" in -*) set -- -l "\$@" ;; esac
+if [ -z "\$NIX_CHROOT" ]; then
+    export NIX_CHROOT=1
+    exec $chroot $store ~/.nix-profile/bin/fish "\$@"
+fi
+exec ~/.nix-profile/bin/fish "\$@"
+EOF
+    chmod +x ~/.local/bin/fish
+
+    # login shells enter the chroot and start fish
     if ! grep -q NIX_CHROOT ~/.bash_profile 2>/dev/null; then
         cat >>~/.bash_profile <<EOF
 

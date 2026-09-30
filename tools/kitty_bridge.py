@@ -7,9 +7,10 @@ kitty.conf, acts on it. anything printed to a terminal can set user vars, so
 messages carry a secret that only this machine's shells (and, through
 `kitten ssh`, their remote sessions) know. see nvim/lua/kitty_bridge.lua.
 
-windows opened for a remote nvim run a login shell on the same host in nvim's
-directory; commands are typed into it, since hosts like adroit only set up
-their environment for interactive logins.
+windows opened for a remote nvim run on the same host, over nvim's ssh
+connection. their commands go through the remote login shell, which
+`login_shell` in kitty's ssh.conf can point at one with the full environment
+(see kitty.nix).
 """
 
 import hmac
@@ -18,7 +19,6 @@ import os
 import shlex
 import sys
 import time
-from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -43,12 +43,10 @@ ROLE_VAR = "nvim_role"
 PARENT_VAR = "nvim_parent"
 
 POLL_SECONDS = 0.1
-# give up waiting for a program to accept input after this long
+# paste anyway if a program hasn't asked for input after this long
 STARTUP_TIMEOUT_SECONDS = 30
 # fish drops input that arrives right after its first prompt
 STARTUP_SETTLE_SECONDS = 0.3
-
-type Step = Callable[[], bool]
 
 
 def on_set_user_var(
@@ -98,8 +96,6 @@ def open_window(
             paste(existing, text, message.get("submit", False))
         return
 
-    remote = window.ssh_kitten_cmdline()
-    cmd = shlex.join(message["cmd"]) if message.get("cmd") else ""
     args = [
         "launch",
         # nvim's tab, which needn't be the active one
@@ -112,66 +108,50 @@ def open_window(
     if text is not None:
         args.append("--keep-focus")
 
-    if remote:
-        # a login shell over the same connection, in nvim's directory
+    cmd = message.get("cmd") or []
+    if remote := window.ssh_kitten_cmdline():
+        # the same `kitten ssh` as nvim's window, in nvim's directory
         argv = [kitten_exe(), *remote[1:]] if remote[0] == "kitten" else list(remote)
         set_cwd_in_cmdline(message["cwd"], argv)
         set_env_in_cmdline(message["env"], argv, clone=False)
-        set_server_args_in_cmdline([], argv)
+        # the remote shell gets one string, joined unquoted
+        set_server_args_in_cmdline(
+            [shlex.join(cmd)] if cmd else [], argv, allocate_tty=bool(cmd)
+        )
         args += argv
     else:
         args += [f"--cwd={message['cwd']}"]
         args += [f"--env={k}={v}" for k, v in message["env"].items()]
-        args += message.get("cmd") or []
+        args += cmd
 
     new = boss.window_id_map[int(rc(boss, window, *args))]
-    run_steps(
-        new,
-        startup_steps(new, cmd if remote else "", text, message.get("submit", False)),
-    )
-
-
-def startup_steps(
-    window: Window,
-    typed_cmd: str,
-    text: str | None,
-    submit: bool,
-) -> Iterator[Step]:
-    """wait for the new window's program, type its command, then send text."""
-    if typed_cmd:
-        yield from until_ready(window)
-        # the leading space keeps it out of fish's history
-        window.write_to_child(f" exec {typed_cmd}\r")
-        yield lambda: not window.screen.in_bracketed_paste_mode
-
     if text is not None:
-        yield from until_ready(window)
-        paste(window, text, submit)
+        paste_when_ready(new, text, message.get("submit", False))
 
 
-def until_ready(window: Window) -> Iterator[Step]:
-    """programs turn on bracketed paste once they read input."""
-    yield lambda: window.screen.in_bracketed_paste_mode
-    settled = time.monotonic() + STARTUP_SETTLE_SECONDS
-    yield lambda: time.monotonic() > settled
-
-
-def run_steps(
+def paste_when_ready(
     window: Window,
-    steps: Iterator[Step],
+    text: str,
+    submit: bool,
 ) -> None:
-    """advance `steps` whenever the current one is done, polling on a timer."""
+    """paste once the program reads input, which it signals by turning on
+    bracketed paste. a little later, since fish drops input that arrives
+    right after its first prompt"""
     deadline = time.monotonic() + STARTUP_TIMEOUT_SECONDS
-    step = next(steps, None)
+    ready_at = None
 
     def poll(timer_id: int | None) -> None:
-        nonlocal step
-        if window.destroyed or step is None:
+        nonlocal ready_at
+        if window.destroyed:
             return
-        # past the deadline, carry on anyway rather than drop the text
-        while step is not None and (step() or time.monotonic() > deadline):
-            step = next(steps, None)
-        if step is not None:
+        now = time.monotonic()
+        if ready_at is None and (
+            window.screen.in_bracketed_paste_mode or now > deadline
+        ):
+            ready_at = now + STARTUP_SETTLE_SECONDS
+        if ready_at is not None and now > ready_at:
+            paste(window, text, submit)
+        else:
             add_timer(poll, POLL_SECONDS, False)
 
     poll(None)
