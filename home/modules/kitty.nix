@@ -10,6 +10,10 @@
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   split = "${config.lib.dotfiles.root}/tools/kitty_split.py";
+  bridge = "${config.lib.dotfiles.root}/tools/kitty_bridge.py";
+  # authenticates messages to the bridge. outside the nix store, which anyone
+  # on the machine can read
+  secret = "${config.xdg.stateHome}/kitty-bridge-secret";
 
   # tab templates are python f-strings, so remote tabs can use different
   # colors. fish_title prefixes {host} when $SSH_TTY is set; the ssh check
@@ -66,6 +70,8 @@ in
       # remote control
       allow_remote_control = "socket-only";
       listen_on = "unix:/tmp/kitty-{kitty_pid}";
+      # lets nvim open and drive windows, also from remote hosts
+      watcher = bridge;
     }
     // lib.optionalAttrs isDarwin {
       # kitty starts from launchd with a bare PATH. programs it runs directly,
@@ -96,4 +102,21 @@ in
       "ctrl+t" = "new_tab";
     };
   };
+
+  # the bridge's secret: generated once, exported to shells here, and passed
+  # on to remote sessions by `kitten ssh`
+  home.activation.kittyBridgeSecret = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f ${secret} ]; then
+      run mkdir -p "$(dirname ${secret})"
+      (umask 077 && ${pkgs.coreutils}/bin/head -c 32 /dev/urandom | ${pkgs.coreutils}/bin/base64 > ${secret})
+    fi
+  '';
+  programs.fish.interactiveShellInit = ''
+    if test -r ${secret}
+        set -gx KITTY_BRIDGE_SECRET (string trim < ${secret})
+    end
+  '';
+  xdg.configFile."kitty/ssh.conf".text = ''
+    env KITTY_BRIDGE_SECRET=_kitty_copy_env_var_
+  '';
 }

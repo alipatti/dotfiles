@@ -5,8 +5,9 @@ vim.pack.add({ "https://github.com/willothy/flatten.nvim" })
 -- guests can also come from sibling kitty windows (see kitty.lua), where
 -- opening a file should bring nvim to the front and unblocking should go back
 local function kitty_focus(guest, target)
-	if vim.env.KITTY_LISTEN_ON and guest and guest ~= vim.env.KITTY_WINDOW_ID then
-		vim.system({ "kitten", "@", "focus-window", "--match", "id:" .. target })
+	local bridge = require("kitty_bridge")
+	if bridge.available and guest and guest ~= vim.env.KITTY_WINDOW_ID then
+		bridge.send({ op = "focus", window = target })
 	end
 end
 
