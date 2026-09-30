@@ -8,11 +8,14 @@ local M = {}
 local SECRET_FILE = vim.fn.expand("~/.local/state/kitty-bridge-secret")
 
 -- inside tmux the escape code would not reach kitty
-M.available = vim.env.KITTY_WINDOW_ID ~= nil
-	and vim.env.TMUX == nil
-	and vim.fn.filereadable(SECRET_FILE) == 1
+M.available = vim.env.KITTY_WINDOW_ID ~= nil and vim.env.TMUX == nil
 
 function M.send(message)
+	if vim.fn.filereadable(SECRET_FILE) == 0 then
+		-- e.g. connected with plain ssh, or to a host missing from ssh.conf
+		vim.notify("kitty bridge: no secret at " .. SECRET_FILE .. " (connect with kitten ssh)", vim.log.levels.ERROR)
+		return
+	end
 	local secret = vim.trim(vim.fn.readfile(SECRET_FILE)[1])
 	local value = vim.base64.encode(vim.json.encode(vim.tbl_extend("error", message, { secret = secret })))
 	vim.api.nvim_ui_send(("\27]1337;SetUserVar=kitty_bridge=%s\7"):format(value))

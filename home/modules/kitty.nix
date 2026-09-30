@@ -124,7 +124,8 @@ in
     copy --dest=.local/state/kitty-bridge-secret .local/state/kitty-bridge-remote-secret
     # the account's login shell is bash outside the nix chroot, so commands
     # run over ssh (e.g. windows opened by the bridge) wouldn't find anything.
-    # this wrapper from ../../setup enters the chroot first
-    login_shell /home/ap1741/.local/bin/fish
+    # a bare name is looked up on the remote PATH, where ~/.local/bin comes
+    # first, and finds the wrapper from ../../setup that enters the chroot
+    login_shell fish
   '';
 }

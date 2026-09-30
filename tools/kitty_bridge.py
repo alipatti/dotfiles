@@ -14,11 +14,14 @@ windows opened for a remote nvim run over nvim's ssh connection, through the
 remote login shell (see login_shell in kitty.nix).
 """
 
+import functools
 import hmac
 import json
 import shlex
 import sys
 import time
+import traceback
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -29,7 +32,7 @@ from kittens.ssh.utils import (
 )
 from kitty.boss import Boss
 from kitty.constants import kitten_exe
-from kitty.fast_data_types import add_timer
+from kitty.fast_data_types import add_timer, get_boss
 from kitty.window import Window
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -54,6 +57,21 @@ STARTUP_SETTLE_SECONDS = 0.3
 pending: dict[int, list[tuple[str, bool]]] = {}
 
 
+def reported[**P](fn: Callable[P, None]) -> Callable[P, None]:
+    """show errors in a kitty window. kitty only logs watcher errors to its
+    stderr, which nobody sees when it's started from the dock."""
+
+    @functools.wraps(fn)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
+        try:
+            fn(*args, **kwargs)
+        except Exception:  # noqa: BLE001
+            get_boss().show_error("kitty bridge failed", traceback.format_exc())
+
+    return wrapper
+
+
+@reported
 def on_set_user_var(
     boss: Boss,
     window: Window,
@@ -78,11 +96,10 @@ def on_set_user_var(
         case "close":
             close_children(boss, window)
         case "focus":
-            boss.set_active_window(
-                int(message["window"]), switch_os_window_if_needed=True
-            )
+            rc(boss, window, "focus-window", f"--match=id:{message['window']}")
 
 
+@reported
 def on_close(
     boss: Boss,
     window: Window,
@@ -118,7 +135,7 @@ def open_window(
         (w for w in children(boss, window) if w.user_vars.get(ROLE_VAR) == role), None
     )
     if existing and text is None:
-        boss.set_active_window(existing, switch_os_window_if_needed=True)
+        rc(boss, window, "focus-window", f"--match=id:{existing.id}")
     elif existing:
         queue_paste(existing, text, submit)
     else:
@@ -161,7 +178,7 @@ def launch(
         args += [f"--env={k}={v}" for k, v in message["env"].items()]
         args += cmd
 
-    return boss.window_id_map[int(boss.call_remote_control(window, tuple(args)))]
+    return boss.window_id_map[int(rc(boss, window, *args))]
 
 
 def queue_paste(
@@ -180,10 +197,12 @@ def flush_when_ready(window: Window) -> None:
     turning on bracketed paste."""
     deadline = time.monotonic() + STARTUP_TIMEOUT_SECONDS
 
+    @reported
     def flush(timer_id: int | None) -> None:
         for text, submit in pending.pop(window.id, []):
             paste(window, text, submit)
 
+    @reported
     def poll(timer_id: int | None) -> None:
         if window.destroyed:
             pending.pop(window.id, None)
@@ -212,13 +231,10 @@ def show(
     window: Window,
 ) -> None:
     """unzoom and pick tall or fat by the tab's width, like kitty_split.py."""
-    ls = boss.call_remote_control(
-        window, ("ls", f"--match-tab=id:{window.tabref().id}")
-    )
-    tab = json.loads(ls)[0]["tabs"][0]
-    window.tabref().goto_layout(
-        "fat" if tab_columns(tab) < NARROW_WIDE_CUTOFF else "tall"
-    )
+    tab_id = window.tabref().id
+    tab = json.loads(rc(boss, window, "ls", f"--match-tab=id:{tab_id}"))[0]["tabs"][0]
+    layout = "fat" if tab_columns(tab) < NARROW_WIDE_CUTOFF else "tall"
+    rc(boss, window, "goto-layout", f"--match=id:{tab_id}", layout)
 
 
 def children(
@@ -235,5 +251,15 @@ def close_children(
     boss: Boss,
     window: Window,
 ) -> None:
+    # directly: remote control's window search fails while a window is closing
     for w in children(boss, window):
         boss.mark_window_for_close(w)
+
+
+def rc(
+    boss: Boss,
+    window: Window,
+    *args: str,
+) -> Any:
+    """a remote control command, run as if from `window`."""
+    return boss.call_remote_control(window, args)
