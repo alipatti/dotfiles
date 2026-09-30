@@ -15,3 +15,12 @@ require("typst-preview").setup({
 		return vim.fn.getcwd()
 	end,
 })
+
+-- the preview only updates on TextChanged, which isn't fired when checktime
+-- reloads a buffer that isn't current (e.g. after claude edits it)
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+	pattern = "*.typ",
+	callback = function(ev)
+		vim.api.nvim_exec_autocmds("TextChanged", { buffer = ev.buf })
+	end,
+})

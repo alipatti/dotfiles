@@ -82,6 +82,17 @@ vim.api.nvim_create_autocmd("FileType", {
 	callback = function() pcall(vim.treesitter.start) end,
 })
 
+-- a checktime reload keeps the stale treesitter parser, which can break
+-- highlighting. re-edit so it starts fresh, like a manual :e
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+	nested = true,
+	callback = function(ev)
+		if not vim.bo[ev.buf].modified then
+			vim.api.nvim_buf_call(ev.buf, vim.cmd.edit)
+		end
+	end,
+})
+
 -- highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
