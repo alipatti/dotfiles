@@ -30,6 +30,7 @@ in
       vim = "nvim";
       ipy = "ipython";
       npm = "pnpm";
+      ssh.function = "ssh_abbr";
     };
 
     # runs after the starship/zoxide/fzf integrations
