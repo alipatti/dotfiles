@@ -10,7 +10,9 @@ import pytest
 from joblib._store_backends import CacheWarning
 
 from alipatti.cache import (
+    _WRITE_LOCKS,
     LAZY_PARQUET_FILENAME,
+    LAZY_TOKEN_FILENAME,
     PARQUET_FILENAME,
     MmapMode,
     ParquetCache,
@@ -85,15 +87,20 @@ def test_other_types_fall_back_to_pickle(cache: ParquetCache):
     assert cached_files(cache) == ["output.pkl"]
 
 
-def test_unwritable_dataframe_warns_and_leaves_no_files(cache: ParquetCache):
-    """Warn and still return the result when a DataFrame cannot be cached."""
+@pytest.mark.filterwarnings("ignore::joblib._store_backends.CacheWarning")
+def test_object_dataframe_falls_back_to_pickle(cache: ParquetCache):
+    """Hand DataFrames with Object columns, which parquet can't store, to joblib."""
     frame = cache.cache(object_frame)
 
-    with pytest.warns(CacheWarning):
-        result = frame()
-
-    assert result.shape == (1, 1)
+    assert frame().shape == (1, 1)
     assert cached_files(cache, "output.parquet*") == []
+
+
+@pytest.mark.parametrize("option", ["use_pyarrow", "lazy", "not_an_option"])
+def test_unsupported_parquet_options_raise(tmp_path: Path, option: str):
+    """Reject options not accepted by both write_parquet and sink_parquet."""
+    with pytest.raises(TypeError, match=option):
+        ParquetCache(tmp_path, parquet_options={option: True})
 
 
 def test_joblib_options_are_forwarded(tmp_path: Path):
@@ -326,3 +333,33 @@ def test_corrupt_lazy_parquet_is_recomputed(cache: ParquetCache, counter: Counte
     parquet.write_bytes(b"not a parquet file")
 
     assert query(3).collect()["b"].to_list() == [0, 10, 20]
+
+
+def test_shelving_lazy_result_fails_loudly(cache: ParquetCache, counter: Counter):
+    """Raise a clear error when loading a LazyFrame result that was never collected."""
+    shelved = cache.cache(counter.query).call_and_shelve(3)
+
+    with pytest.raises(RuntimeError, match="only cached once collected"):
+        shelved.get()
+
+
+def test_write_lock_is_released_after_caching(cache: ParquetCache, counter: Counter):
+    """Drop an entry's write lock once its result is on disk."""
+    cache.cache(counter.query)(3).collect()
+    (parquet,) = Path(str(cache.location)).rglob(LAZY_PARQUET_FILENAME)
+
+    assert parquet not in _WRITE_LOCKS
+
+
+def test_lazy_write_errors_propagate(cache: ParquetCache, counter: Counter):
+    """Raise, rather than silently skip caching, when the result can't be written."""
+    lf = cache.cache(counter.query)(3)
+    (token,) = Path(str(cache.location)).rglob(LAZY_TOKEN_FILENAME)
+    token.parent.chmod(0o500)
+
+    try:
+        # polars wraps errors raised inside io sources
+        with pytest.raises(pl.exceptions.ComputeError, match="PermissionError"):
+            lf.collect()
+    finally:
+        token.parent.chmod(0o700)

@@ -1,3 +1,11 @@
+"""Parquet-backed caching of polars results on top of joblib.
+
+LazyFrame support relies on polars' unstable `register_io_source` API and on
+swapping the private `LazyFrame._ldf` attribute in place, so polars upgrades may
+break it.
+"""
+
+import inspect
 import os
 import threading
 import time
@@ -33,6 +41,12 @@ type MmapMode = Literal["r+", "r", "w+", "c"]
 # serializes writing each deferred LazyFrame's cache within this process
 _WRITE_LOCKS: defaultdict[Path, threading.Lock] = defaultdict(threading.Lock)
 
+# options accepted by both `DataFrame.write_parquet` and `LazyFrame.sink_parquet`
+PARQUET_OPTIONS = frozenset(
+    inspect.signature(pl.DataFrame.write_parquet).parameters.keys()
+    & inspect.signature(pl.LazyFrame.sink_parquet).parameters.keys()
+) - {"self"}
+
 
 class ParquetStoreBackend(FileSystemStoreBackend):
     """A local store backend that stores DataFrames and LazyFrames as Parquets."""
@@ -50,6 +64,12 @@ class ParquetStoreBackend(FileSystemStoreBackend):
     ) -> None:
         options = dict(backend_options or {})
         self.parquet_options = dict(options.pop("parquet_options", None) or {})
+
+        if unsupported := self.parquet_options.keys() - PARQUET_OPTIONS:
+            raise TypeError(
+                f"Unsupported parquet_options: {sorted(unsupported)}. "
+                f"Supported options are {sorted(PARQUET_OPTIONS)}."
+            )
         self._pending = weakref.WeakValueDictionary()
 
         super().configure(location, verbose, options)
@@ -67,22 +87,12 @@ class ParquetStoreBackend(FileSystemStoreBackend):
         if isinstance(item, pl.LazyFrame):
             return self._defer_lazy_item(call_id, item, replaced=replaced)
 
-        if not isinstance(item, pl.DataFrame):
+        if not isinstance(item, pl.DataFrame) or _has_object_columns(item.schema):
             return super().dump_item(call_id, item, verbose=verbose)
 
         parquet_path = self._parquet_path(call_id)
         parquet_path.parent.mkdir(parents=True, exist_ok=True)
-
-        try:
-            _write_parquet_atomic(item, parquet_path, self.parquet_options)
-
-        except Exception as e:  # noqa: BLE001 (matches joblib's own dump_item)
-            warnings.warn(
-                f"Unable to cache DataFrame as parquet, falling back to pickle. "
-                f"Exception: {e}.",
-                CacheWarning,
-            )
-            super().dump_item(call_id, item, verbose=verbose)
+        _write_parquet_atomic(item, parquet_path, self.parquet_options)
 
     @override
     def contains_item(self, call_id: list[str]) -> bool:
@@ -113,6 +123,14 @@ class ParquetStoreBackend(FileSystemStoreBackend):
 
         if pending is not None:
             return pending
+
+        if lazy_parquet_path.with_name(LAZY_TOKEN_FILENAME).exists() and not (
+            lazy_parquet_path.exists() or super().contains_item(call_id)
+        ):
+            raise RuntimeError(
+                "LazyFrame results are only cached once collected, so they can't be "
+                "loaded before then (e.g. via `call_and_shelve`)."
+            )
 
         if not (parquet_path.exists() or lazy_parquet_path.exists()):
             return super().load_item(
@@ -232,7 +250,10 @@ def _scan_cached(
     """Stream `query` to the parquet at `path` if needed, then yield batches from it."""
     with _WRITE_LOCKS[path]:
         if not path.exists() and _token_matches(path, token):
-            _try_write_lazy(query, path, parquet_options)
+            _write_lazy(query, path, parquet_options)
+
+    if path.exists():
+        _WRITE_LOCKS.pop(path, None)
 
     source = pl.scan_parquet(path) if path.exists() else query
 
@@ -255,30 +276,24 @@ def _token_matches(path: Path, token: str) -> bool:
     return token_path.exists() and token_path.read_text() == token
 
 
-def _try_write_lazy(
+def _write_lazy(
     query: pl.LazyFrame,
     path: Path,
     parquet_options: dict[str, Any],
 ) -> None:
-    """Sink `query` to `path`, warning instead of raising if it can't be stored.
-
-    Errors from the query itself propagate so a failing query isn't run twice.
-    """
-    if pl.Object in query.collect_schema().dtypes():
+    """Sink `query` to `path`, skipping results that parquet can't store."""
+    if _has_object_columns(query.collect_schema()):
         warnings.warn(
             "Unable to cache LazyFrame result with Object columns as parquet.",
             CacheWarning,
         )
         return
 
-    try:
-        _write_parquet_atomic(query, path, parquet_options)
+    _write_parquet_atomic(query, path, parquet_options)
 
-    except OSError as e:
-        warnings.warn(
-            f"Unable to cache LazyFrame result as parquet. Exception: {e}.",
-            CacheWarning,
-        )
+
+def _has_object_columns(schema: pl.Schema) -> bool:
+    return pl.Object in schema.dtypes()
 
 
 def _write_parquet_atomic(
@@ -305,9 +320,7 @@ def _write_parquet(
     try:
         with open(filename, "wb") as f:
             if isinstance(frame, pl.LazyFrame):
-                # a lazy sink would never run, leaving an empty file
-                options = {k: v for k, v in parquet_options.items() if k != "lazy"}
-                frame.sink_parquet(f, **options, lazy=False)
+                frame.sink_parquet(f, **parquet_options)
             else:
                 frame.write_parquet(f, **parquet_options)
 
@@ -360,7 +373,9 @@ class ParquetCache(Memory):
     compress
         Compression level for pickled (non-DataFrame) results.
     parquet_options
-        Keyword arguments passed to :meth:`polars.DataFrame.write_parquet`.
+        Keyword arguments passed to :meth:`polars.DataFrame.write_parquet` and
+        :meth:`polars.LazyFrame.sink_parquet`. Only options accepted by both are
+        allowed (see ``PARQUET_OPTIONS``).
 
     Examples
     --------
