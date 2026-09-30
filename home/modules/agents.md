@@ -6,7 +6,7 @@
 
 ## Git
 
-- Write concise and imperative git commit messages.
+- Write concise, imperative, lowercase git commit messages.
 
 ## Coding
 
