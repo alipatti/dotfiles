@@ -64,10 +64,16 @@ def main():
     if "--layout-only" in sys.argv[1:]:
         return
 
-    # pass the cwd explicitly: --cwd=current resolves against the script's own
-    # cwd when invoked from remote control, not the focused window's
+    # --cwd=current resolves against the source window, which defaults to the
+    # script's own when invoked from remote control. when the focused window
+    # is running `kitten ssh`, this also opens the new window on the remote
     focused = next(w for w in tab["windows"] if w["is_focused"])
-    kitten("launch", "--type=window", f"--cwd={focused['cwd']}")
+    kitten(
+        "launch",
+        "--type=window",
+        "--cwd=current",
+        f"--source-window=id:{focused['id']}",
+    )
 
 
 if __name__ == "__main__":
