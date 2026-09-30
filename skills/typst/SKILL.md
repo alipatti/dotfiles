@@ -17,6 +17,8 @@ and provides theorem environments (theorion), cetz/fletcher/subpar, math macros
 (`inner`, `to`, `toto`, ...), and all document styling.
 Do not re-add set/show rules the template already handles.
 
+There is no need to compile after every change.
+
 Style:
 
 - Put tables inside floats:
