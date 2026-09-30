@@ -3,11 +3,6 @@ if not bridge.available then
 	return -- not inside kitty
 end
 
--- each window we launch gets these env vars, so it can identify itself from
--- the inside. the watcher tags it with user vars to find it again
-local ROLE_VAR = "NVIM_TERM_ROLE"
-local PARENT_VAR = "NVIM_TERM_PARENT"
-
 -- <send><target>{motion} sends text, e.g. stip or scaf. the uppercase send
 -- key is the linewise version, like d/D and c/C: St, Sc
 -- <focus><target> focuses the window, launching it if needed
@@ -22,13 +17,9 @@ local function open(target, text)
 		role = target.role,
 		cmd = target.cmd,
 		cwd = vim.fn.getcwd(),
-		env = {
-			[ROLE_VAR] = target.role,
-			[PARENT_VAR] = tostring(vim.fn.getpid()),
-			-- same var nvim sets in :terminal. lets flatten open files from these
-			-- windows in this nvim, and lets claude's hook run checktime
-			NVIM = vim.v.servername,
-		},
+		-- same var nvim sets in :terminal. lets flatten open files from these
+		-- windows in this nvim, and lets claude's hook run checktime
+		env = { NVIM = vim.v.servername },
 		text = text,
 		submit = target.submit,
 	})
@@ -54,12 +45,12 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
 vim.keymap.set({ "n", "x" }, SEND, "<Nop>")
 vim.keymap.set({ "n", "x" }, string.upper(SEND), "<Nop>")
 
+local ipython = { "uv", "run", "--with", "ipython" }
 -- the dataframe browser is macos only (appkit)
-local ipython = { "uv", "run", "--with", "ipython", "ipython" }
 if vim.fn.has("mac") == 1 then
-	table.insert(ipython, 5, "--with")
-	table.insert(ipython, 6, "git+https://github.com/alipatti/browse@8d18aafae82404edaa363d3f20324c8fae5c2968")
+	vim.list_extend(ipython, { "--with", "git+https://github.com/alipatti/browse@8d18aafae82404edaa363d3f20324c8fae5c2968" })
 end
+table.insert(ipython, "ipython")
 
 -- terminals to create
 local targets = {
