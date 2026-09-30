@@ -10,6 +10,8 @@ require("blink.cmp").setup({
 		preset = "default",
 		["<C-c>"] = { "cancel", "fallback" },
 		["<C-Space>"] = { "select_and_accept" },
+		-- signature help is mapped in 01-ui.lua
+		["<C-k>"] = false,
 	},
 	signature = { enabled = false },
 	-- cmdline completion is handled by noice

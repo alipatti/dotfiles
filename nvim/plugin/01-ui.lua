@@ -39,9 +39,9 @@ require("which-key").setup({
 		},
 		{
 			mode = "i",
-			{ "<C-i>", vim.lsp.buf.signature_help, desc = "function signature help" },
-			{ "<C-h>", "<Left>",                   desc = "go left" },
-			{ "<C-l>", "<Right>",                  desc = "go right" },
+			{ "<C-k>", require("signature"), desc = "function signature help" },
+			{ "<C-h>", "<Left>",             desc = "go left" },
+			{ "<C-l>", "<Right>",            desc = "go right" },
 		},
 		{
 			mode = "n",
@@ -63,11 +63,11 @@ require("todo-comments").setup({
 
 -- pop up cmd line
 require("noice").setup({
-	-- leave signature help to neovim's builtin float (<C-i>); noice's version
-	-- auto-opens on every "(" or ","
+	-- leave signature help to lua/signature.lua
 	lsp = {
 		signature = { enabled = false },
 	},
+	-- route command line output into a popup
 	routes = {
 		{
 			view = "popup",
