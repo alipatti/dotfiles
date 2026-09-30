@@ -21,7 +21,10 @@ uv run scripts/canvas.py submit COURSE_ID ASSIGNMENT FILE [--name UPLOAD_NAME]
   (Safari Web Inspector Cmd+Opt+I > Storage > Cookies > `canvas_session`)
   and pass it with `--cookie`.
 - `download` grabs module items of type File and Assignment
-  (assignment attachments are parsed out of the description HTML).
+  (assignment attachments are parsed out of the description HTML),
+  then sweeps the course's assignments page for any assignment not linked
+  from a module and saves its attachments under `assignments/<name>/`.
+  Many courses post homework and solutions only there.
 - `submit` takes an assignment id or a name substring (must match exactly
   one) and submits FILE as an `online_upload`. Cookie-authed POSTs need the
   `X-CSRF-Token` header (URL-decoded `_csrf_token` cookie, set by any GET);

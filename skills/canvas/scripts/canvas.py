@@ -92,6 +92,23 @@ def _save_file(
     print(f"   saved {path} ({len(r.content) // 1024} KB)")
 
 
+def _slug(name: str) -> str:
+    return re.sub(r"\W+", "-", name.strip().lower()).strip("-")
+
+
+def _save_attachments(
+    s: requests.Session, base: str, a: dict, folder: pathlib.Path
+) -> None:
+    # assignments embed attachments as file links in the description
+    ids = re.findall(
+        r'data-api-endpoint="[^"]*/files/(\d+)"', a.get("description") or ""
+    )
+    if not ids:
+        print(f"   skipped {a['name']} (no attached files)")
+    for fid in dict.fromkeys(ids):
+        _save_file(s, base, fid, folder)
+
+
 @app.command
 def download(
     course_id: int,
@@ -100,24 +117,26 @@ def download(
     cookie: str | None = None,
     base: str = DEFAULT_BASE,
 ):
-    """Download all File items from a course's modules.
+    """Download File items from a course's modules, plus assignment attachments.
 
     Parameters
     ----------
     course_id
         Canvas course id, from the URL (e.g. /courses/22861/modules).
     dest
-        Directory to download into; one subfolder per module.
+        Directory to download into; one subfolder per module, and one per
+        assignment (under assignments/) for assignments not in any module.
     cookie
         canvas_session cookie value. Defaults to the cached one.
     base
         Canvas base URL.
     """
     s = _session(base, cookie)
+    seen = set()
     for mod in _api(
         s, base, f"/api/v1/courses/{course_id}/modules", **{"include[]": "items"}
     ):
-        folder = dest / re.sub(r"\W+", "-", mod["name"].strip().lower()).strip("-")
+        folder = dest / _slug(mod["name"])
         items = mod.get("items") or _api(
             s, base, f"/api/v1/courses/{course_id}/modules/{mod['id']}/items"
         )
@@ -126,15 +145,15 @@ def download(
             if item["type"] == "File":
                 _save_file(s, base, str(item["content_id"]), folder)
             elif item["type"] == "Assignment":
-                # assignments embed attachments as file links in the description
+                seen.add(item["content_id"])
                 a = _api(s, base, item["url"].removeprefix(base))[0]
-                ids = re.findall(
-                    r'data-api-endpoint="[^"]*/files/(\d+)"', a.get("description") or ""
-                )
-                if not ids:
-                    print(f"   skipped {item['title']} (no attached files)")
-                for fid in ids:
-                    _save_file(s, base, fid, folder)
+                _save_attachments(s, base, a, folder)
+    # many courses post homework only on the assignments page, not in modules
+    for a in _api(s, base, f"/api/v1/courses/{course_id}/assignments"):
+        if a["id"] in seen:
+            continue
+        print(f"== {a['name']}")
+        _save_attachments(s, base, a, dest / "assignments" / _slug(a["name"]))
 
 
 def _find_assignment(
