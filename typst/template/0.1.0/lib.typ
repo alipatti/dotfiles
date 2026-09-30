@@ -21,6 +21,15 @@
 #let var = $op("Var")$
 #let st = $op("s.t.")$
 
+// probability and convergence
+#let pto = $stretch(arrow.r)^p$
+#let dto = $stretch(arrow.r)^d$
+#let asto = $stretch(arrow.r)^"a.s."$
+#let qmto = $stretch(arrow.r)^2$
+#let ind = $bb(1)$
+#let supp = $op("supp")$
+#let argmax = $op("arg" thin "max", limits: #true)$
+
 // equivalent of latex's \clearpage: place pending floats, then start a new page
 #let clearpage() = {
   place.flush()
