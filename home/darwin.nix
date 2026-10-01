@@ -36,6 +36,11 @@ in
   home.file = {
     # mac-specific config locations
     "Library/Application Support/typst/packages/ali".source = link "typst";
+
+    # make rga cache in ~/.cache
+    "Library/Application Support/ripgrep-all/config.jsonc".text = builtins.toJSON {
+      cache.path = "${config.xdg.cacheHome}/ripgrep-all";
+    };
   };
 
   targets.darwin.search = "DuckDuckGo";

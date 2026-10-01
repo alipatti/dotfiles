@@ -19,6 +19,8 @@
 
 - Use `rg` instead of `grep -r` and `fd` instead of `find`.
   Both respect `.gitignore` by default and are faster.
+- Use `rga` (ripgrep-all) to search inside PDFs and other documents
+  instead of looping over `pdftotext`.
 
 ## Code Review
 
