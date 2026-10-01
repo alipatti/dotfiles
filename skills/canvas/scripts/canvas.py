@@ -8,8 +8,9 @@
 # ///
 """Canvas LMS CLI: download course files, list and submit assignments.
 
-The course id is in the Canvas URL, e.g. /courses/22872.
-To submit, run `assignments` to find the assignment id, then `submit` with it.
+Find course ids with `courses` (or in the Canvas URL, e.g. /courses/22872).
+To submit, run `assignments` to find the assignment id, then `submit` with it,
+first with --dry-run.
 
 Authentication uses the canvas_session browser cookie (Princeton disables API
 tokens). Pass it once with --cookie; it is validated and cached in
@@ -27,7 +28,7 @@ import pathlib
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import unquote, urlparse
 
 import httpx
@@ -40,6 +41,9 @@ DEFAULT_BASE = "https://princeton.instructure.com"
 ASSIGNMENT_HEADER = (
     f"{'id':>8}  {'due':<20}  {'state':<12}  {'attempt':>7}  {'types':<14}  name"
 )
+
+# how a downloaded file compares to the copy already in the mirror
+type DownloadStatus = Literal["new", "updated", "unchanged"]
 
 
 @Parameter(name="*")
@@ -180,8 +184,12 @@ class Canvas:
 
         return matches[0]
 
-    def _download_file(self, file_id: str, folder: pathlib.Path) -> str:
-        """Download a file into FOLDER, returning "new", "updated" or "unchanged"."""
+    def _download_file(
+        self,
+        file_id: str,
+        folder: pathlib.Path,
+    ) -> tuple[pathlib.Path, DownloadStatus]:
+        """Download a file into FOLDER, returning its path and status."""
         meta = self.get(f"/files/{file_id}")
         # display names come from canvas, so strip any directory components
         name = pathlib.Path(meta["display_name"]).name
@@ -199,7 +207,7 @@ class Canvas:
 
         folder.mkdir(parents=True, exist_ok=True)
         path = folder / name
-        status = (
+        status: DownloadStatus = (
             "new"
             if not path.exists()
             else "unchanged"
@@ -208,13 +216,13 @@ class Canvas:
         )
         path.write_bytes(r.content)
         print(f"   {status:<9} {path} ({len(r.content) // 1024} KB)")
-        return status
+        return path, status
 
     def _download_attachments(
         self,
         assignment: dict,
         folder: pathlib.Path,
-    ) -> list[str]:
+    ) -> list[tuple[pathlib.Path, DownloadStatus]]:
         # assignments embed attachments as file links in the description
         ids = re.findall(
             r'data-api-endpoint="[^"]*/files/(\d+)"',
@@ -254,8 +262,9 @@ def download(
     Files keep their Canvas names, in one subfolder per module and one per
     assignment (under assignments/) for assignments not in any module. Each file
     is reported as new, updated or unchanged relative to the previous run, so
-    rerunning shows what changed on Canvas. Copy the files you need out of the
-    mirror rather than editing them in place.
+    rerunning shows what changed on Canvas, and mirror files no longer on Canvas
+    are listed as local-only (but not deleted). Copy the files you need out of
+    the mirror rather than editing them in place.
 
     Parameters
     ----------
@@ -267,7 +276,7 @@ def download(
     dest = dest or CACHE_DIR / "files" / str(course_id)
     canvas = Canvas(auth)
     seen = set()
-    statuses = Counter()
+    results: list[tuple[pathlib.Path, DownloadStatus]] = []
 
     for module in canvas.paginate(
         f"/courses/{course_id}/modules",
@@ -281,11 +290,11 @@ def download(
 
         for item in items:
             if item["type"] == "File":
-                statuses[canvas._download_file(str(item["content_id"]), folder)] += 1
+                results.append(canvas._download_file(str(item["content_id"]), folder))
             elif item["type"] == "Assignment":
                 seen.add(item["content_id"])
                 assignment = canvas.get(item["url"])
-                statuses.update(canvas._download_attachments(assignment, folder))
+                results.extend(canvas._download_attachments(assignment, folder))
             else:
                 # pages, links, headers etc. have no file to save
                 print(f"   skipped   {item['type']} {item['title']!r}")
@@ -295,10 +304,34 @@ def download(
         if a["id"] not in seen:
             print(f"== assignment {a['name']!r} (not in any module)")
             folder = dest / "assignments" / _slug(a["name"])
-            statuses.update(canvas._download_attachments(a, folder))
+            results.extend(canvas._download_attachments(a, folder))
 
+    # e.g. a file the instructor replaced or removed since an earlier run
+    mirrored = {path for path, _ in results}
+    for path in sorted(p for p in dest.rglob("*") if p.is_file() and p not in mirrored):
+        print(f"   local-only {path} (no longer on Canvas)")
+
+    statuses = Counter(status for _, status in results)
     summary = ", ".join(f"{n} {s}" for s, n in statuses.items()) or "nothing"
-    print(f"done: {sum(statuses.values())} files ({summary}) under {dest}")
+    print(f"done: {len(results)} files ({summary}) under {dest}")
+
+
+@app.command
+def courses(*, all: bool = False, auth: Auth = DEFAULT_AUTH) -> None:
+    """List your courses with their ids.
+
+    Parameters
+    ----------
+    all
+        Include past and future courses, not just currently active ones.
+    """
+    canvas = Canvas(auth)
+    params = {"include[]": "term"} | ({} if all else {"enrollment_state": "active"})
+
+    print(f"{'id':>8}  {'term':<12}  {'code':<16}  name")
+    for c in canvas.paginate("/courses", **params):
+        term = (c.get("term") or {}).get("name") or "-"
+        print(f"{c['id']:>8}  {term:<12}  {c.get('course_code', '-'):<16}  {c['name']}")
 
 
 @app.command
@@ -317,9 +350,13 @@ def submit(
     file: pathlib.Path,
     *,
     name: str | None = None,
+    dry_run: bool = False,
     auth: Auth = DEFAULT_AUTH,
 ) -> None:
     """Upload FILE and submit it to ASSIGNMENT. This creates a new attempt.
+
+    Run with --dry-run first to check the assignment and file without
+    submitting anything.
 
     Parameters
     ----------
@@ -332,6 +369,8 @@ def submit(
         File to upload and submit.
     name
         Filename to submit under. Defaults to the file's own name.
+    dry_run
+        Resolve the assignment and check the file, then stop before uploading.
     """
     if not file.is_file():
         raise SystemExit(f"{file} does not exist or is not a file.")
@@ -342,17 +381,22 @@ def submit(
         raise SystemExit(
             f"{a['name']!r} does not accept uploads (types: {a['submission_types']})."
         )
+    upload_name = name or file.name
+    mime_type = mimetypes.guess_type(upload_name)[0] or "application/octet-stream"
     previous = a.get("submission") or {}
     print(
-        f"submitting to {a['id']} {a['name']!r} (due {a['due_at']}; currently "
+        f"{'would submit' if dry_run else 'submitting'} {file} as {upload_name!r} "
+        f"({file.stat().st_size // 1024} KB, {mime_type}) to {a['id']} "
+        f"{a['name']!r} (due {a['due_at']}; currently "
         f"{previous.get('workflow_state', 'unsubmitted')}, "
         f"{previous.get('attempt') or 0} previous attempts)"
     )
-    assignment_path = f"/courses/{course_id}/assignments/{a['id']}"
+    if dry_run:
+        print("dry run: nothing was uploaded or submitted")
+        return
 
     # canvas uploads take three steps: request a slot, upload, then submit
-    upload_name = name or file.name
-    mime_type = mimetypes.guess_type(upload_name)[0] or "application/octet-stream"
+    assignment_path = f"/courses/{course_id}/assignments/{a['id']}"
     slot = canvas.post(
         f"{assignment_path}/submissions/self/files",
         data={
