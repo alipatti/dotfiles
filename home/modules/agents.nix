@@ -23,6 +23,11 @@ let
     "neovim.io"
     "json.schemastore.org"
     "schemastore.org"
+    # canvas api, then the hosts file downloads redirect through and
+    # submissions upload to
+    "princeton.instructure.com"
+    "*.canvas-user-content.com"
+    "*.inscloudgate.net"
   ];
 in
 {
