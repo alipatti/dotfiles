@@ -123,6 +123,11 @@ Some of these libraries have their own skills.
 Load them when appropriate.
 When there's no skill, refer to the sections below.
 
+When unsure about an API, check the installed version's source
+(docstrings and signatures under
+`.venv/lib/python*/site-packages/<package>`) and the linked the web
+documentation.
+
 | Purpose         | Use                     | Not                     | Documentation                                                    |
 | --------------- | ----------------------- | ----------------------- | ---------------------------------------------------------------- |
 | Tabular data    | polars                  | pandas                  | See skill.                                                       |
@@ -156,7 +161,8 @@ instead of raw dicts or dataclasses.
 The user's personal helper package
 (private repo <https://github.com/alipatti/alipatti.py>),
 with optional extras per submodule (e.g. `alipatti[plot]`).
-Import it as `import alipatti as ap` and reference submodules as `ap.plot`, `ap.cache`, etc.
+Import it as `import alipatti as ap` and reference submodules as `ap.plot`,
+`ap.cache`, etc.
 Before writing a generic helper, check whether the package already has one,
 and import it rather than copying its code into the project.
 If you have an idea for a new helper or for changes to an existing helper,
