@@ -10,6 +10,9 @@
 // grow nested delimiters by depth
 #import "nested-delims.typ": nested-delims
 
+// tables from csv data
+#import "tables.typ": make-table
+
 // macros
 #let todo(x) = "TODO: " + x
 #let inner(x, y) = $chevron.l #x, #y chevron.r$
