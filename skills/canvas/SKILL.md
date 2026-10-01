@@ -5,54 +5,42 @@ description: "Use this skill when downloading files, listing modules, submitting
 
 # Canvas Skill
 
-Use the premade CLI `scripts/canvas.py` (relative to this skill):
+Interact with Canvas only through the CLI at `scripts/canvas.py`
+(relative to this skill).
+Never write ad-hoc Python or call the Canvas API yourself.
+Run `uv run scripts/canvas.py --help`
+(and `COMMAND --help`)
+for usage; its error messages say what went wrong,
+so read them before guessing.
+If the CLI can't do something, propose a new subcommand to the user.
 
 ```bash
-uv run scripts/canvas.py download COURSE_ID [--dest DIR] [--cookie VALUE]
-uv run scripts/canvas.py submit COURSE_ID ASSIGNMENT FILE [--name UPLOAD_NAME]
+# list course 22872's assignments with their ids, due dates and submission state
+uv run scripts/canvas.py assignments 22872
+
+# submit submission.pdf to assignment 205810 (id from the list above)
+uv run scripts/canvas.py submit 22872 205810 submission.pdf
+
+# mirror module files and assignment attachments into ~/.cache/canvas/files/22872/
+uv run scripts/canvas.py download 22872
 ```
 
-- The course id is in the Canvas URL (e.g. `/courses/22861/modules`).
-- Authentication uses the `canvas_session` cookie
-  (Princeton disables API token generation).
-  The script validates it against the API and caches a working cookie in
-  `~/.cache/canvas/`, so later runs need no flags. When there is no valid
-  cached cookie, ask the user to paste a fresh one
-  (Safari Web Inspector Cmd+Opt+I > Storage > Cookies > `canvas_session`)
-  and pass it with `--cookie`.
-- `download` grabs module items of type File and Assignment
-  (assignment attachments are parsed out of the description HTML),
-  then sweeps the course's assignments page for any assignment not linked
-  from a module and saves its attachments under `assignments/<name>/`.
-  Many courses post homework and solutions only there.
-- `submit` takes an assignment id or a name substring (must match exactly
-  one) and submits FILE as an `online_upload`. Cookie-authed POSTs need the
-  `X-CSRF-Token` header (URL-decoded `_csrf_token` cookie, set by any GET);
-  `_session` handles this. Submitting creates a new attempt and cannot be
-  undone, so confirm with the user before running.
-  After a successful submit, open the submission page in the browser so the
-  user can verify it:
-  `open "https://princeton.instructure.com/courses/COURSE_ID/assignments/ASSIGNMENT_ID/submissions/self"`
-  (needs to run outside the sandbox).
-- The sandbox network allowlist may not include instructure.com, and the
-  cookie cache write needs `~/.cache/canvas/`; the script may need to run
-  outside the sandbox.
-- Run with `--help` for all options; for other Canvas API needs, add a
-  subcommand reusing the `_session`/`_api` helpers
-  (cookie auth works on all `/api/v1/` endpoints;
-  strip the `while(1);` response prefix, paginate via the `Link` header).
-  Do the hacking manually first, and if it works,
-  ask the user if they'd like to update this skill.
+- Submitting creates a new attempt and cannot be undone;
+  confirm with the user first, then `open` the "verify at" URL it prints
+  (outside the sandbox).
+- `download` only mirrors files under their Canvas names.
+  Then copy (don't move or hardlink) each `new`
+  or `updated` file it reports into the course repo,
+  renamed per the conventions below.
 
 ## Conventions
 
-- Save files as
-  `handouts/{lecture-notes, slides, etc.}/N-topic-slug.pdf` (N is the lecture
-  number, slugs from lecture titles), matching the layout
-  of the other course directories under `~/Documents/education/classes/`.
-  Do not prefix with dates; they are easy to get wrong.
-- Problem sets go in `psets/N/`: the assignment as `problems.pdf` and
-  instructor solutions as `solutions.pdf` (plus any starter code).
+- Save files as `handouts/{lecture-notes, slides, etc.}/N-topic-slug.pdf`
+  (N is the lecture number, slugs from lecture titles,
+  e.g. `handouts/lecture-notes/2-lln-clt-delta-method.pdf`),
+  matching the layout of the other course directories under
+  `~/Documents/education/classes/`.
+- Problem sets go in `psets/N/`:
+  the assignment as `problems.pdf` and instructor solutions
+  as `solutions.pdf` (plus any starter code).
   The user's own writeup is `submission.*` (e.g. `submission.typ`).
-- Verify downloads with `file *.pdf` —
-  an expired cookie yields HTML login pages, not PDFs.
