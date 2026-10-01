@@ -10,8 +10,7 @@ unless pandas is strictly required by legacy dependencies.
 
 This document is intended as an overview and style guide,
 not an exhaustive source on how to use `polars`.
-Refer to surrounding code, the linked documentation,
-and the context7 documentation MCP server with `libraryId: websites/pola_rs`
+Refer to surrounding code and the linked documentation
 for more information.
 
 ## Setup
@@ -121,7 +120,8 @@ print(lazy_query.collect())
 ### Streaming
 
 For lazy queries over data too large to fit in memory,
-use the streaming engine to process the data in batches rather than all at once.
+use the streaming engine to process the data in batches rather than all at
+once.
 
 ```python
 # collect() -> new streaming engine
@@ -192,13 +192,20 @@ df1.join(
     df2,
     on=["join", "keys"],  # arbitrary expressions are also accepted!
     how="inner",  # "left", "right", "full", "semi", "anti"
+    validate="m:1",  # "1:1", "1:m", "m:1", "m:m"
 )
 ```
+
+Always pass `validate` to state the expected relationship between the keys.
+This catches bugs early.
 
 There are also non-equality joins by key proximity (`.join_asof`)
 or by arbitrary boolean expressions (`.join_where`).
 See [the guide](https://docs.pola.rs/user-guide/transformations/joins/)
 for more info.
+
+Anti and semi joins are also very useful and usually faster than filtering.
+Don't forget about them!
 
 ### Pivoting
 
@@ -210,8 +217,7 @@ This is not available lazily (the possible values aren't known a priori).
 To go from wide to long, use `.unpivot()`
 ([guide](https://docs.pola.rs/user-guide/transformations/unpivot/),
 [eager reference](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html),
-[lazy reference](https://docs.pola.rs/api/python/stable/reference/lazyframe/api/polars.LazyFrame.unpivot.html)
-).
+[lazy reference](https://docs.pola.rs/api/python/stable/reference/lazyframe/api/polars.LazyFrame.unpivot.html) ).
 This works both lazily and eagerly.
 
 ### Concatenation
@@ -230,8 +236,8 @@ pl.concat(frames_with_different_schemas, how="diagonal_relaxed")
 ## Expressions
 
 Expressions are the main way that you interact with data in polars.
-Use expressions as much as possible rather than chaining multiple with_columns
-calls.
+Use expressions as much
+as possible rather than chaining multiple with_columns calls.
 
 To preserve readability,
 build up complicated expressions using well-named intermediate expressions
@@ -286,9 +292,10 @@ When doing the same operation to many columns, prefer selectors
 
 ### Window Expressions
 
-Window functions restrict expressions to operate only _within_ defined groups.
-Prefer them to using `group_by` followed by a join -- they often let one avoid
-constructing temporary dataframes.
+Window functions restrict expressions to operate only _within_ defined
+groups.
+Prefer them to using `group_by` followed by a join -- they often let one
+avoid constructing temporary dataframes.
 
 ```python
 # demeaning a variable within some group
@@ -303,11 +310,13 @@ x_rank = pl.col("x").rank(method="average").over("cohort", "sex")
 
 ### Custom Functions
 
-Make a best effort to implement functionality using the built-in expression API.
+Make a best effort to implement functionality using the built-in expression
+API.
 For things that can't be implemented natively in Polars,
 there are three options in order of preference:
 
-1. Write a function that operates on `pl.Series` and use `.map_batches()`
+1. Write a function that operates on `pl.Series`
+   and use `.map_batches()`
    [docs](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_batches.html).
 2. Write and then call a `numpy` ufunc or generalized ufunc.
    These can be used in polars with little overhead
@@ -333,25 +342,28 @@ For example, columns indicating the date should be stored as a `pl.Date`,
 not a `yyyy-mm-dd` string.
 Time spans should be stored as `pl.Duration`s.
 
-Categorical columns with a fixed set of options should be stored as `pl.Enum`s.
+Categorical columns with a fixed set of options should be stored
+as `pl.Enum`s.
 Columns with a large or a-priori unknown set of categories should be stored
 as `pl.Categorical`s.
 Do not store categorical columns as strings or integers.
 
 Numeric columns that cannot take on fractional values should be stored
 as integers.
-Default to `pl.Int64` and use smaller integer types only when you are certain
-that the values will not overflow
+Default to `pl.Int64` and use smaller integer types only
+when you are certain that the values will not overflow
 (e.g. year can safely be stored as a `pl.Int16`).
-Avoid unsigned integer types (they make subtraction behave in unexpected ways).
+Avoid unsigned integer types
+(they make subtraction behave in unexpected ways).
 
 ### Null Values
 
 Polars stores missing data as `null`,
-tracked via a separate per-column validity bitmask rather than a sentinel value
-in the data itself.
-This means every dtype (including numeric and categorical types) can represent
-missingness without reserving a value for it.
+tracked via a separate per-column validity bitmask rather than a sentinel
+value in the data itself.
+This means every dtype
+(including numeric and categorical types)
+can represent missingness without reserving a value for it.
 
 Always use `null` for missing data.
 Do not use sentinel values such as empty strings (`""`) or magic integers
@@ -426,4 +438,41 @@ df.write_parquet(DATA / "output.parquet")
 
 # use sink_parquet to write lazy queries to disk
 really_complicated_query.sink_parquet(DATA / "output.parquet")
+```
+
+## Structuring Pipelines
+
+Write each step (renaming, cleaning, transformations) as a function
+that takes a frame and returns a frame, lazy whenever possible.
+These functions should not read or write data.
+
+Keep all reading and writing in the driver code,
+which chains the steps together.
+
+```python
+def standardize_dtypes(lf: pl.LazyFrame) -> pl.LazyFrame:
+    return lf.with_columns(
+        pl.col("birth_date").str.to_date(),
+        pl.col("state").cast(STATE_ENUM),
+    )
+
+
+def main():
+    people = (
+        pl.scan_parquet(DATA / "people.parquet")
+        .pipe(rename_cols)
+        .pipe(standardize_dtypes)
+    )
+
+    earnings = (
+        pl.scan_parquet(DATA / "earnings.parquet")
+        .pipe(do_expensive_manipulations)
+        .pipe(drop_before, year=2000)  # extra arguments are passed to the function
+        .select(*relevant_columns)
+    )
+
+    (
+        people.join(earnings, on="id", validate="1:m")
+        .sink_parquet(DATA / "clean.parquet")
+    )
 ```
