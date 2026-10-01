@@ -260,6 +260,68 @@ x_bar = pl.col("x").pipe(weighted_mean, "weight").over("group")
 lf.with_columns(x_bar)
 ```
 
+### Expression-First Design
+
+If possible, design data transformations by building up `pl.Expr`s,
+not chaining `with_columns` calls.
+In particular,
+
+- Bind derived quantities to variables
+  (or module-level constants if frequently used,
+  e.g. `VALUE = pl.col("value")`).
+  Don't materialize intermediate columns with `with_columns` only to
+  reference them by name later.
+- Aim for one `with_columns` / `agg` per function.
+  Many `with_columns` or `group_by` calls usually means an expression
+  should be factored out into a variable.
+- Write reusable transformations as functions `( pl.Expr ) -> pl.Expr`
+  so results stay consistent by construction.
+- Use windows (`.over(...)`) inside `agg` to get per-subgroup values
+  without a second `group_by`.
+- Name groups of columns once
+  (`METADATA = (...)`, `PARAMETERS = cs.exclude(METADATA)`)
+  and use selectors instead of listing column names.
+- Derive simple columns as one pure expression
+  (`pl.any_horizontal(pl.all().diff() != 0)`),
+  not python lists or `zip`-built expression lists.
+- When a frame's purpose is a table,
+  give output columns display names with `.alias()`
+  in the final `agg` or `select`.
+
+```python
+# avoid: intermediate columns passed between stages by name
+(
+    draws.with_columns(batch=..., time_per_step=...)
+    .with_columns(posterior_var=pl.col("value").var().over("sampler"))
+    .group_by("sampler", "batch")
+    .agg(
+        pl.col("value").mean().alias("batch_mean"),
+        pl.len().alias("batch_size"),
+        pl.col("posterior_var").first(),
+    )
+    .group_by("sampler")
+    .agg(
+        tau=pl.col("batch_size").mean()
+        * pl.col("batch_mean").var()
+        / pl.col("posterior_var").first()
+    )
+)
+
+# prefer: named expressions composed in a single aggregation
+VALUE = pl.col("value")
+
+
+def batch_se(statistic: pl.Expr) -> pl.Expr:
+    first_in_batch = pl.struct("chain", "batch").is_first_distinct()
+
+    per_batch = statistic.over("chain", "batch").filter(first_in_batch)
+    return per_batch.std() / first_in_batch.sum().sqrt()
+
+
+tau = pl.len() * batch_se(VALUE.mean()) ** 2 / VALUE.var()
+long_draws.group_by("sampler").agg(tau.alias("τ"), (pl.len() / tau).alias("ESS"))
+```
+
 ### Selectors and Expression Expansion
 
 Use selectors to select many columns at once.

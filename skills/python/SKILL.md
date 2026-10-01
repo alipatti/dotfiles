@@ -19,6 +19,10 @@ In addition:
 
 - Extract a helper when logic repeats multiple times,
   or a name would clarify intent that inline code doesn't convey.
+- Prefer consolidation.
+  If there are several similar functions,
+  think about how to abstract their shared functionality.
+  Don't be afraid to refactor.
 - Use lowercase for comments.
   Include comments iff functionality is not obvious.
   Prefer extracting descriptively named constants
