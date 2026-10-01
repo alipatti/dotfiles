@@ -1,6 +1,6 @@
 ---
 name: polars
-description: "Use this skill for any tabular data task in Python: loading, transforming, aggregating, or writing dataframes. Covers polars style and conventions, including lazy evaluation, expressions, dtype choices, and reading SAS/Stata files."
+description: "Load BEFORE writing or editing any Python code that uses polars (`import polars`, `pl.*`), even small helpers inside non-data code such as simulations or plotting, and for any tabular data task: loading, transforming, aggregating, or writing dataframes. Covers polars style and conventions, including lazy evaluation, expressions, dtype choices, and reading SAS/Stata files."
 ---
 
 # Polars Skill

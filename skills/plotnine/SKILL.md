@@ -1,6 +1,6 @@
 ---
 name: plotnine
-description: "Use this skill when making figures in Python. Covers visual style and shared helpers in the users personal package. Load the python skill first."
+description: "Load BEFORE writing or editing any Python code that imports plotnine or mizani, or that produces a figure (.pdf/.png) from Python. Takes precedence over generic charting skills for Python figure code. Covers visual style and shared helpers in the user's personal package. Load the python skill first."
 ---
 
 # plotnine

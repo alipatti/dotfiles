@@ -1,6 +1,6 @@
 ---
 name: python
-description: "Use this skill whenever you use or consider using python. Contains style/best practices"
+description: "Load BEFORE writing, editing, or reviewing any Python code: .py files, pyproject.toml, uv commands, or inline scripts. Contains style and best practices, and points to library-specific skills (polars, plotnine) that must also be loaded."
 ---
 
 # Python
@@ -120,7 +120,9 @@ Avoid using the libraries in the "Not" column.
 Ask before installing things not on this list.
 
 Some of these libraries have their own skills.
-Load them when appropriate.
+Load a library's skill before writing any code that uses it,
+even when the library is incidental to the task
+(e.g. a polars frame returned by a simulation).
 When there's no skill, refer to the sections below.
 
 When unsure about an API, check the installed version's source
@@ -130,9 +132,9 @@ documentation.
 
 | Purpose         | Use                     | Not                     | Documentation                                                    |
 | --------------- | ----------------------- | ----------------------- | ---------------------------------------------------------------- |
-| Tabular data    | polars                  | pandas                  | See skill.                                                       |
+| Tabular data    | polars                  | pandas                  | Load skill.                                                      |
 | CLI             | cyclopts                | argparse, click, typer  | <https://cyclopts.readthedocs.io/en/stable/getting_started.html> |
-| Figures         | plotnine                | matplotlib, seaborn     | See skill.                                                       |
+| Figures         | plotnine                | matplotlib, seaborn     | Load skill.                                                      |
 | HTTP            | httpx (sync by default) | requests, urllib        | <https://www.python-httpx.org/quickstart/>                       |
 | HTML parsing    | parsel                  | BeautifulSoup, lxml     | <https://parsel.readthedocs.io/en/latest/usage.html>             |
 | Structured data | pydantic or dataclasses | TypedDict, manual dicts | <https://docs.pydantic.dev/latest/>                              |
