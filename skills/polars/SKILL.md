@@ -414,30 +414,6 @@ logger.debug("Expensive step done!")
 logger.debug("Data after processing: {}", df_processed)
 ```
 
-### Interactive Use with IPython
-
-For interactive exploration of a dataframe or query,
-use the `ipython` MCP server rather than repeatedly editing
-and rerunning a script.
-It runs a persistent IPython session,
-so variables and imports stay alive between tool calls.
-
-Add it to `settings.json`:
-
-```json
-"mcpServers": {
-  "ipython": {
-    "command": "uvx",
-    "args": ["--from", "git+https://github.com/alipatti/repl-mcp", "repl-mcp", "ipython"]
-  }
-}
-```
-
-Use it to collect the desired data once
-(possibly after performing some operations),
-and then experiment against the live session instead of re-running `pl.scan_*`
-from scratch each time.
-
 ## Writing Data
 
 Save data to parquet files by default.
