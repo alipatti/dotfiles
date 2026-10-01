@@ -32,26 +32,16 @@ def theme_ali(base_size: float = 11) -> pn.theme:
 
 
 @contextmanager
-def math_font(font: str = FONT) -> Iterator[None]:
+def math_font() -> Iterator[None]:
     """
-    Render mathtext labels in `font` within the block.
+    Render mathtext labels in Computer Modern math within the block.
 
-    Matplotlib's settings are restored on exit, so nothing leaks into later
-    figures.
+    This matches typst, which sets math in New Computer Modern Math. Pointing
+    mathtext at FONT instead would use the text font's italic Greek, whose α
+    looks like an italic a. Matplotlib's settings are restored on exit, so
+    nothing leaks into later figures.
     """
-    # every custom slot is set, since the default cal (cursive) resolves to
-    # apple chancery on macos and warns about its weight
-    with mpl.rc_context(
-        {
-            "mathtext.fontset": "custom",
-            "mathtext.rm": font,
-            "mathtext.it": f"{font}:italic",
-            "mathtext.bf": f"{font}:bold",
-            "mathtext.sf": font,
-            "mathtext.tt": font,
-            "mathtext.cal": font,
-        }
-    ):
+    with mpl.rc_context({"mathtext.fontset": "cm"}):
         yield
 
 
