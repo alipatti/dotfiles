@@ -22,6 +22,7 @@
 #let End = $op("End")$
 #let poly = $op("poly")$
 #let var = $op("Var")$
+#let cov = $op("Cov")$
 #let st = $op("s.t.")$
 
 // probability and convergence
