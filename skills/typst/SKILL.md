@@ -34,9 +34,9 @@ There is no need to compile after every change.
 
 ## Formatting Math
 
-- Only the simplest math should be inline.
-  Anything complicated should be put in a display, indented two spaces,
-  and with the delimiters on their own lines.
+- Default to display math; inline math is the exception.
+  Inline math is for naming objects, not for stating results.
+  Displays are indented two spaces, with the delimiters on their own lines.
 - Math is part of the prose.
   Display blocks should end with appropriate punctuation:
   for example a comma when they lead into a separate clause,
@@ -80,6 +80,25 @@ $
 $
 // we add "The estimator ..." to avoid starting a sentence with a symbol
 The estimator $hat(alpha)$ is consistent by the continuous mapping theorem.
+```
+
+### Inline vs. Display
+
+Bad:
+
+```typst
+Its moments are $EE(X) = mu = m$, $var(X) = sigma^2 + tau^2 = s$, and $cov(X, Y) = rho$.
+```
+
+Good:
+
+```typst
+Its moments are
+$
+  EE(X) & = mu = m, \
+  var(X) & = sigma^2 + tau^2 = s, \
+  cov(X, Y) & = rho.
+$
 ```
 
 ## Tables
