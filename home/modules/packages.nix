@@ -52,6 +52,7 @@ in
     scc # line counter
     watchexec # run command on file change
     poppler-utils # pdf tools
+    llama-cpp # llama-server, used by marker's ocr models (tools/pdf2md.py)
     just
     wget
     file
