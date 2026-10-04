@@ -34,5 +34,15 @@
       "qlcolorcode"
       "qlstephen" # preview files without an extension
     ];
+
+    # mac app store apps, installed with mas. needs an app store sign-in, and
+    # unlike casks, apps removed from this list are not uninstalled
+    masApps = {
+      Hush = 1544743900;
+      "uBlock Origin Lite" = 6745342698;
+      Pages = 409201541;
+      Numbers = 409203825;
+      Xcode = 497799835;
+    };
   };
 }
