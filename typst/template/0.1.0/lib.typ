@@ -73,7 +73,7 @@
 
   // spacing
   set page(paper: "us-letter", margin: 1in, numbering: "1")
-  set list(indent: 1em)
+  set list(indent: 1em, marker: context box(width: 0.4em, height: 0.07em, fill: text.fill, baseline: -0.26em))
   set enum(indent: 1em)
   set par(justify: true, leading: 0.6em, first-line-indent: 0em, spacing: 1em)
 
