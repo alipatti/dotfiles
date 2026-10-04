@@ -67,13 +67,6 @@ in
           "~/.cache/"
           "~/.local/share/uv/"
         ];
-        # from a repo subfolder, .git sits above the writable cwd. run the
-        # index/history writers unsandboxed and let the permission classifier
-        # judge them instead of failing and retrying
-        excludedCommands = [
-          "git add *"
-          "git commit *"
-        ];
       };
 
       hooks.PostToolUse = [
