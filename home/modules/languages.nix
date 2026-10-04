@@ -9,6 +9,7 @@ in
     uv # python
     nodejs # js
     pnpm # js
+    R # r
     rustup # rust; also provides rust-analyzer via `rustup component add rust-analyzer`
   ];
 
