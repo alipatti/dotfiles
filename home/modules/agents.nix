@@ -120,7 +120,7 @@ in
   home.file = {
     ".claude/CLAUDE.md".source = link "home/modules/agents.md";
     ".claude/skills".source = link "skills";
-    # enter inserts a newline, shift+enter sends
+    # enter inserts a newline
     ".claude/keybindings.json".text = builtins.toJSON {
       "$schema" = "https://www.schemastore.org/claude-code-keybindings.json";
       "$docs" = "https://code.claude.com/docs/en/keybindings";
@@ -129,7 +129,6 @@ in
           context = "Chat";
           bindings = {
             enter = "chat:newline";
-            "shift+enter" = "chat:submit";
           };
         }
       ];
