@@ -49,7 +49,7 @@ in
     ripgrep # better grep
     ripgrep-all # search pdfs & more
     jq # json parser
-    scc # line counter
+    tokei # line counter
     watchexec # run command on file change
     poppler-utils # pdf tools
     llama-cpp # llama-server, used by marker's ocr models (tools/pdf2md.py)
