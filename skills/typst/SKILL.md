@@ -24,10 +24,6 @@ There is no need to compile after every change.
 - Be concise and assume that your reader is very intelligent.
   Err on the side of brevity and omitting details in the first pass.
   If more detail is needed, it will be requested.
-- After a formal definition or theorem, add a short informal gloss
-  ("Informally, ...").
-- Before a long computation or notation-heavy section,
-  give an intuitive overview of what's to come.
 - Prefer algebraic-flavored exposition: maps, spaces, commutative diagrams
   (using `fletcher`).
 - Place each sentence on its own own line in the source file.
