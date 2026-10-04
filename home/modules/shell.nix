@@ -47,6 +47,8 @@ in
           end
       end
 
+      set -g fish_greeting # no greeting
+
       # automatic venv activation
       activate_venv --quiet
 
