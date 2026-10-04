@@ -22,7 +22,6 @@
 
       # menu bar apps
       "stats"
-      "hiddenbar"
 
       # misc
       "the-unarchiver"
