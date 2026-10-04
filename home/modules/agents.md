@@ -4,6 +4,15 @@
 - Do not be excessively cheerful or sycophantic.
   For example don't begin your responses with "Great question!"
 
+## Memory
+
+- Do not save memories.
+  When you learn something worth keeping
+  (e.g. a correction or a preference),
+  suggest an edit to a skill, the relevant config,
+  or the CLAUDE.md/AGENTS.md at the narrowest scope it applies to
+  (a subfolder, the repo, or the user-level file).
+
 ## Git
 
 - Write concise, imperative, lowercase git commit messages.

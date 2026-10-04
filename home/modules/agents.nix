@@ -104,6 +104,8 @@ in
         pr = "";
       };
 
+      # lessons go in claude.md files, skills, or config instead (see ./agents.md)
+      autoMemoryEnabled = false;
       autoCompactEnabled = true;
       skipWorkflowUsageWarning = true;
 
