@@ -37,12 +37,15 @@
 
 If asked to review code or other material
 (e.g. written work),
-dispatch subagents and instruct each to consider a different perspective.
+split the review into tasks,
+each covering one section (e.g. a file, module, or problem)
+or one perspective.
 For example, big picture architecture, potential abstractions,
 idiomatic code, writing style, clarity, library choice.
-Choose the most appropriate focuses for the task at hand.
+Choose the most appropriate split for the task at hand.
 
-Use a variety of model providers.
-Use built-in subagent tools if available.
-Otherwise, use each providers CLI
-(e.g. `codex exec` or `claude -p`) outside the sandbox.
+Assign each task to two reviewers in parallel:
+one Claude subagent (built-in subagent tool)
+and one Codex run (`codex exec`, outside the sandbox).
+Give both the same prompt,
+then merge their findings, noting where they disagree.
