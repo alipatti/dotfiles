@@ -6,20 +6,20 @@
 """Convert a PDF to markdown plus images with marker, then have an LLM fix each chunk of pages.
 
 Marker gets layout, tables, figures, and display math mostly right but garbles inline math.
-Lines that look garbled are flagged, and the LLM returns replacements for wrong line ranges
-as structured output, along with short descriptions of each figure that make it findable
-by search. Models starting with "claude" run through `claude -p`, anything else through
-`codex exec`.
+Lines that look garbled are flagged, and an OpenAI model (run through `codex exec` with no
+tools) returns replacements for wrong line ranges as structured output, along with short
+descriptions of each figure that make it findable by search.
 """
 
+import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
-from functools import partial
-from itertools import batched, chain
+from itertools import batched
 from pathlib import Path
 
 import pypdfium2
@@ -27,12 +27,35 @@ from cyclopts import App
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
 
-app = App()
+OPENAI_MODEL: str = "gpt-6-luna"
+REASONING_EFFORT: str = "low"
+PAGES_PER_CHUNK: int = 2
+PASSES: int = 2  # passes after the first only run while some lines still look garbled
+CALL_TIMEOUT: int = 180  # seconds; most calls take under a minute, a few stall for many
+PAGE_IMAGE_DPI: int = 110
+CACHE_DIR: Path = (
+    Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "pdf2md"
+)
+
+# codex features that give the model tools; it only needs the prompt and the images
+CODEX_TOOLS: tuple[str, ...] = (
+    "shell_tool",
+    "unified_exec",
+    "view_image",
+    "image_generation",
+    "multi_agent",
+    "plugins",
+    "apps",
+    "browser_use",
+    "computer_use",
+    "sleep_tool",
+    "tool_suggest",
+    "skill_search",
+    "goals",
+)
 
 PAGE_SEPARATOR = re.compile(r"\n\n\{(\d+)\}-{48}\n\n")
 PAGE_MARKER = "<!-- page"
-PAGE_IMAGE_DPI = 110
-CALL_TIMEOUT = 180  # seconds; most calls take under a minute, a few stall for many
 
 # spans that are fine as far as math goes: footnote markers (linked or at the start of a
 # footnote), latex (but not escaped currency), links, html anchors, and minus signs in
@@ -53,9 +76,9 @@ WORD = re.compile(r"[a-zA-Z]{3,}")
 
 PROMPT = """\
 Below is a machine transcription (marker OCR) of pages {first}-{last} of a PDF, one line per
-paragraph, prefixed with line numbers. The page images are {pages}.
+paragraph, prefixed with line numbers. The attached images are, in order, {images}.
 
-Compare the transcription against the images and return fixes for wrong lines.
+Compare the transcription against the page images and return fixes for wrong lines.
 Lines marked `!` contain math that was not converted to LaTeX, e.g.
 `<sup>L</sup>bn(<sup>θ</sup> ∗ n ; σb 2)` for `$\\widehat{{L}}_n(\\theta^*_n; \\widehat\\sigma^2)$`.
 Rewrite all such math in each `!` line as LaTeX in $...$, keeping the prose identical.
@@ -73,7 +96,6 @@ Rules:
 - The transcription escapes markdown characters such as `\\_`, `\\*`, and `\\(` in prose.
   Leave those, all links and image links, citations, and author blocks as they are.
 - Every row of a table, header included, must have the same number of cells.
-- Everything you need is in this prompt and the images. {tool_hint}
 
 {figures}
 
@@ -81,18 +103,15 @@ Rules:
 """
 
 FIGURES_TASK = """\
-The figures on these pages are also attached as {names}. For each one, write a description
-in `figures` whose purpose is to make the figure findable by search, not to describe it
-perfectly: say what kind of figure it is, what it is about, and its main takeaway, using
-the terms someone would search for (variables, outcomes, methods, places, time periods).
-One to three sentences; exact values aren't needed."""
+For each figure image ({names}), write a description in `figures` whose purpose is to make
+the figure findable by search, not to describe it perfectly: say what kind of figure it is,
+what it is about, and its main takeaway, using the terms someone would search for
+(variables, outcomes, methods, places, time periods). One to three sentences; exact values
+aren't needed."""
 
 NO_FIGURES_TASK = "Leave `figures` empty."
 
-TOOL_HINTS = {
-    "claude": "Read the page images with the Read tool and nothing else.",
-    "codex": "Do not run any commands.",
-}
+app = App()
 
 
 class Strict(BaseModel):
@@ -116,26 +135,6 @@ class Figure(Strict):
 class Response(Strict):
     fixes: list[Fix]
     figures: list[Figure]
-
-
-SCHEMA = json.dumps(Response.model_json_schema())
-
-
-class Tokens(BaseModel):
-    input_tokens: int
-    cached_input_tokens: int
-    output_tokens: int
-    cost_usd: float | None = None
-
-
-class Usage(Tokens):
-    chunk: int
-    pass_number: int
-    seconds: float
-    flagged_lines: int
-    applied_fixes: int
-    rejected_fixes: int
-    described_figures: int
 
 
 def run_marker(pdf: Path, out: Path, force_ocr: bool) -> str:
@@ -198,46 +197,19 @@ def numbered(lines: list[str]) -> str:
     )
 
 
-def run_claude(
-    model: str,
-    effort: str,
-    prompt: str,
-    directory: Path,
-    images: list[str],
-) -> tuple[Response, Tokens]:
-    """Run one `claude -p` session in `directory`; it reads the images itself."""
-    command = [
-        "claude", "-p", prompt,
-        "--model", model,
-        "--effort", effort,
-        "--output-format", "json",
-        "--json-schema", SCHEMA,
-        "--tools", "Read",
-    ]  # fmt: skip
-    result = json.loads(run(command, directory))
-    usage = result["usage"]
-    return Response.model_validate(result["structured_output"]), Tokens(
-        input_tokens=usage["input_tokens"] + usage["cache_creation_input_tokens"],
-        cached_input_tokens=usage["cache_read_input_tokens"],
-        output_tokens=usage["output_tokens"],
-        cost_usd=result["total_cost_usd"],
-    )
+def run_codex(prompt: str, images: list[str], directory: Path) -> Response:
+    """Run one tool-less `codex exec` call in `directory` and return its structured output.
 
-
-def run_codex(
-    model: str,
-    effort: str,
-    prompt: str,
-    directory: Path,
-    images: list[str],
-) -> tuple[Response, Tokens]:
-    """Run one `codex exec` session in `directory` with the images attached."""
-    (directory / "schema.json").write_text(SCHEMA)
+    A call that stalls past `CALL_TIMEOUT` is retried once.
+    """
+    (directory / "schema.json").write_text(json.dumps(Response.model_json_schema()))
     command = [
         "codex", "exec", prompt,
-        "--model", model,
-        "--config", f'model_reasoning_effort="{effort}"',
-        "--json",
+        "--model", OPENAI_MODEL,
+        "--config", f'model_reasoning_effort="{REASONING_EFFORT}"',
+        *(arg for tool in CODEX_TOOLS for arg in ("--disable", tool)),
+        "--ignore-user-config",
+        "--ignore-rules",
         "--sandbox", "read-only",
         "--skip-git-repo-check",
         "--ephemeral",
@@ -245,72 +217,52 @@ def run_codex(
         "--output-last-message", "result.json",
         *(arg for image in images for arg in ("--image", image)),
     ]  # fmt: skip
-    events = map(json.loads, run(command, directory).splitlines())
-    usage = next(e["usage"] for e in events if e["type"] == "turn.completed")
-    return Response.model_validate_json(
-        (directory / "result.json").read_text()
-    ), Tokens(
-        input_tokens=usage["input_tokens"] - usage["cached_input_tokens"],
-        cached_input_tokens=usage["cached_input_tokens"],
-        output_tokens=usage["output_tokens"],
-    )
 
+    for attempt in range(2):
+        try:
+            subprocess.run(
+                command,
+                cwd=directory,
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                check=True,
+                timeout=CALL_TIMEOUT,
+            )
+            break
+        except subprocess.TimeoutExpired:
+            if attempt:
+                raise
+            logger.warning(f"{directory.name} stalled, retrying")
 
-def run(command: list[str], directory: Path) -> str:
-    """Run `command` in `directory`, retrying once if it stalls past `CALL_TIMEOUT`."""
-    attempt = partial(
-        subprocess.run,
-        command,
-        cwd=directory,
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-        check=True,
-        timeout=CALL_TIMEOUT,
-    )
-
-    try:
-        return attempt().stdout
-    except subprocess.TimeoutExpired:
-        logger.warning(f"{directory.name} stalled, retrying")
-        return attempt().stdout
+    return Response.model_validate_json((directory / "result.json").read_text())
 
 
 def fix_chunk(
     pages: dict[int, str],
     page_images: list[str],
     figures: list[str],
-    chunk: int,
     directory: Path,
-    *,
-    model: str,
-    effort: str,
-    passes: int,
-) -> tuple[str, list[Usage]]:
-    """Have an LLM fix one chunk of pages and describe its figures.
+) -> str:
+    """Have the LLM fix one chunk of pages and describe its figures; return the markdown.
 
-    Returns the fixed markdown and per-pass usage. Passes after the first only run while
-    some lines still look garbled, since cheap models sometimes skip lines or whole chunks,
-    and only the first pass describes figures.
+    Passes after the first only run while some lines still look garbled, since cheap models
+    sometimes skip lines or whole chunks, and only the first pass describes figures.
     """
-    backend = "claude" if model.startswith("claude") else "codex"
-    run_llm = run_claude if backend == "claude" else run_codex
     first, last = min(pages), max(pages)
     lines = join_pages(pages).splitlines()
     descriptions = {}
-    usages = []
+    applied = 0
 
-    for n in range(passes):
-        flagged_lines = sum(map(is_garbled, lines))
-        if n and not flagged_lines:
+    for n in range(PASSES):
+        if n and not any(map(is_garbled, lines)):
             break
 
         describe = not n and figures
+        images = page_images + figures if describe else page_images
         prompt = PROMPT.format(
             first=first,
             last=last,
-            pages=", ".join(page_images),
-            tool_hint=TOOL_HINTS[backend],
+            images=", ".join(images),
             figures=(
                 FIGURES_TASK.format(names=", ".join(figures))
                 if describe
@@ -320,56 +272,24 @@ def fix_chunk(
         )
         (directory / f"prompt-{n}.md").write_text(prompt)
 
-        images = page_images + (figures if describe else [])
-        start = time.monotonic()
         try:
-            output, tokens = run_llm(model, effort, prompt, directory, images)
+            response = run_codex(prompt, images, directory)
         except subprocess.TimeoutExpired:
-            logger.warning(f"Chunk {chunk} stalled twice, keeping it as is")
+            logger.warning(f"Pages {first}-{last} stalled twice, keeping them as is")
             break
 
-        lines, applied = apply_fixes(lines, output.fixes)
+        lines, pass_applied = apply_fixes(lines, response.fixes)
+        applied += pass_applied
         if describe:
             descriptions = {
-                f.image: f.description for f in output.figures if f.image in figures
+                f.image: f.description for f in response.figures if f.image in figures
             }
 
-        usages.append(
-            Usage(
-                chunk=chunk,
-                pass_number=n,
-                seconds=time.monotonic() - start,
-                flagged_lines=flagged_lines,
-                applied_fixes=applied,
-                rejected_fixes=len(output.fixes) - applied,
-                described_figures=len(descriptions) if describe else 0,
-                **tokens.model_dump(),
-            )
-        )
-
-    fixed = "\n".join(add_descriptions(lines, descriptions)) + "\n"
-    (directory / "chunk.md").write_text(fixed)
-
     logger.info(
-        f"Chunk {chunk} (pages {first}-{last}): "
-        f"{sum(u.applied_fixes for u in usages)} fixes in {len(usages)} passes, "
+        f"Pages {first}-{last}: {applied} fixes, "
         f"{len(descriptions)}/{len(figures)} figures described"
     )
-    return fixed, usages
-
-
-def add_descriptions(lines: list[str], descriptions: dict[str, str]) -> list[str]:
-    """Insert each figure's labeled description below its image link."""
-    result = []
-    for line in lines:
-        result.append(line)
-        for image in IMAGE_LINK.findall(line):
-            if image in descriptions:
-                # descriptions mention currency, which markdown would read as math
-                description = BARE_DOLLAR.sub(r"\\$", descriptions[image])
-                result += ["", f"> {DESCRIPTION_LABEL} {description}"]
-
-    return result
+    return "\n".join(add_descriptions(lines, descriptions)) + "\n"
 
 
 def apply_fixes(lines: list[str], fixes: list[Fix]) -> tuple[list[str], int]:
@@ -420,77 +340,105 @@ def fits(text: str, original: list[str]) -> bool:
     return not old or len(new & old) / min(len(new), len(old)) >= 0.5
 
 
-@app.default
-def main(
+def add_descriptions(lines: list[str], descriptions: dict[str, str]) -> list[str]:
+    """Insert each figure's labeled description below its image link."""
+    result = []
+    for line in lines:
+        result.append(line)
+        for image in IMAGE_LINK.findall(line):
+            if image in descriptions:
+                # descriptions mention currency, which markdown would read as math
+                description = BARE_DOLLAR.sub(r"\\$", descriptions[image])
+                result += ["", f"> {DESCRIPTION_LABEL} {description}"]
+
+    return result
+
+
+def fix_pages(
     pdf: Path,
-    out: Path | None = None,
-    *,
-    model: str = "gpt-6-luna",
-    effort: str = "low",
-    pages_per_chunk: int = 2,
-    passes: int = 2,
-    jobs: int = 32,
-    fix: bool = True,
-    force_ocr: bool = False,
-):
-    """Convert PDF into OUT/NAME.md plus figure images.
+    pages: dict[int, str],
+    marker_dir: Path,
+    work_dir: Path,
+) -> str:
+    """Fix all chunks of pages in parallel and return the joined markdown."""
+    chunks = [dict(chunk) for chunk in batched(pages.items(), PAGES_PER_CHUNK)]
+    directories = [work_dir / f"chunk-{i:02}" for i in range(len(chunks))]
 
-    The raw marker output is kept as NAME.marker.md and per-pass usage in usage.jsonl.
-    """
-    pdf = pdf.resolve()
-    out = (out or pdf.with_suffix("")).resolve()
-    out.mkdir(parents=True, exist_ok=True)
-
-    marker_path = out / f"{pdf.stem}.marker.md"
-    if not marker_path.exists():
-        logger.info(f"Running marker on {pdf.name}")
-        start = time.monotonic()
-        marker_path.write_text(run_marker(pdf, out, force_ocr))
-        logger.info(f"Marker done in {time.monotonic() - start:.0f}s")
-
-    pages = split_pages(marker_path.read_text())
-    if not fix:
-        (out / f"{pdf.stem}.md").write_text(join_pages(pages))
-        return
-
-    chunks = [dict(chunk) for chunk in batched(pages.items(), pages_per_chunk)]
-    directories = [out / "work" / f"chunk-{i:02}" for i in range(len(chunks))]
-
-    # pdfium isn't thread-safe, so render every page before starting the llms
+    # pdfium isn't thread-safe, so render every page before starting the llm calls
     document = pypdfium2.PdfDocument(pdf)
     page_images = [
         render_pages(document, list(c), d) for c, d in zip(chunks, directories)
     ]
 
-    # copy each chunk's figures next to its page images so either cli can read them
+    # copy each chunk's figures next to its page images so codex can attach them
     figures = [IMAGE_LINK.findall(join_pages(c)) for c in chunks]
     for names, directory in zip(figures, directories):
         for name in names:
-            shutil.copy(out / name, directory / name)
-
-    logger.info(f"Fixing {len(pages)} pages in {len(chunks)} chunks with {model}")
-    fix_one = partial(fix_chunk, model=model, effort=effort, passes=passes)
-    with ThreadPoolExecutor(jobs) as pool:
-        markdowns, chunk_usages = zip(
-            *pool.map(
-                fix_one, chunks, page_images, figures, range(len(chunks)), directories
-            )
-        )
-
-    usages = list(chain.from_iterable(chunk_usages))
-    (out / f"{pdf.stem}.md").write_text("\n".join(markdowns))
-    (out / "usage.jsonl").write_text(
-        "".join(u.model_dump_json() + "\n" for u in usages)
-    )
+            shutil.copy(marker_dir / name, directory / name)
 
     logger.info(
-        f"Done: {sum(u.applied_fixes for u in usages)} fixes applied, "
-        f"{sum(u.rejected_fixes for u in usages)} rejected, "
-        f"{sum(u.described_figures for u in usages)} figures described, "
-        f"{sum(u.input_tokens for u in usages):,} input, "
-        f"{sum(u.cached_input_tokens for u in usages):,} cached input, and "
-        f"{sum(u.output_tokens for u in usages):,} output tokens"
+        f"Fixing {len(pages)} pages in {len(chunks)} chunks with {OPENAI_MODEL}"
     )
+    with ThreadPoolExecutor(len(chunks)) as pool:
+        return "\n".join(pool.map(fix_chunk, chunks, page_images, figures, directories))
+
+
+def digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()[:16]
+
+
+@app.default
+def main(
+    pdf: Path,
+    *,
+    fix: bool = True,
+    force_ocr: bool = False,
+    refresh: bool = False,
+    out: Path | None = None,
+):
+    """Convert PDF to markdown plus figure images and print the markdown's path.
+
+    Results are cached in CACHE_DIR by the PDF's hash: marker's output once per PDF, and
+    the fixed markdown once per version of this script, so reruns are instant and editing
+    the prompt or settings reuses marker's output. `--refresh` redoes both.
+
+    The markdown links its figures by relative path, so `--out` copies it together with
+    its figures into OUT and prints that path instead.
+    """
+    pdf_dir = CACHE_DIR / digest(pdf.read_bytes())
+    marker_dir = pdf_dir / ("marker-force-ocr" if force_ocr else "marker")
+    if refresh:
+        shutil.rmtree(pdf_dir, ignore_errors=True)
+    marker_dir.mkdir(parents=True, exist_ok=True)
+
+    marker_path = marker_dir / "marker.md"
+    if not marker_path.exists():
+        logger.info(f"Running marker on {pdf.name}")
+        start = time.monotonic()
+        marker_path.write_text(run_marker(pdf, marker_dir, force_ocr))
+        logger.info(f"Marker done in {time.monotonic() - start:.0f}s")
+
+    key = digest(Path(__file__).read_bytes()) if fix else "unfixed"
+    markdown_path = marker_dir / f"{key}.md"
+
+    if not markdown_path.exists():
+        pages = split_pages(marker_path.read_text())
+        markdown = (
+            fix_pages(pdf, pages, marker_dir, pdf_dir / f"work-{key}")
+            if fix
+            else join_pages(pages)
+        )
+        markdown_path.write_text(markdown)
+
+    if out:
+        out.mkdir(parents=True, exist_ok=True)
+        markdown = markdown_path.read_text()
+        markdown_path = out / f"{pdf.stem}.md"
+        markdown_path.write_text(markdown)
+        for image in IMAGE_LINK.findall(markdown):
+            shutil.copy(marker_dir / image, out / image)
+
+    print(markdown_path)
 
 
 if __name__ == "__main__":
