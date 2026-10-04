@@ -64,13 +64,8 @@ in
     done
   '';
 
-  # build the webview helper if the source is newer than the binary
-  home.activation.webview = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    src=${root}/tools/webview.swift
-    bin=$HOME/.local/bin/webview
-    if [ ! "$bin" -nt "$src" ]; then
-      run mkdir -p "$HOME/.local/bin"
-      run /usr/bin/swiftc -O "$src" -o "$bin"
-    fi
+  # preview window for typst, markdown and pdfs
+  home.activation.viewer = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run ${root}/tools/viewer/build.sh
   '';
 }
