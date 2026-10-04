@@ -21,6 +21,8 @@
   Both respect `.gitignore` by default and are faster.
 - Use `rga` (ripgrep-all) to search inside PDFs and other documents
   instead of looping over `pdftotext`.
+- Use `trash` instead of `rm` to delete files,
+  so they can be recovered.
 
 ## Code Review
 

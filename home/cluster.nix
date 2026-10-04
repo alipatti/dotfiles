@@ -19,6 +19,9 @@
     ./modules/ssh.nix
   ];
 
+  # `trash`. macos has its own, and fridge gets it from linux.nix
+  home.packages = [ pkgs.trashy ];
+
   # the netid differs between clusters, so this needs --impure
   home.username = builtins.getEnv "USER";
   home.homeDirectory = builtins.getEnv "HOME";
