@@ -67,6 +67,13 @@ in
           "~/.cache/"
           "~/.local/share/uv/"
         ];
+        # from a repo subfolder, .git sits above the writable cwd. run the
+        # index/history writers unsandboxed and let the permission classifier
+        # judge them instead of failing and retrying
+        excludedCommands = [
+          "git add *"
+          "git commit *"
+        ];
       };
 
       hooks.PostToolUse = [
@@ -122,7 +129,8 @@ in
   home.file = {
     ".claude/CLAUDE.md".source = link "home/modules/agents.md";
     ".claude/skills".source = link "skills";
-    # enter inserts a newline
+    # enter inserts a newline and ctrl+enter takes over enter's default
+    # submit, which queues mid-turn instead of interrupting like sendNow
     ".claude/keybindings.json".text = builtins.toJSON {
       "$schema" = "https://www.schemastore.org/claude-code-keybindings.json";
       "$docs" = "https://code.claude.com/docs/en/keybindings";
@@ -131,6 +139,7 @@ in
           context = "Chat";
           bindings = {
             enter = "chat:newline";
+            "ctrl+enter" = "chat:submit";
           };
         }
       ];
