@@ -49,6 +49,8 @@ in
     texlab
 
     # command line tools
+    coreutils # gnu versions, plus timeout, tac, shuf, etc. that macos lacks
+    gnused # gnu sed, so `sed -i` matches linux
     eza # better ls
     fd # better find
     ripgrep # better grep
@@ -62,6 +64,9 @@ in
     just
     wget
     file
+    xz
+    zstd
+    p7zip # 7z
 
     # fonts. home-manager installs these in ~/Library/Fonts on macos and
     # through fontconfig on linux. the terminal font is set in kitty.nix
