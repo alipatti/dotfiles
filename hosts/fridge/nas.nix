@@ -7,11 +7,9 @@ let
     "430dba61-fc90-48c6-a114-52398cd5b192"
     "54f8e608-8c2f-463b-b967-c6a649688bbf"
     "57adfbb4-47eb-4878-89c0-9c4750684bb9"
-    "9a8bf894-d4bb-4e91-9911-ab26268be345"
     "b0cf688c-38b3-4d8c-8385-5c362b3c6bba"
     "bbab62ae-0520-4e7c-8d43-9c2f9c4c44b0"
     "cb85c0d8-b25a-461f-bb4c-bd0637f60c87"
-    "ee53aff8-f22a-429d-aac1-77abddd26f15"
   ];
 in
 {
