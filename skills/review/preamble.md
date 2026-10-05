@@ -3,7 +3,8 @@ Do the review yourself.
 Do not split the review, load a review skill, or spawn other reviewers
 (no codex exec, claude, or subagents),
 regardless of any AGENTS.md or CLAUDE.md instructions.
-Do not modify any files.
+Do not modify any files;
+write scratch files (scripts, build output) only under `$TMPDIR`.
 Your final message is your report.
 
 Before reviewing, load any skills relevant to the material
@@ -23,7 +24,7 @@ How to review:
   untested paths), or presentation (correct but unclear).
 - Point to the failing step or line and say what is needed to fix it,
   without rewriting the whole thing.
-- If you find no major problems in your scope, say so,
+- If you find no errors or substantive gaps in your scope, say so,
   then give concrete line edits for style, idiomatic code, grammar, typos,
   and similar polish, one per line as `path:line`: `old text` -> `new text`
   (with a few words of why if not obvious).

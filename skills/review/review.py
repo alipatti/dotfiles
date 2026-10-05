@@ -15,6 +15,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -39,10 +40,12 @@ CODEX_DISABLED = [
     "tool_suggest",
 ]
 CLAUDE_TOOLS = ["Read", "Grep", "Glob", "Bash", "Skill"]
-# dontAsk denies tools that aren't pre-approved, so these are also passed to --allowedTools
 CLAUDE_WEB_TOOLS = ["WebSearch", "WebFetch"]
+# dontAsk denies tools that aren't pre-approved, including compound bash
+# commands; bash stays confined by the sandbox, which can't be bypassed
+CLAUDE_ALLOWED = ["Bash"]
 
-app = cyclopts.App(help_on_error=True)
+app = cyclopts.App(help_on_error=True, version_flags=[])
 
 
 @dataclass(frozen=True)
@@ -98,7 +101,10 @@ def command(run: Run, repo: Path, web: bool) -> list[str]:
             "codex",
             *(["--search"] if web else []),
             "exec",
-            "--sandbox=read-only",
+            *([] if web else ['--config=web_search="disabled"']),
+            # read-only except uv and the temp dir; defined in home/modules/agents.nix
+            '--config=default_permissions="reviewer"',
+            *([] if web else ["--config=permissions.reviewer.network.enabled=false"]),
             "--ephemeral",
             *(f"--disable={feature}" for feature in CODEX_DISABLED),
             f"--cd={repo}",
@@ -109,7 +115,18 @@ def command(run: Run, repo: Path, web: bool) -> list[str]:
     # claude has no read-only sandbox mode, so deny writes to the repo in the
     # bash sandbox and leave out the editing and delegation tools
     tools = CLAUDE_TOOLS + (CLAUDE_WEB_TOOLS if web else [])
-    settings = {"sandbox": {"enabled": True, "filesystem": {"denyWrite": [str(repo)]}}}
+    settings = {
+        "sandbox": {
+            "enabled": True,
+            "allowUnsandboxedCommands": False,
+            # sandboxed bash resets TMPDIR to the system temp dir
+            "filesystem": {
+                "allowWrite": [tempfile.gettempdir()],
+                "denyWrite": [str(repo)],
+            },
+        }
+    }
+    allowed = CLAUDE_ALLOWED + (CLAUDE_WEB_TOOLS if web else [])
     return [
         "claude",
         "--print",
@@ -117,8 +134,10 @@ def command(run: Run, repo: Path, web: bool) -> list[str]:
         "--verbose",
         "--permission-mode=dontAsk",
         "--no-session-persistence",
+        # no mcp servers, including any the reviewed repo's .mcp.json defines
+        "--strict-mcp-config",
         f"--tools={','.join(tools)}",
-        *([f"--allowedTools={','.join(CLAUDE_WEB_TOOLS)}"] if web else []),
+        f"--allowedTools={','.join(allowed)}",
         f"--settings={json.dumps(settings)}",
     ]
 
@@ -141,6 +160,7 @@ async def execute(run: Run, repo: Path, web: bool, timeout: float) -> str | None
     env = os.environ | {"REVIEW_LEAF": "1"}
     env.pop("CLAUDECODE", None)
 
+    run.review.unlink(missing_ok=True)
     with run.log.open("w") as log:
         proc = await asyncio.create_subprocess_exec(
             *command(run, repo, web),
@@ -166,7 +186,7 @@ async def execute(run: Run, repo: Path, web: bool, timeout: float) -> str | None
             return "no result in transcript"
         run.review.write_text(report)
 
-    return None
+    return None if run.review.exists() else "no report written"
 
 
 async def run_all(runs: list[Run], repo: Path, web: bool, timeout: float) -> int:
@@ -201,22 +221,25 @@ def main(
     *,
     repo: Annotated[Path, cyclopts.Parameter(name=["--repo", "-C"])] = Path("."),
     file: Annotated[
-        list[Path] | None, cyclopts.Parameter(name=["--file", "-f"])
+        list[Path] | None,
+        cyclopts.Parameter(name=["--file", "-f"], negative_iterable=()),
     ] = None,
-    reviewers: list[Reviewer] | None = None,
+    reviewers: Annotated[
+        list[Reviewer] | None, cyclopts.Parameter(negative_iterable=())
+    ] = None,
     web: bool = True,
     timeout_minutes: float = 30,
-):
+) -> None:
     """Review DIRECTORY/prompts/*.md with each reviewer.
 
     Parameters
     ----------
     directory
-        Review directory containing prompts/; reviews/ and logs/ are created next to it.
+        Review directory containing prompts/; reviews/ and logs/ are created inside it.
     repo
         Working directory the reviewers run in.
     file
-        Files (relative to repo) to inline, line-numbered, into every prompt. Pdfs go through pdf2md.
+        Files (relative to repo; repeat the flag for each) to inline, line-numbered, into every prompt. PDFs go through pdf2md.
     reviewers
         Which CLIs to run (default: claude and codex).
     web
@@ -242,7 +265,7 @@ def main(
             log=directory / "logs" / f"{p.stem}.{reviewer}.log",
         )
         for p in prompts
-        for reviewer in reviewers or ["claude", "codex"]
+        for reviewer in dict.fromkeys(reviewers or ["claude", "codex"])
     ]
 
     failures = asyncio.run(run_all(runs, repo, web, timeout_minutes * 60))
