@@ -32,20 +32,3 @@
   instead of looping over `pdftotext`.
 - Use `trash` instead of `rm` to delete files,
   so they can be recovered.
-
-## Code Review
-
-If asked to review code or other material
-(e.g. written work),
-split the review into tasks,
-each covering one section (e.g. a file, module, or problem)
-or one perspective.
-For example, big picture architecture, potential abstractions,
-idiomatic code, writing style, clarity, library choice.
-Choose the most appropriate split for the task at hand.
-
-Assign each task to two reviewers in parallel:
-one Claude subagent (built-in subagent tool)
-and one Codex run (`codex exec`, outside the sandbox).
-Give both the same prompt,
-then merge their findings, noting where they disagree.
