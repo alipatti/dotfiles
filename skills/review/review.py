@@ -124,6 +124,8 @@ def command(run: Run, repo: Path, web: bool) -> list[str]:
             '--config=default_permissions="reviewer"',
             *([] if web else ["--config=permissions.reviewer.network.enabled=false"]),
             "--ephemeral",
+            # reviewers can't write, so material outside a trusted git repo is fine
+            "--skip-git-repo-check",
             *(f"--disable={feature}" for feature in CODEX_DISABLED),
             f"--cd={repo}",
             f"--output-last-message={run.review}",
