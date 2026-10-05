@@ -13,6 +13,11 @@ let
     esac
     exec ${pkgs.tectonic}/bin/tectonic "$@"
   '';
+
+  # runs the live script in the checkout, so edits apply without a rebuild
+  pdf2md = pkgs.writeShellScriptBin "pdf2md" ''
+    exec ${config.lib.dotfiles.root}/tools/pdf2md.py "$@"
+  '';
 in
 {
   home.packages = with pkgs; [
@@ -52,6 +57,7 @@ in
     tokei # line counter
     watchexec # run command on file change
     poppler-utils # pdf tools
+    pdf2md # tools/pdf2md.py
     llama-cpp # llama-server, used by marker's ocr models (tools/pdf2md.py)
     just
     wget
