@@ -147,6 +147,8 @@ in
             extends = ":read-only";
             filesystem = uv // {
               ":tmpdir" = "write";
+              # the reviewed repo stays read-only even when it is under tmpdir
+              ":workspace_roots"."." = "read";
             };
             network.enabled = true;
           };
