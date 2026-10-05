@@ -153,28 +153,6 @@ in
             network.enabled = true;
           };
         };
-
-      projects =
-        lib.genAttrs
-          [
-            "/Users/ali"
-            "/Users/ali/.dotfiles"
-            "/Users/ali/projects/oi-tools"
-            "/Users/ali/projects/cover-letters"
-            "/Users/ali/projects/econ-blowup"
-          ]
-          (_: {
-            trust_level = "trusted";
-          });
-
-      tui.screen_reader_detection_done = true;
-      desktop = {
-        conversationDetailMode = "STEPS_PROSE";
-        sansFontSize = 14;
-        codeFontSize = 13;
-        ambient-suggestions-enabled = false;
-        followUpQueueMode = "queue";
-      };
     };
   };
 
