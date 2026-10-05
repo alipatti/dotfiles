@@ -11,6 +11,7 @@ Must run outside the claude sandbox: both CLIs need network and their own state 
 """
 
 import asyncio
+import glob
 import json
 import os
 import subprocess
@@ -70,6 +71,23 @@ def read_source(path: Path) -> str:
         text=True,
     ).stdout.strip()
     return Path(markdown).read_text()
+
+
+def expand_files(repo: Path, patterns: list[str]) -> list[Path]:
+    """Resolve -f arguments (paths or globs, relative to repo) to existing files."""
+    files = []
+    for pattern in patterns:
+        is_glob = any(c in pattern for c in "*?[")
+        matches = (
+            sorted(glob.glob(pattern, root_dir=repo, recursive=True))
+            if is_glob
+            else [pattern] * (repo / pattern).is_file()
+        )
+        if not matches:
+            raise SystemExit(f"-f {pattern!r} matched no files in {repo}")
+        files += map(Path, matches)
+
+    return list(dict.fromkeys(files))
 
 
 def inline_sources(repo: Path, files: list[Path]) -> str:
@@ -221,8 +239,12 @@ def main(
     *,
     repo: Annotated[Path, cyclopts.Parameter(name=["--repo", "-C"])] = Path("."),
     file: Annotated[
-        list[Path] | None,
-        cyclopts.Parameter(name=["--file", "-f"], negative_iterable=()),
+        list[str] | None,
+        cyclopts.Parameter(
+            name=["--file", "-f"],
+            consume_multiple=True,
+            negative_iterable=(),
+        ),
     ] = None,
     reviewers: Annotated[
         list[Reviewer] | None, cyclopts.Parameter(negative_iterable=())
@@ -239,7 +261,7 @@ def main(
     repo
         Working directory the reviewers run in.
     file
-        Files (relative to repo; repeat the flag for each) to inline, line-numbered, into every prompt. PDFs go through pdf2md.
+        Files or globs (relative to repo; `-f a b 'dir/**/*.typ'`) to inline, line-numbered, into every prompt. PDFs go through pdf2md.
     reviewers
         Which CLIs to run (default: claude and codex).
     web
@@ -255,7 +277,7 @@ def main(
     for sub in ["reviews", "logs"]:
         (directory / sub).mkdir(exist_ok=True)
 
-    sources = inline_sources(repo, file or [])
+    sources = inline_sources(repo, expand_files(repo, file or []))
     runs = [
         Run(
             task=p.stem,

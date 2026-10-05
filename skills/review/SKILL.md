@@ -50,8 +50,10 @@ report format), so leave those out.
   in the background if your harness supports it
   (`run_in_background` in Claude Code);
   otherwise with a timeout longer than the reviews (up to 30 min).
-- `-f` inlines files (relative to `-C`; repeat `-f` per file),
-  line-numbered, into every prompt.
+- `-f` inlines files, line-numbered, into every prompt.
+  It takes several paths or quoted globs relative to `-C`
+  (`-f a.typ 'sections/*.typ'`).
+  Pass each as a separate argument, not one string built in a variable.
   Use it when the material is small
   (a few thousand lines); omit for large repos.
   Prefer source (`.typ`, `.tex`, `.md`) over PDFs when both exist.
