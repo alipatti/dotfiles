@@ -23,6 +23,10 @@
 - Load the language appropriate skill when editing python,
   etc files if such a skill exists.
 - Search documentation when encountering unfamiliar libraries or APIs.
+- Write markdown with semantic line breaks
+  (one sentence or clause per line).
+  Edited `.md` files are reformatted with `rumdl fmt`,
+  so re-read a file before editing it again.
 
 ## Shell tools
 
