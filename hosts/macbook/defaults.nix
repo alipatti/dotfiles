@@ -101,6 +101,7 @@
       NSGlobalDomain.NSQuitAlwaysKeepsWindow = false;
       "com.apple.print.PrintingPrefs"."Quit When Finished" = true;
       "com.apple.CrashReporter".DialogType = "none";
+      "com.apple.finder".ShowRecentTags = false; # hide tags in sidebar
       # no .DS_Store on drives/network
       "com.apple.desktopservices" = {
         DSDontWriteUSBStores = true;
