@@ -1,13 +1,8 @@
-# commands from the cyclopts scripts in ../../tools. each runs the live script
-# in the checkout, so edits apply without a rebuild, and ships fish completions
-# generated from the committed script, which only change on rebuild
+# commands from the cyclopts scripts in ../../tools, with fish completions.
+# both are built from the committed script, so changes need a rebuild; run
+# ./tools/<name>.py directly while developing
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ lib, pkgs, ... }:
 let
   names = [
     "pdf2md"
@@ -49,11 +44,7 @@ let
     pkgs.runCommand name { } ''
       mkdir -p $out/bin $out/share/fish/vendor_completions.d
 
-      cat > $out/bin/${name} <<'EOF'
-      #!${pkgs.runtimeShell}
-      exec ${config.lib.dotfiles.root}/tools/${name}.py "$@"
-      EOF
-      chmod +x $out/bin/${name}
+      install -m755 ${script} $out/bin/${name}
 
       ${(python (builtins.readFile script)).interpreter} -c '
       import importlib.util
