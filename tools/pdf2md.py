@@ -1,7 +1,7 @@
 #!/usr/bin/env -S uv run --script
 # /// script
 # requires-python = ">=3.12,<3.14"
-# dependencies = ["marker-pdf", "cyclopts", "loguru", "pydantic"]
+# dependencies = ["marker-pdf", "pypdfium2", "cyclopts", "loguru", "pydantic"]
 # ///
 """Convert a PDF to markdown plus images with marker, then have an LLM fix each chunk of pages.
 
@@ -111,7 +111,7 @@ aren't needed."""
 
 NO_FIGURES_TASK = "Leave `figures` empty."
 
-app = App()
+app = App(name="pdf2md")
 
 
 class Strict(BaseModel):

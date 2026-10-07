@@ -13,7 +13,7 @@ from pathlib import Path
 
 from cyclopts import App
 
-app = App()
+app = App(name="pawprint")
 
 
 @app.default
@@ -22,10 +22,10 @@ def pawprint(
     /,
     *,
     color: bool = False,
-    single_sided: bool = False,
+    double_sided: bool = True,
     copies: int = 1,
 ):
-    """Print FILES in black and white, double-sided, unless told otherwise.
+    """Send files to PawPrint.
 
     Parameters
     ----------
@@ -33,13 +33,13 @@ def pawprint(
         Files to print.
     color
         Use the color queue.
-    single_sided
-        Print on one side of the page.
+    double_sided
+        Print on both sides of the page.
     copies
         Number of copies.
     """
     queue = "PawPrintColor" if color else "PawPrint"
-    sides = "one-sided" if single_sided else "two-sided-long-edge"
+    sides = "two-sided-long-edge" if double_sided else "one-sided"
 
     subprocess.run(
         [
