@@ -33,6 +33,9 @@ if [ "$(uname)" = Darwin ]; then
 
 elif [ -f /etc/NIXOS ]; then
     sudo nixos-rebuild switch --flake ".#$host"
+    # switch only restarts the home-manager unit when the generation changes,
+    # so rerun it to restore links that went missing since the last change
+    sudo systemctl restart "home-manager-$USER.service"
 
 elif [[ $(hostname) =~ $clusters ]]; then
     chroot=$HOME/.local/bin/nix-user-chroot
