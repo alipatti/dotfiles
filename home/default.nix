@@ -6,6 +6,9 @@ let
   inherit (config.lib.dotfiles) link;
 in
 {
+  # tools that don't fit a module in ./modules, on every machine
+  imports = [ ../tools/pdf2md ];
+
   # shared by the modules above. `link` symlinks straight into the repo so
   # configs stay editable in place
   lib.dotfiles.root = "${config.home.homeDirectory}/.dotfiles";

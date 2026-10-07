@@ -10,6 +10,8 @@ let
   inherit (config.lib.dotfiles) root link;
 in
 {
+  imports = [ ../tools/pawprint ];
+
   # on nixos this docker stuff is handled by virtualisation.docker
   home.packages = with pkgs; [
     docker-client
