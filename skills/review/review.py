@@ -126,6 +126,9 @@ def command(run: Run, repo: Path, web: bool) -> list[str]:
             "--ephemeral",
             # reviewers can't write, so material outside a trusted git repo is fine
             "--skip-git-repo-check",
+            # trust the repo for this run only. codex splits override keys on
+            # every '.', so the path goes in an inline table, not the key
+            f'--config=projects={{{json.dumps(str(repo.resolve()))}={{trust_level="trusted"}}}}',
             *(f"--disable={feature}" for feature in CODEX_DISABLED),
             f"--cd={repo}",
             f"--output-last-message={run.review}",
