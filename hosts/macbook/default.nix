@@ -7,6 +7,7 @@
   imports = [
     ./homebrew.nix
     ./defaults.nix
+    ../../tools/princeton-vpn
   ];
 
   nixpkgs.hostPlatform = "aarch64-darwin";
