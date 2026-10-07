@@ -23,32 +23,51 @@ In addition:
   If there are several similar functions,
   think about how to abstract their shared functionality.
   Don't be afraid to refactor.
-- Use lowercase for comments.
+- Use lowercase for comments and title case for docstrings
+  and error messages.
   Include comments iff functionality is not obvious.
   Prefer extracting descriptively named constants
   (if short and used only once)
   or helper functions (if long or used multiple times) to extensive
-  comments.
+  commentary.
+- Don't add defensive error handling
+  (`try`/`except`, input validation) for cases that can't occur.
+  Only guard system boundaries: user input, network calls, file I/O.
+
+### Whitespace
+
 - Use ample whitespace.
-  For example, include a blank line between `if` blocks
-  and surrounding code.
-  Group blocks of code into paragraphs separated by whitespace.
+- Always put a blank line before and after an `if` block
+  (including its `elif`/`else` blocks),
+  unless it starts or ends the enclosing block
+  (for example, the first line of a function).
+- Group the rest of the code into paragraphs separated by blank lines.
   Start a paragraph with a descriptive comment only
   if its purpose isn't obvious from the code itself.
-- Split function signatures (and other calls with many arguments)
-  one argument per line, with a trailing comma
-  so `ruff format` keeps them split:
+- In function signatures and calls with more than three arguments,
+  put each argument on its own line and end with a trailing comma,
+  so `ruff format` keeps them split.
+  For calls with three or fewer arguments,
+  use your discretion and split when the code becomes difficult to read.
 
   ```python
   def around_steady_state(
       n_points: int = 6,
       r: float = 0.05,
   ) -> tuple[np.ndarray, np.ndarray]:
-  ```
+      result = subprocess.run(
+          ["solver", "--points", str(n_points)],
+          capture_output=True,
+          text=True,
+          check=False,
+      )
 
-- Don't add defensive error handling
-  (`try`/`except`, input validation) for cases that can't occur.
-  Only guard system boundaries: user input, network calls, file I/O.
+      if result.returncode:
+          sys.exit(f"Solver failed:\n{result.stderr}")
+
+      grid = np.linspace(-r, r, n_points)
+      return grid, np.interp(grid, *parse(result.stdout))
+  ```
 
 ## Tooling
 
