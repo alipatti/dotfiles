@@ -1,5 +1,6 @@
 # home-manager module for `pawprint`, princeton's student print queues. mac
-# only: the queues come from oit's installer (PawPrint_Combined_Installer.app)
+# only: it converts files with cupsfilter and the PPDs from oit's installer
+# (PawPrint_Combined_Installer.app)
 
 { pkgs, ... }:
 {
