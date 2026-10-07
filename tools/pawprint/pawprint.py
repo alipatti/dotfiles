@@ -3,13 +3,12 @@
 # requires-python = ">=3.12"
 # dependencies = ["cyclopts"]
 # ///
-"""Send files to Princeton's PawPrint queues, to be released at a copier with an ID card.
+"""Send PDFs to Princeton's PawPrint queues, to be released at a copier with an ID card.
 
-Converts each file to PostScript with cupsfilter and the queue's PPD, then sends it
-straight to the print server over LPD (RFC 1179), as the netid saved for eduroam. The
-DNS lookup and the connection go over the campus network interface, so printing works
-with a Tailscale exit node on. Everything comes from the CUPS queues set up by OIT's
-installer, the eduroam login in the keychain, and the campus network's DHCP options.
+Wraps each PDF in a PJL header that sets duplex, then sends it straight to the print
+server over LPD (RFC 1179), as the netid saved for eduroam. The DNS lookup and the
+connection go over the campus network interface, so printing works with a Tailscale exit
+node on. No printers need to be installed.
 """
 
 import os
@@ -21,17 +20,25 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import NamedTuple
-from urllib.parse import urlparse
 
 from cyclopts import App
+from cyclopts.types import ExistingFile
 
 app = App(name="pawprint")
+
+# from oit's linux setup: lpd://<netid>@ss226w.princeton.edu/PawPrint.
+# https://csguide.cs.princeton.edu/printing/pawprint
+SERVER = "ss226w.princeton.edu"
+QUEUE = "PawPrint"
+COLOR_QUEUE = "PawPrintColor"
 
 EDUROAM_KEYCHAIN_SERVICE = "com.apple.network.eap.user.item.wlan.ssid.eduroam"
 LPD_PORT = 515
 LPD_SOURCE_PORTS = range(721, 732)  # rfc 1179 asks clients to send from these
 LPD_TIMEOUT_SECONDS = 30
 LPD_MAX_TITLE = 99
+# pjl's universal exit language, which brackets the job
+PJL_UEL = b"\x1b%-12345X"
 IP_BOUND_IF = 25  # from <netinet/in.h>; python's socket module doesn't export it
 
 
@@ -65,22 +72,6 @@ def eduroam_login() -> tuple[str, str]:
         sys.exit("No saved eduroam login in the keychain. Connect to eduroam first.")
 
     return match[1], match[2]
-
-
-def lpd_device(queue: str) -> tuple[str, str]:
-    """The print server and remote queue name behind a local CUPS queue."""
-    # matches any locale's wording of "device for <queue>: <uri>"
-    pattern = rf"{re.escape(queue)}: (\S+://\S+)$"
-
-    if not (match := re.search(pattern, run("lpstat", "-v"), re.MULTILINE)):
-        sys.exit(f"No CUPS queue named {queue}. Run OIT's PawPrint installer.")
-
-    uri = urlparse(match[1])
-
-    if uri.scheme != "lpd" or not uri.hostname:
-        sys.exit(f"{queue} isn't an LPD queue: {match[1]}.")
-
-    return uri.hostname, uri.path.strip("/")
 
 
 def campus_interface(domain: str) -> Interface:
@@ -133,28 +124,22 @@ def resolve(host: str, interface: Interface) -> str:
     return addresses[-1]
 
 
-def to_postscript(file: Path, queue: str, double_sided: bool) -> bytes:
-    """Render a file with the queue's PPD, including its duplex setup."""
-    sides = "two-sided-long-edge" if double_sided else "one-sided"
-    result = subprocess.run(
+def with_pjl(file: Path, double_sided: bool) -> bytes:
+    """The PDF with a PJL header, which the copiers and PaperCut read duplex from."""
+    pdf = file.read_bytes()
+
+    if not pdf.startswith(b"%PDF"):
+        sys.exit(f"{file} isn't a PDF.")
+
+    header = "".join(
         [
-            "cupsfilter",
-            "-d",
-            queue,
-            "-m",
-            "application/vnd.cups-postscript",
-            "-o",
-            f"sides={sides}",
-            str(file),
-        ],
-        capture_output=True,
-        check=False,
+            "@PJL\r\n",
+            f"@PJL SET DUPLEX={'ON' if double_sided else 'OFF'}\r\n",
+            "@PJL SET BINDING=LONGEDGE\r\n",
+            "@PJL ENTER LANGUAGE=PDF\r\n",
+        ]
     )
-
-    if result.returncode:
-        sys.exit(f"Couldn't convert {file}:\n{result.stderr.decode()}")
-
-    return result.stdout
+    return PJL_UEL + header.encode() + pdf + PJL_UEL
 
 
 def bind_source_port(lpd: socket.socket) -> None:
@@ -247,19 +232,19 @@ def send_job(
 
 @app.default
 def pawprint(
-    files: list[Path],
+    files: list[ExistingFile],
     /,
     *,
     color: bool = False,
     double_sided: bool = True,
     copies: int = 1,
 ):
-    """Send files to PawPrint.
+    """Send PDFs to PawPrint.
 
     Parameters
     ----------
     files
-        Files to print.
+        PDFs to print.
     color
         Use the color queue.
     double_sided
@@ -267,18 +252,18 @@ def pawprint(
     copies
         Number of copies.
     """
-    queue = "PawPrintColor" if color else "PawPrint"
+    queue = COLOR_QUEUE if color else QUEUE
     netid, realm = eduroam_login()
-    server, remote_queue = lpd_device(queue)
     interface = campus_interface(realm)
-    address = resolve(server, interface)
+    address = resolve(SERVER, interface)
+    # wrap every file first, so a bad one doesn't leave the rest half sent
+    jobs = [(file, with_pjl(file, double_sided)) for file in files]
 
-    for i, file in enumerate(files):
-        data = to_postscript(file, queue, double_sided)
+    for i, (file, data) in enumerate(jobs):
         job = (os.getpid() + i) % 1000
 
         try:
-            with lpd_connection(address, interface.name, remote_queue) as lpd:
+            with lpd_connection(address, interface.name, queue) as lpd:
                 send_job(
                     lpd,
                     job,
@@ -288,9 +273,9 @@ def pawprint(
                     copies,
                 )
         except OSError as error:
-            sys.exit(f"Couldn't send {file} to {server} ({address}): {error}.")
+            sys.exit(f"Couldn't send {file} to {SERVER} ({address}): {error}.")
 
-        print(f"Sent {file} to {remote_queue} as {netid}.")
+        print(f"Sent {file} to {queue} as {netid}.")
 
 
 if __name__ == "__main__":
