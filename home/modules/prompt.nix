@@ -32,7 +32,7 @@
       };
 
       sudo = {
-        format = "[\\(as sudo\\)]($style)";
+        format = "[\\(as sudo\\)]($style) ";
         disabled = false;
       };
 
