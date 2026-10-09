@@ -1,15 +1,15 @@
 """draw each tab as a rounded pill, loaded by kitty's `tab_bar_style custom`.
 
-the title comes from fish_title (`[host] command | path`). kitty truncates
+the title comes from fish_title (`[host] path | command`). kitty truncates
 titles by overwriting the last cell, which drops the pill's right cap, so
-truncate here instead. cutting from the end shortens the path first, then the
-command. docs: https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.tab_bar_style
+truncate here instead. cutting from the end shortens the command first, then
+the path. docs: https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.tab_bar_style
 """
 
 import os
 
 from kitty.fast_data_types import Screen, get_boss, wcswidth
-from kitty.tab_bar import DrawData, ExtraData, TabBarData, as_rgb
+from kitty.tab_bar import DrawData, ExtraData, TabBarData
 
 LEFT_CAP = ""
 RIGHT_CAP = ""
@@ -18,9 +18,11 @@ RIGHT_CAP = ""
 CHROME_WIDTH = 4
 GAP = " "
 
-PEACH = as_rgb(0xEF9F76)
-MAUVE = as_rgb(0xCA9EE6)
-SURFACE = (8 << 8) | 1  # palette color8
+# palette colors, so they follow the theme. yellow matches starship's
+# ssh hostname
+BLUE = (4 << 8) | 1
+YELLOW = (3 << 8) | 1
+SURFACE = (8 << 8) | 1
 DEFAULT = 0
 
 
@@ -55,8 +57,8 @@ def draw_tab(
     extra_data: ExtraData,
 ) -> int:
     remote = is_remote(tab)
-    fill = (PEACH if remote else MAUVE) if tab.is_active else SURFACE
-    text = screen.cursor.fg if tab.is_active else (PEACH if remote else DEFAULT)
+    fill = (YELLOW if remote else BLUE) if tab.is_active else SURFACE
+    text = screen.cursor.fg if tab.is_active else (YELLOW if remote else DEFAULT)
     title = truncate(tab.title, max(1, max_tab_length - CHROME_WIDTH - len(GAP)))
 
     screen.cursor.fg, screen.cursor.bg = fill, DEFAULT
