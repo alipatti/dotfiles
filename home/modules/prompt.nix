@@ -4,9 +4,8 @@
     enable = true;
     settings = {
       format = lib.concatStrings [
-        "$directory"
-        "$username"
         "$hostname"
+        "$directory"
         "$sudo"
         "$cmd_duration"
         "$fill"
@@ -37,13 +36,8 @@
         disabled = false;
       };
 
-      hostname = {
-        format = "[@$hostname](bright-white) ";
-      };
-
-      username = {
-        format = "[– $user](bright-white)";
-      };
+      # only shown over ssh
+      hostname.format = "[\\[$hostname\\]](yellow) ";
 
       # languages
       python = {
