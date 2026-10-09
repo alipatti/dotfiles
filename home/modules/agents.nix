@@ -36,6 +36,11 @@ let
   ];
 in
 {
+  # the tab title comes from fish_title (see tools/kitty_tab_bar.py). set in
+  # the shell: with it in settings.json's env, claude still retitled tabs
+  # (that env seems to be applied after claude reads the flag)
+  home.sessionVariables.CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
+
   # ~/.claude/settings.json is generated from this. claude code cannot write
   # to it, so toggles made through /config or /plugin have to be added here
   programs.claude-code = {
@@ -120,8 +125,6 @@ in
       autoCompactEnabled = true;
       skipWorkflowUsageWarning = true;
 
-      # kitty sets the tab title itself
-      env.CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
       # nvim's default log dir isn't writable in the sandbox, so it falls
       # back to ./nvim.log in whatever directory it was run from
       env.NVIM_LOG_FILE = "/tmp/claude/nvim.log";
@@ -137,6 +140,8 @@ in
       model_reasoning_effort = "medium";
       service_tier = "default";
       features.js_repl = false;
+      # leave the tab title to fish_title; with no items codex never sets one
+      tui.terminal_title = [ ];
 
       # uv keeps managed pythons and tools in ~/.local/share/uv and writes to
       # its cache even for `uv run`
