@@ -92,6 +92,12 @@ in
     enable = true;
     config.theme = "Coldark-Dark";
   };
+  programs.tmux = {
+    enable = true;
+    shell = lib.getExe config.programs.fish.package;
+    mouse = true;
+    escapeTime = 0;
+  };
   home.sessionVariables.MANPAGER = "sh -c 'col -bx | bat -l man -p'";
 
   xdg.configFile = {
