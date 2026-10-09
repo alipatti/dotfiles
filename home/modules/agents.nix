@@ -52,7 +52,10 @@ in
 
       permissions = {
         defaultMode = "auto";
-        allow = map (d: "WebFetch(domain:${d})") allowedDomains;
+        allow = map (d: "WebFetch(domain:${d})") allowedDomains ++ [
+          # runs unsandboxed (see sandbox.excludedCommands)
+          "Bash(pdf2md:*)"
+        ];
         # local history is fair game (the reflog keeps it recoverable) but
         # pushed history isn't. deny rules are checked before the sandbox
         # auto-allow; --force also covers --force-with-lease
@@ -66,6 +69,9 @@ in
       sandbox = {
         enabled = true;
         network.allowedDomains = allowedDomains;
+        # pdf2md talks to a local llama-server and nests codex's own
+        # sandbox, neither of which works inside seatbelt
+        excludedCommands = [ "pdf2md" ];
         # uv keeps managed pythons and tools in ~/.local/share/uv and writes
         # temp files there even for `uv run`
         filesystem.allowWrite = [
