@@ -77,6 +77,11 @@ in
       "ctrl+;" = "toggle_layout stack";
       "ctrl+." = "next_window";
       "ctrl+," = "previous_window";
+      "ctrl+'" = "move_window_to_top";
+
+      # undo/redo, translated to keys fish understands
+      "cmd+z" = "send_key ctrl+_";
+      "cmd+shift+z" = "send_key ctrl+shift+z";
 
       # splits
       "kitty_mod+enter" = "remote_control_script ${split}";
