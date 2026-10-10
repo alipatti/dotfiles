@@ -26,6 +26,10 @@ in
       gladog = "git log --all --decorate --oneline --graph";
       gb = "git branch";
 
+      # claude
+      c = "claude";
+      ca = "claude agents";
+
       # other
       vim = "nvim";
       ipy = "ipython";
