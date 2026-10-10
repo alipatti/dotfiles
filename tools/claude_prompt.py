@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Status line for claude code: model, usage, and the right side of the starship prompt."""
+
 from __future__ import annotations
 
 import json
@@ -7,27 +9,52 @@ import subprocess
 import sys
 import time
 
+# the modules on the right side of the starship prompt (see home/modules/prompt.nix)
+STARSHIP_MODULES = [
+    "rust",
+    "python",
+    "git_branch",
+    "git_commit",
+    "git_state",
+    "git_status",
+    "git_metrics",
+]
 
-def get_starship_rhs():
-    result = subprocess.run(["starship", "prompt"], capture_output=True, text=True, check=False)
-    lines = result.stdout.split("\n")
-    line = lines[1] if len(lines) > 1 else (lines[0] if lines else "")
+MODEL_ICON = "\U000f06a9"  # 󰚩
+WEEK_CUTOFF = 80
 
-    # Remove everything up to first reset code (skips the directory part)
-    line = re.sub(r".*?\x1b\[0m", "", line, count=1)
-    # Remove alignment padding (spaces + color codes before actual RHS content)
-    line = re.sub(r"^\s*\x1b\[[0-9;]*m\s+\x1b\[0m", "", line)
-    # Keep only red/green ANSI codes and reset; strip everything else
-    line = re.sub(r"\x1b\[(?!(?:0|3[12]|9[12])m)\d+(?:;\d+)*m", "", line)
-    return line
+# usage at or above these percentages is colored yellow and red
+YELLOW_CUTOFF = 75
+RED_CUTOFF = 90
+
+ANSI = r"\x1b\[[0-9;]*m"
+# everything except reset, red, and green
+UNWANTED_ANSI = re.compile(r"\x1b\[(?!(?:0|3[12]|9[12])m)[0-9;]*m")
 
 
-def format_remaining(resets_at: int | None) -> str:
-    """Format seconds until reset as a human-readable string."""
-    if resets_at is None:
-        return ""
+def visible_strip(text: str) -> str:
+    """Strip whitespace from the ends of the text, looking through ansi codes."""
+    text = re.sub(rf"^((?:{ANSI})*)\s+", r"\1", text)
+    return re.sub(rf"\s+((?:{ANSI})*)$", r"\1", text)
 
-    remaining = int(resets_at - time.time())
+
+def starship_module(name: str, path: str) -> str:
+    result = subprocess.run(
+        ["starship", "module", name, "--path", path, "--logical-path", path],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return visible_strip(UNWANTED_ANSI.sub("", result.stdout))
+
+
+def starship_rhs(path: str) -> str:
+    modules = (starship_module(name, path) for name in STARSHIP_MODULES)
+    return " ".join(m for m in modules if re.sub(ANSI, "", m).strip())
+
+
+def time_until(timestamp: int) -> str:
+    remaining = int(timestamp - time.time())
     if remaining <= 0:
         return "now"
 
@@ -35,53 +62,62 @@ def format_remaining(resets_at: int | None) -> str:
     hours, remainder = divmod(remainder, 3600)
     minutes = remainder // 60
 
-    if days > 0:
+    if days:
         return f"{days}d {hours}h"
-    if hours > 0:
+
+    if hours:
         return f"{hours}h {minutes:02d}m"
+
     return f"{minutes}m"
 
 
-def main(
-    context_cutoff: int = 75, five_hour_cutoff: int = 50, week_cutoff: int = 80
-) -> None:
-    data_from_claude = json.load(sys.stdin)
+def format_usage(label: str, percent: float, note: str | None = None) -> str:
+    percent = round(percent)
+    text = f"{label}: {percent}%" + (f" ({note})" if note else "")
 
-    model = (data_from_claude.get("model") or {}).get("display_name", "")
-    rate_limits = data_from_claude.get("rate_limits") or {}
+    if percent >= RED_CUTOFF:
+        return f"\x1b[31m{text}\x1b[0m"
 
-    five_h_data = rate_limits.get("five_hour") or {}
-    week_data = rate_limits.get("seven_day") or {}
+    if percent >= YELLOW_CUTOFF:
+        return f"\x1b[33m{text}\x1b[0m"
 
-    five_h = five_h_data.get("used_percentage")
-    five_h_resets_at = five_h_data.get("resets_at")
-    week = week_data.get("used_percentage")
-    week_resets_at = week_data.get("resets_at")
-    context = (data_from_claude.get("context_window") or {}).get("used_percentage")
+    return text
 
-    model_icon = "\U000f06a9"  # 󰚩
-    usage = f"{model_icon} {model}"
 
-    if context is not None and round(context) > context_cutoff:
-        usage = usage + f" | {round(context)}% (context)"
+def format_limit(label: str, limit: dict) -> str:
+    resets_at = limit.get("resets_at")
+    remaining = time_until(resets_at) if resets_at is not None else None
+    return format_usage(label, limit["used_percentage"], remaining)
 
-    limits = []
-    if five_h is not None and round(five_h) > five_hour_cutoff:
-        remaining = format_remaining(five_h_resets_at)
-        label = remaining if remaining else "5h"
-        limits.append(f"{round(five_h)}% ({label})")
-    if week is not None and round(week) > week_cutoff:
-        remaining = format_remaining(week_resets_at)
-        label = remaining if remaining else "7d"
-        limits.append(f"{round(week)}% ({label})")
-    if limits:
-        usage = usage + " | " + " ".join(limits)
 
-    starship = get_starship_rhs()
-    if starship:
-        print(f"{usage} | {starship}")
-    else:
-        print(usage)
+def main() -> None:
+    data = json.load(sys.stdin)
+
+    model = (data.get("model") or {}).get("display_name", "")
+    context = (data.get("context_window") or {}).get("used_percentage")
+    rate_limits = data.get("rate_limits") or {}
+    five_hour = rate_limits.get("five_hour") or {}
+    week = rate_limits.get("seven_day") or {}
+    cwd = (data.get("workspace") or {}).get("current_dir") or data.get("cwd") or "."
+
+    usage = []
+    if context is not None:
+        usage.append(format_usage("context", context))
+
+    if five_hour.get("used_percentage") is not None:
+        usage.append(format_limit("usage", five_hour))
+
+    if round(week.get("used_percentage") or 0) > WEEK_CUTOFF:
+        usage.append(format_limit("week", week))
+
+    sections = [
+        f"{MODEL_ICON} {model}",
+        starship_module("directory", cwd),
+        starship_rhs(cwd),
+    ]
+    print(" | ".join(filter(None, sections)))
+    if usage:
+        print(" | ".join(usage))
 
 
 if __name__ == "__main__":
