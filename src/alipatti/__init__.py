@@ -11,8 +11,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import cache as cache
     from . import plot as plot
+    from . import terminal as terminal
 
-SUBMODULES = {"cache", "plot"}
+SUBMODULES = {"cache", "plot", "terminal"}
 
 
 def __getattr__(name: str) -> ModuleType:
