@@ -73,15 +73,14 @@ def time_until(timestamp: int) -> str:
 
 def format_usage(label: str, percent: float, note: str | None = None) -> str:
     percent = round(percent)
-    text = f"{label}: {percent}%" + (f" ({note})" if note else "")
+    shown = f"{percent}%"
 
     if percent >= RED_CUTOFF:
-        return f"\x1b[31m{text}\x1b[0m"
+        shown = f"\x1b[31m{shown}\x1b[0m"
+    elif percent >= YELLOW_CUTOFF:
+        shown = f"\x1b[33m{shown}\x1b[0m"
 
-    if percent >= YELLOW_CUTOFF:
-        return f"\x1b[33m{text}\x1b[0m"
-
-    return text
+    return f"{label}: {shown}" + (f" ({note})" if note else "")
 
 
 def format_limit(label: str, limit: dict) -> str:
