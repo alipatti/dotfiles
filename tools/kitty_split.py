@@ -8,6 +8,9 @@ the stack layout if the tab was zoomed. run via
 
 with --layout-only, just pick the layout and launch nothing; nvim uses
 this before showing its terminal windows.
+
+kitty also loads this file as a watcher (see kitty.nix), so on_resize
+reflows tall/fat when the window is resized.
 """
 
 import json
@@ -21,6 +24,8 @@ KITTEN = shutil.which("kitten")
 
 
 def kitten(*args, capture=False):
+    assert KITTEN, "`kitten` not on path"
+
     # kitty passes its control socket as an inherited fd (KITTY_LISTEN_ON=fd:N),
     # so the child must not close inherited fds
     return subprocess.run(
@@ -30,6 +35,27 @@ def kitten(*args, capture=False):
         text=True,
         close_fds=False,
     ).stdout
+
+
+def layout_for(columns):
+    return "fat" if columns < NARROW_WIDE_CUTOFF else "tall"
+
+
+def on_resize(boss, window, data):
+    tab = window.tabref()
+
+    # leave zoomed (stack) tabs alone
+    if tab is None or tab.current_layout.name not in ("tall", "fat"):
+        return
+
+    from kitty.fast_data_types import viewport_for_window
+
+    central, *_, cell_width, _ = viewport_for_window(tab.os_window_id)
+    layout = layout_for(central.width // cell_width)
+
+    # goto_layout resizes the windows again, so only switch on a change
+    if layout != tab.current_layout.name:
+        tab.goto_layout(layout)
 
 
 def tab_columns(tab):
@@ -56,7 +82,7 @@ def active_tab():
 def main():
     tab = active_tab()
 
-    layout = "fat" if tab_columns(tab) < NARROW_WIDE_CUTOFF else "tall"
+    layout = layout_for(tab_columns(tab))
     # the bias comes from enabled_layouts in kitty.conf; goto-layout ignores
     # options that are not listed there
     kitten("goto-layout", layout)

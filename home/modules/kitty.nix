@@ -55,6 +55,9 @@ in
       # goto_layout only matches names listed here, so the bias has to be set here
       enabled_layouts = "tall:bias=60,fat:bias=60,stack";
 
+      # reflows tall/fat on resize, via on_resize in the split script
+      watcher = split;
+
       # remote control
       allow_remote_control = "socket-only";
       listen_on = "unix:/tmp/kitty-{kitty_pid}";
