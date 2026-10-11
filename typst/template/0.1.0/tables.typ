@@ -1,8 +1,8 @@
 // tables from csv data; only make-table is exported by lib.typ
 
-// fixed decimals, thousands separators, and a real minus sign, e.g. num(-1234.5, digits: 1) = −1,234.5;
-// with percent, the value is a share shown in percent, e.g. num(0.0036, digits: 2, percent: true) = 0.36%
-#let num(value, digits: 3, percent: false) = {
+// fixed decimals, thousands separators, and a real minus sign, e.g. format-num(-1234.5, digits: 1) = −1,234.5;
+// with percent, the value is a share shown in percent, e.g. format-num(0.0036, digits: 2, percent: true) = 0.36%
+#let format-num(value, digits: 3, percent: false) = {
   let x = float(value) * if percent { 100 } else { 1 }
   let (whole, ..fraction) = str(calc.round(calc.abs(x), digits: digits)).split(".")
   let fraction = fraction.at(0, default: "")
@@ -29,7 +29,7 @@
 // "$tau$"; other text cells are too with markup-cells. the first column labels
 // the rows. a column named "x" + se-suffix is set below column "x" as its
 // standard error. facet splits the rows into lettered panels by that column.
-// column-styles maps column names to `num` arguments; numbers default to 3
+// column-styles maps column names to `format-num` arguments; numbers default to 3
 // digits, or 0 for integers, and standard errors get one more digit than their
 // column. rule-after names columns followed by a rule.
 #let make-table(
@@ -52,7 +52,7 @@
       return if markup-cells { markup(value) } else { value }
     }
     let digits = style.at("digits", default: if value.contains(regex("[.eE]")) { 3 } else { 0 })
-    num(value, ..style, digits: digits)
+    format-num(value, ..style, digits: digits)
   }
   let cell(row, name) = {
     let style = column-styles.at(name, default: (:))
