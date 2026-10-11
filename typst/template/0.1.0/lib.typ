@@ -11,7 +11,7 @@
 #import "nested-delims.typ": nested-delims
 
 // tables from csv data
-#import "tables.typ": make-table
+#import "tables.typ": make-table, num
 
 // macros
 #let todo(x) = "TODO: " + x
