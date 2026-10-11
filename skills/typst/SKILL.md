@@ -5,17 +5,25 @@ description: Use this skill when writing or editing Typst documents (.typ files)
 
 # Typst Skill
 
-Start every new document with the personal template:
+Start every new document with the personal template,
+imported as a namespace:
 
 ```typst
-#import "@ali/template:0.1.0": *
-#show: template
+#import "@ali/template:0.1.0" as ali
+#import ali: cov, var // only the math macros the document uses
+#show: ali.template
 ```
 
 It lives in `~/.dotfiles/typst/template/`
 and provides theorem environments (theorion), cetz/fletcher/subpar,
-math macros (`inner`, `to`, `toto`, ...), and all document styling.
+math macros (`inner`, `to`, `toto`, ...), table helpers,
+and all document styling.
 Do not re-add set/show rules the template already handles.
+
+Refer to everything through the namespace
+(`ali.make-table`, `ali.format-num`, `ali.clearpage()`),
+except math macros: import those by name,
+since `$ali.var(X)$` is noisy in equations.
 
 There is no need to compile after every change.
 
@@ -53,7 +61,8 @@ There is no need to compile after every change.
 - Use `$EE(...)$` for expectation
   (blackboard + parentheses, not square brackets).
 - Use the provided template's macros
-  (`to`, `toto`, `inner`, ...) instead of raw symbols.
+  (`to`, `toto`, `inner`, ...) instead of raw symbols,
+  imported by name.
 
 ### Minimal Math Example
 
@@ -102,7 +111,7 @@ $
 - Put tables inside floats:
   wrap them in `#figure(...)` with a caption rather than placing them bare
   in the text.
-- Build tables of computed results with the template's `make-table`,
+- Build tables of computed results with the template's `ali.make-table`,
   fed by a csv that the analysis code writes.
   The code writes raw numbers at full precision
   and Typst does all the formatting
@@ -116,7 +125,7 @@ $
 - To split one table into lettered panels ("Panel A: ..."),
   include a column to `facet`.
 - Pass per-column formatting with `column-styles`
-  (`num` arguments: `digits`, `percent`).
+  (`ali.format-num` arguments: `digits`, `percent`).
   Numbers default to 3 digits, integers to 0.
 - Mark column groups with `rule-after` (column names);
   there is no need for other rules.
@@ -127,7 +136,7 @@ $
 
 ```typst
 #figure(
-  make-table(
+  ali.make-table(
     csv("numbers/estimates.csv", row-type: dictionary),
     facet: "Parameter",
     column-styles: ("$tau$": (digits: 1), "ESS / Sec.": (digits: 0)),
@@ -135,4 +144,17 @@ $
   ),
   caption: [...],
 ) <tab:estimates>
+```
+
+## Computed Numbers in Text
+
+- Don't hard-code computed numbers
+  (draw counts, test statistics, ...) in the prose.
+  Have the analysis code write them to a json file next to its csvs,
+  load it with `json(...)`, and format with `ali.format-num`.
+
+```typst
+#let settings = json("numbers/settings.json")
+
+We keep #ali.format-num(settings.draws, digits: 0) draws.
 ```
