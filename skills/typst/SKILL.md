@@ -34,7 +34,12 @@ There is no need to compile after every change.
   If more detail is needed, it will be requested.
 - Prefer algebraic-flavored exposition: maps, spaces, commutative diagrams
   (using `fletcher`).
-- Place each sentence on its own own line in the source file.
+- Place each sentence on its own line in the source file.
+- Use commas only where grammar or clarity requires them.
+  For example, do not put a comma before a trailing prepositional phrase:
+  write "The acceptance rate
+  and speed of each sampler over the retained draws" rather than "The
+  acceptance rate and speed of each sampler, over the retained draws".
 
 ## Formatting Math
 
