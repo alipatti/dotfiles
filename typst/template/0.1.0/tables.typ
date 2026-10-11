@@ -1,8 +1,11 @@
-// tables from csv data; only make-table is exported by lib.typ
+// tables from csv data; make-table and format-num are exported by lib.typ
 
 // fixed decimals, thousands separators, and a real minus sign, e.g. format-num(-1234.5, digits: 1) = −1,234.5;
-// with percent, the value is a share shown in percent, e.g. format-num(0.0036, digits: 2, percent: true) = 0.36%
-#let format-num(value, digits: 3, percent: false) = {
+// with percent, the value is a share shown in percent, e.g. format-num(0.0036, digits: 2, percent: true) = 0.36%.
+// digits defaults to 0 for integers (including integer strings from csvs) and 3 otherwise
+#let format-num(value, digits: auto, percent: false) = {
+  let integer = type(value) == int or (type(value) == str and not value.contains(regex("[.eE]")))
+  let digits = if digits == auto { if integer { 0 } else { 3 } } else { digits }
   let x = float(value) * if percent { 100 } else { 1 }
   let (whole, ..fraction) = str(calc.round(calc.abs(x), digits: digits)).split(".")
   let fraction = fraction.at(0, default: "")
@@ -51,8 +54,7 @@
     if value.match(regex("^-?\\d*\\.?\\d+([eE][-+]?\\d+)?$")) == none {
       return if markup-cells { markup(value) } else { value }
     }
-    let digits = style.at("digits", default: if value.contains(regex("[.eE]")) { 3 } else { 0 })
-    format-num(value, ..style, digits: digits)
+    format-num(value, ..style)
   }
   let cell(row, name) = {
     let style = column-styles.at(name, default: (:))

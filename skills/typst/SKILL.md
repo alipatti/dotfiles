@@ -151,10 +151,11 @@ $
 - Don't hard-code computed numbers
   (draw counts, test statistics, ...) in the prose.
   Have the analysis code write them to a json file next to its csvs,
-  load it with `json(...)`, and format with `ali.format-num`.
+  load it with `json(...)`, and format with `ali.format-num`
+  (integers default to 0 digits, other numbers to 3).
 
 ```typst
 #let settings = json("numbers/settings.json")
 
-We keep #ali.format-num(settings.draws, digits: 0) draws.
+We keep #ali.format-num(settings.draws) draws.
 ```
