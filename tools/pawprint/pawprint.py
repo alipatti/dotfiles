@@ -5,10 +5,10 @@
 # ///
 """Send PDFs to Princeton's PawPrint queues, to be released at a copier with an ID card.
 
-Wraps each PDF in a PJL header that sets duplex, then sends it straight to the print
-server over LPD (RFC 1179), as the netid saved for eduroam. The DNS lookup and the
-connection go over the campus network interface, so printing works with a Tailscale exit
-node on. No printers need to be installed.
+Wraps each PDF in a PJL header that sets duplex and stapling, then sends it straight to
+the print server over LPD (RFC 1179), as the netid saved for eduroam. The DNS lookup and
+the connection go over the campus network interface, so printing works with a Tailscale
+exit node on. No printers need to be installed.
 """
 
 import os
@@ -39,6 +39,8 @@ LPD_TIMEOUT_SECONDS = 30
 LPD_MAX_TITLE = 99
 # pjl's universal exit language, which brackets the job
 PJL_UEL = b"\x1b%-12345X"
+# canon's pjl extension for the copiers' finisher
+STAPLE_PJL = "@PJL COMMENT CANPJL SET STAPLE=ONEUPLEFT\r\n"
 IP_BOUND_IF = 25  # from <netinet/in.h>; python's socket module doesn't export it
 
 
@@ -124,8 +126,8 @@ def resolve(host: str, interface: Interface) -> str:
     return addresses[-1]
 
 
-def with_pjl(file: Path, double_sided: bool) -> bytes:
-    """The PDF with a PJL header, which the copiers and PaperCut read duplex from."""
+def with_pjl(file: Path, double_sided: bool, staple: bool) -> bytes:
+    """The PDF with a PJL header, which the copiers and PaperCut read finishing from."""
     pdf = file.read_bytes()
 
     if not pdf.startswith(b"%PDF"):
@@ -136,6 +138,7 @@ def with_pjl(file: Path, double_sided: bool) -> bytes:
             "@PJL\r\n",
             f"@PJL SET DUPLEX={'ON' if double_sided else 'OFF'}\r\n",
             "@PJL SET BINDING=LONGEDGE\r\n",
+            STAPLE_PJL if staple else "",
             "@PJL ENTER LANGUAGE=PDF\r\n",
         ]
     )
@@ -237,6 +240,7 @@ def pawprint(
     *,
     color: bool = False,
     double_sided: bool = True,
+    staple: bool = False,
     copies: int = 1,
 ):
     """Send PDFs to PawPrint.
@@ -249,6 +253,8 @@ def pawprint(
         Use the color queue.
     double_sided
         Print on both sides of the page.
+    staple
+        Staple each copy in the top left corner.
     copies
         Number of copies.
     """
@@ -257,7 +263,7 @@ def pawprint(
     interface = campus_interface(realm)
     address = resolve(SERVER, interface)
     # wrap every file first, so a bad one doesn't leave the rest half sent
-    jobs = [(file, with_pjl(file, double_sided)) for file in files]
+    jobs = [(file, with_pjl(file, double_sided, staple)) for file in files]
 
     for i, (file, data) in enumerate(jobs):
         job = (os.getpid() + i) % 1000
