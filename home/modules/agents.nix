@@ -84,6 +84,7 @@ in
         filesystem.allowWrite = [
           "~/.cache/"
           "~/.local/share/uv/"
+          "~/Downloads/"
         ];
       };
 
