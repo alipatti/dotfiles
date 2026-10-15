@@ -75,6 +75,12 @@
   set page(paper: "us-letter", margin: 1in, numbering: "1")
   set list(indent: 1em, marker: context box(width: 0.4em, height: 0.07em, fill: text.fill, baseline: -0.26em))
   set enum(indent: 1em)
+  // term lists as hanging paragraphs: "_term_. description" with wrapped lines indented
+  show terms: it => context {
+    let spacing = if it.spacing != auto { it.spacing } else if it.tight { par.leading } else { par.spacing }
+    set par(spacing: spacing)
+    block(inset: (left: 1em), it.children.map(item => par(hanging-indent: 1.5em, emph(item.term) + [. ] + item.description)).join())
+  }
   set par(justify: true, leading: 0.6em, first-line-indent: 0em, spacing: 1em)
 
   // add extra space around relations in display math
@@ -100,7 +106,6 @@
   }
 
   // numbering
-  set enum(numbering: "(a)")
   set heading(numbering: "1.1")
   set math.equation(numbering: "(1)")
 
@@ -168,6 +173,10 @@
   set figure(gap: 2em, placement: top)
   // space between floating figures and the body text (default 1.5em)
   set place(clearance: 2.5em)
+  // number images and tables in one sequence (figure 1, table 2, ...)
+  // by stepping the other kind's counter alongside each figure
+  show figure.where(kind: image): it => counter(figure.where(kind: table)).step() + it
+  show figure.where(kind: table): it => counter(figure.where(kind: image)).step() + it
   // inset captions by 1em per side; center single-line captions,
   // otherwise justify with a flush-left last line
   show figure.caption: it => {
