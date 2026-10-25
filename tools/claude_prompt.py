@@ -93,13 +93,15 @@ def main() -> None:
     data = json.load(sys.stdin)
 
     model = (data.get("model") or {}).get("display_name", "")
+    model = re.sub(r"\s*\(.*\)$", "", model)  # drop suffixes like "(1M context)"
     context = (data.get("context_window") or {}).get("used_percentage")
     rate_limits = data.get("rate_limits") or {}
     five_hour = rate_limits.get("five_hour") or {}
     week = rate_limits.get("seven_day") or {}
     cwd = (data.get("workspace") or {}).get("current_dir") or data.get("cwd") or "."
 
-    usage = []
+    usage = [f"{MODEL_ICON} {model}"]
+
     if context is not None:
         usage.append(format_usage("context", context))
 
@@ -110,13 +112,11 @@ def main() -> None:
         usage.append(format_limit("week", week))
 
     sections = [
-        f"{MODEL_ICON} {model}",
         starship_module("directory", cwd),
         starship_rhs(cwd),
     ]
     print(" | ".join(filter(None, sections)))
-    if usage:
-        print(" | ".join(usage))
+    print(" | ".join(usage))
 
 
 if __name__ == "__main__":
