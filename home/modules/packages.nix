@@ -28,8 +28,8 @@ in
     neovim
     tree-sitter
 
-    # language servers, enabled in nvim/plugin/lsp.lua
-    ty
+    # language servers, enabled in nvim/plugin/lsp.lua. ty and ruff's servers
+    # run through uvx; ruff stays here for rumdl's code-block formatting
     ruff
     lua-language-server
     yaml-language-server

@@ -1,8 +1,10 @@
 -- the servers themselves are installed by nix (see home/packages.nix). the
 -- keys are lspconfig names; values override lspconfig's default config
 local lsp_servers = {
-	ty            = {},
-	ruff          = {},
+	-- through uvx so the editor matches `uvx ty check` and `uvx ruff check`
+	-- instead of nixpkgs' lagging releases
+	ty            = { cmd = { "uvx", "ty", "server" } },
+	ruff          = { cmd = { "uvx", "ruff", "server" } },
 	lua_ls        = {},
 	yamlls        = {},
 	taplo         = {},
