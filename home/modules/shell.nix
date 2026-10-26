@@ -72,7 +72,14 @@ in
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
-    config.global.load_dotenv = true;
+    config.global = {
+      load_dotenv = true;
+      # status lines must match the filter, so none print; errors bypass it.
+      # (log_format = "-" is documented to disable logging but is printed
+      # literally in 2.37)
+      log_filter = "^$";
+      hide_env_diff = true;
+    };
   };
   programs.fzf = {
     enable = true;
