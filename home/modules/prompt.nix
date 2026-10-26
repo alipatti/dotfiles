@@ -11,6 +11,7 @@
         "$fill"
         "$rust"
         "$python"
+        "$nix_shell"
         "$git_branch"
         "$git_commit"
         "$git_state"
@@ -46,6 +47,12 @@
         detect_files = [ ];
         detect_folders = [ ];
         version_format = "$v\${major}.\${minor}";
+      };
+      nix_shell = {
+        # just the glyph; the directory segment already names the project
+        format = "[ | ](bright-white)";
+        # also detect `nix shell nixpkgs#foo`, which doesn't set IN_NIX_SHELL
+        heuristic = true;
       };
       rust = {
         format = "[ \${version} | ](bright-white)";
