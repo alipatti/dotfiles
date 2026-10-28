@@ -23,6 +23,8 @@ in
     ignores = [
       ".DS_Store"
       "__pycache__/"
+      # nix-direnv's cached dev shells
+      ".direnv/"
       "*.local.*"
       "**/.claude/.cc-writes/"
       "**/.claude/settings.local.json"
