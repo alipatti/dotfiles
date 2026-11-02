@@ -21,8 +21,8 @@
 #let toto = $arrows.rr$
 #let End = $op("End")$
 #let poly = $op("poly")$
-#let var = $op("Var")$
-#let cov = $op("Cov")$
+#let var = $op("var")$
+#let cov = $op("cov")$
 #let st = $op("s.t.")$
 
 // probability and convergence
