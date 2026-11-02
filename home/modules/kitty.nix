@@ -22,6 +22,9 @@ in
     # listen_on. with allow_remote_control = socket-only, this gives anything
     # on the remote host full control of kitty
     forward_remote_control yes
+    # use the ControlMaster from home/modules/ssh.nix, whose path other
+    # programs can find, instead of kitten ssh's own
+    share_connections no
   '';
 
   programs.kitty = {

@@ -23,5 +23,14 @@
       HostName = "adroit.princeton.edu";
       User = "ap1741";
     };
+    # one connection per host, shared by ssh, scp, rsync, git and kitten ssh,
+    # so 2fa is only asked once. after sleep or a network change, a dead master
+    # can make new connections hang until ServerAlive notices or `ssh -O exit`
+    settings."fasrc adroit fridge" = {
+      ControlMaster = "auto";
+      ControlPath = "~/.ssh/cm-%C";
+      ControlPersist = "10m";
+      ServerAliveInterval = 30;
+    };
   };
 }
