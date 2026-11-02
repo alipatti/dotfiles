@@ -16,6 +16,14 @@ in
   # loaded by tab_bar_style = "custom"
   xdg.configFile."kitty/tab_bar.py".source = link "tools/kitty_tab_bar.py";
 
+  # options for `kitten ssh`. docs: https://sw.kovidgoyal.net/kitty/kittens/ssh/
+  xdg.configFile."kitty/ssh.conf".text = ''
+    # lets remote programs (e.g. tools/viewer) use `kitten @` through
+    # listen_on. with allow_remote_control = socket-only, this gives anything
+    # on the remote host full control of kitty
+    forward_remote_control yes
+  '';
+
   programs.kitty = {
     enable = true;
 
