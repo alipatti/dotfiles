@@ -1,5 +1,7 @@
+-- fork that serves the page and its websocket on one port, so a preview over
+-- ssh needs a single forward. switch back once it's merged upstream
 vim.pack.add({
-	{ src = "https://github.com/chomosuke/typst-preview.nvim", version = vim.version.range("1") },
+	{ src = "https://github.com/alipatti/typst-preview.nvim", version = "single-port" },
 })
 
 -- see tools/viewer

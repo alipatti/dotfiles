@@ -87,9 +87,9 @@
       "src": "https://github.com/folke/todo-comments.nvim"
     },
     "typst-preview.nvim": {
-      "rev": "1c2e19486397be1c580b560fc50ee36abe329c46",
-      "src": "https://github.com/chomosuke/typst-preview.nvim",
-      "version": "1.0.0 - 2.0.0"
+      "rev": "16195ab004f0254ff8573bf9e2c13894148fbe06",
+      "src": "https://github.com/alipatti/typst-preview.nvim",
+      "version": "'single-port'"
     },
     "vim-eunuch": {
       "rev": "929490937745cd96130d3e7948f762f0aa403314",
