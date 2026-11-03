@@ -60,8 +60,9 @@ in
       permissions = {
         defaultMode = "auto";
         allow = map (d: "WebFetch(domain:${d})") allowedDomains ++ [
-          # runs unsandboxed (see sandbox.excludedCommands)
+          # run unsandboxed (see sandbox.excludedCommands)
           "Bash(pdf2md:*)"
+          "Bash(_nvim_peer:*)"
         ];
         # local history is fair game (the reflog keeps it recoverable) but
         # pushed history isn't. deny rules are checked before the sandbox
@@ -77,8 +78,13 @@ in
         enabled = true;
         network.allowedDomains = allowedDomains;
         # pdf2md talks to a local llama-server and nests codex's own
-        # sandbox, neither of which works inside seatbelt
-        excludedCommands = [ "pdf2md" ];
+        # sandbox, neither of which works inside seatbelt. _nvim_peer connects
+        # to nvim's socket, which seatbelt refuses; it only runs the fixed
+        # lua in tools/nvim_peer, never code passed to it
+        excludedCommands = [
+          "pdf2md"
+          "_nvim_peer"
+        ];
         # uv keeps managed pythons and tools in ~/.local/share/uv and writes
         # temp files there even for `uv run`
         filesystem.allowWrite = [
@@ -87,6 +93,19 @@ in
           "~/Downloads/"
         ];
       };
+
+      hooks.PostToolUse = [
+        {
+          matcher = "Edit|MultiEdit|Write|Bash";
+          hooks = [
+            {
+              type = "command";
+              # reload buffers in the nvims in this kitty (tools/nvim_peer)
+              command = "_nvim_peer reload || true";
+            }
+          ];
+        }
+      ];
 
       statusLine = {
         type = "command";

@@ -8,6 +8,7 @@ in
 {
   # tools that don't fit a module in ./modules, on every machine
   imports = [
+    ../tools/nvim_peer
     ../tools/pdf2md
     ../tools/viewer
   ];
