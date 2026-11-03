@@ -446,26 +446,19 @@ def live_servers() -> list[Path]:
 
 
 def tab_window_ids() -> set[str] | None:
-    """Ids of the windows in the caller's kitty tab, or None when kitty can't say.
-
-    That's outside a kitty window, and over ssh to a host without kitty's
-    remote control (kitten ssh's forward_remote_control).
-    """
+    """Ids of the windows in the caller's kitty tab, or None outside a kitty window."""
     if not (window := os.environ.get("KITTY_WINDOW_ID")):
         return None
 
-    try:
-        result = subprocess.run(
-            ["kitten", "@", "ls", "--match-tab", f"window_id:{window}"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except FileNotFoundError:
-        return None
+    result = subprocess.run(
+        ["kitten", "@", "ls", "--match-tab", f"window_id:{window}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     if result.returncode:
-        return None
+        sys.exit(f"kitten @ ls failed:\n{result.stderr}")
 
     return {
         str(w["id"])
@@ -476,10 +469,9 @@ def tab_window_ids() -> set[str] | None:
 
 
 def the_nvim() -> Path:
-    """The socket of the one nvim in this kitty tab.
+    """The socket of the one nvim in this kitty tab (or kitty, outside a window).
 
-    When kitty can't list the tab, any nvim on this host counts. Exits if
-    there isn't exactly one.
+    Exits if there isn't exactly one.
     """
     tab = tab_window_ids()
     servers = [s for s in live_servers() if tab is None or s.stem.split("-")[-1] in tab]
