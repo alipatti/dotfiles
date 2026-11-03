@@ -21,10 +21,9 @@
     table-format.enabled = true;
   };
 
-  # format markdown claude edits with the config above. mkBefore keeps it
-  # ahead of the nvim reload hook in ./agents.nix so the buffer picks up the
-  # formatted file. anything rumdl can't fix is fed back via exit code 2
-  programs.claude-code.settings.hooks.PostToolUse = lib.mkBefore [
+  # format markdown claude edits with the config above. anything rumdl can't
+  # fix is fed back via exit code 2
+  programs.claude-code.settings.hooks.PostToolUse = [
     {
       matcher = "Edit|MultiEdit|Write";
       hooks = [

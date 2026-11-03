@@ -16,6 +16,7 @@
 ## Git
 
 - Write concise, imperative, lowercase git commit messages.
+- Do not push branches created in worktrees (`.claude/worktrees/`).
 
 ## Coding
 
