@@ -12,7 +12,15 @@ local lsp_servers = {
 	fish_lsp      = {},
 	svelte        = {},
 	tailwindcss   = {},
-	rumdl         = {},
+	-- skip claude code's ctrl-g prompt buffers. not calling on_dir stops attach
+	rumdl         = {
+		root_dir = function(bufnr, on_dir)
+			local name = vim.fs.basename(vim.api.nvim_buf_get_name(bufnr))
+			if not name:match("^claude%-prompt%-.*%.md$") then
+				on_dir(vim.fs.root(bufnr, { ".rumdl.toml", "rumdl.toml", ".git" }) or vim.fn.getcwd())
+			end
+		end,
+	},
 	tinymist      = {},
 	nixd          = {},
 	rust_analyzer = {
