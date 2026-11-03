@@ -113,14 +113,20 @@ vim.api.nvim_set_hl(0, "ClaudeRange", { bg = tint })
 vim.api.nvim_set_hl(0, "ClaudeRule", { fg = blend(accent, background, 0.35), bg = tint })
 vim.api.nvim_set_hl(0, "ClaudeNumber", { fg = accent, bold = true })
 
+local function clear_notes()
+    for _, b in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(b) and vim.bo[b].filetype ~= OUTLINE then
+            vim.api.nvim_buf_clear_namespace(b, ns, 0, -1)
+        end
+    end
+end
 local function clear()
     for _, b in ipairs(vim.api.nvim_list_bufs()) do
         if vim.bo[b].filetype == OUTLINE then
             vim.api.nvim_buf_delete(b, { force = true })
-        elseif vim.api.nvim_buf_is_loaded(b) then
-            vim.api.nvim_buf_clear_namespace(b, ns, 0, -1)
         end
     end
+    clear_notes()
 end
 vim.api.nvim_create_user_command("ClearAnnotations", clear, { desc = "Clear Claude's annotations" })
 
@@ -319,6 +325,14 @@ map("<cr>", function()
         vim.api.nvim_set_current_win(main)
     end
 end)
+
+-- closing the outline wipes it (bufhidden), taking the notes with it. this
+-- runs synchronously so a new annotate call clears before it places its own
+vim.api.nvim_create_autocmd("BufWipeout", {
+    buffer = outline_buf,
+    once = true,
+    callback = clear_notes,
+})
 
 vim.api.nvim_create_autocmd("CursorMoved", {
     buffer = outline_buf,
@@ -550,7 +564,7 @@ def annotate():
     annotation only highlights, so it needs a range. Annotations with outline
     (the default) are listed in a split that steps through them, by their
     summary if given and their text otherwise; give a summary when the text is
-    long. An empty list clears all notes.
+    long. Closing the outline clears all notes, and so does an empty list.
     """
     try:
         annotations = Annotations.model_validate_json(sys.stdin.read()).annotations
