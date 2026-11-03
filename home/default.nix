@@ -7,7 +7,10 @@ let
 in
 {
   # tools that don't fit a module in ./modules, on every machine
-  imports = [ ../tools/pdf2md ];
+  imports = [
+    ../tools/pdf2md
+    ../tools/viewer
+  ];
 
   # shared by the modules above. `link` symlinks straight into the repo so
   # configs stay editable in place

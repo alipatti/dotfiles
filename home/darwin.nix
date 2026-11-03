@@ -7,7 +7,7 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) root link;
+  inherit (config.lib.dotfiles) link;
 in
 {
   imports = [ ../tools/pawprint ];
@@ -64,10 +64,5 @@ in
         run ${pkgs.duti}/bin/duti -s com.apple.TextEdit "$uti" all
       fi
     done
-  '';
-
-  # preview window for typst, markdown and pdfs
-  home.activation.viewer = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    run ${root}/tools/viewer/build.sh
   '';
 }

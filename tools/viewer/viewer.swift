@@ -1,9 +1,9 @@
 // webkit window for local preview servers (typst-preview, notebooks, ...) and pdfs
 //
 // usage: viewer <url-or-file>...
-// build.sh builds viewer.app and a viewer command that passes documents to
-// the running app with `open`. the window shows one document at a time, and a
-// pill of buttons along the bottom switches between them
+// default.nix builds viewer.app, and the viewer command (viewer.sh) passes
+// documents to the running app with `open`. the window shows one document at a
+// time, and a pill of buttons along the bottom switches between them
 
 import AppKit
 import PDFKit
@@ -92,7 +92,10 @@ final class Page: NSObject, WKNavigationDelegate, WKUIDelegate {
 		request.httpMethod = "HEAD"
 		watcher = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
 			URLSession.shared.dataTask(with: request) { _, _, error in
-				if (error as? URLError)?.code == .cannotConnectToHost {
+				// through an ssh forward (see viewer.sh), the forward accepts the
+				// connection and drops it once nothing listens behind it
+				let code = (error as? URLError)?.code
+				if code == .cannotConnectToHost || code == .networkConnectionLost {
 					DispatchQueue.main.async { if let self { self.delegate.close(self) } }
 				}
 			}.resume()
