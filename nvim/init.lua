@@ -123,9 +123,10 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 -- also listen at a path derived from the kitty window, so agents in other
 -- windows of the same tab can find this nvim and drive it over rpc
-if vim.env.KITTY_WINDOW_ID and vim.env.KITTY_PID then
+if vim.env.KITTY_WINDOW_ID then
 	local dir = vim.fn.stdpath("cache") .. "/kitty"
-	local sock = string.format("%s/%s-%s.sock", dir, vim.env.KITTY_PID, vim.env.KITTY_WINDOW_ID)
+	-- kitten ssh passes the window id to the remote, but not kitty's pid
+	local sock = string.format("%s/%s-%s.sock", dir, vim.env.KITTY_PID or "ssh", vim.env.KITTY_WINDOW_ID)
 	vim.fn.mkdir(dir, "p")
 	-- a socket left behind by a crashed nvim makes serverstart fail. if
 	-- another nvim is still listening (e.g. one suspended in this window),
