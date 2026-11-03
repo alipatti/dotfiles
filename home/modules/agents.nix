@@ -52,8 +52,18 @@ in
       tui = "fullscreen";
       # don't auto-open the diff panel on the right; /diff still toggles it
       diffSidebarOpen = false;
+      # start in focus view (prompt, one-line tool summary, final response);
+      # ctrl+o still opens the full transcript with diffs
+      viewMode = "focus";
+      # summarize tool output instead of printing it in full
+      verbose = false;
       # no tips under the spinner while claude is working
       spinnerTipsEnabled = false;
+      # one fixed verb instead of the rotating whimsical ones
+      spinnerVerbs = {
+        mode = "replace";
+        verbs = [ "Working" ];
+      };
       # skills come from ./skills; don't pull claude.ai's into it
       syncClaudeAiSkills = false;
 
