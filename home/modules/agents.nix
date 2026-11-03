@@ -64,6 +64,8 @@ in
         mode = "replace";
         verbs = [ "Working" ];
       };
+      # no spinner, shimmer, or flash animations
+      prefersReducedMotion = true;
       # skills come from ./skills; don't pull claude.ai's into it
       syncClaudeAiSkills = false;
 
