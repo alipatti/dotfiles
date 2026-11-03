@@ -64,8 +64,8 @@ in
     }
     // lib.optionalAttrs isDarwin {
       # kitty starts from launchd with a bare PATH. programs it runs directly,
-      # without a shell in between (e.g. `kitten @ launch claude` from nvim),
-      # would otherwise miss the nix profile paths that fish sets up
+      # without a shell in between (e.g. the split script's python3 and
+      # kitten), would otherwise miss the nix profile paths that fish sets up
       env = "read_from_shell=PATH";
 
       macos_quit_when_last_window_closed = true;

@@ -88,19 +88,6 @@ in
         ];
       };
 
-      hooks.PostToolUse = [
-        {
-          matcher = "Edit|MultiEdit|Write|Bash";
-          hooks = [
-            {
-              type = "command";
-              # reload buffers when claude runs inside nvim's terminal
-              command = ''[ -n "$NVIM" ] && nvim --server "$NVIM" --remote-send '<cmd>checktime<cr>' || true'';
-            }
-          ];
-        }
-      ];
-
       statusLine = {
         type = "command";
         command = "${root}/tools/claude_prompt.py";

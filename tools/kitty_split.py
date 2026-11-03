@@ -6,9 +6,6 @@ side) when the tab is wide and fat (stacked) when it is narrow, leaving
 the stack layout if the tab was zoomed. run via
 `remote_control_script` so no remote control permission is needed.
 
-with --layout-only, just pick the layout and launch nothing; nvim uses
-this before showing its terminal windows.
-
 kitty also loads this file as a watcher (see kitty.nix), so on_resize
 reflows tall/fat when the window is resized.
 """
@@ -16,7 +13,6 @@ reflows tall/fat when the window is resized.
 import json
 import shutil
 import subprocess
-import sys
 
 NARROW_WIDE_CUTOFF = 100
 
@@ -86,9 +82,6 @@ def main():
     # the bias comes from enabled_layouts in kitty.conf; goto-layout ignores
     # options that are not listed there
     kitten("goto-layout", layout)
-
-    if "--layout-only" in sys.argv[1:]:
-        return
 
     # --cwd=current resolves against the source window, which defaults to the
     # script's own when invoked from remote control. when the focused window
