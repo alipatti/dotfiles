@@ -21,10 +21,10 @@ in
     # lets remote programs (e.g. tools/viewer) use `kitten @` through
     # listen_on. with allow_remote_control = socket-only, this gives anything
     # on the remote host full control of kitty
+    # needs kitten ssh's own ControlMaster (share_connections, on by default),
+    # which overrides the one in home/modules/ssh.nix. its socket is at
+    # /tmp/kssh-rdir-$UID/kssh-$KITTY_PID-%C on macos
     forward_remote_control yes
-    # use the ControlMaster from home/modules/ssh.nix, whose path other
-    # programs can find, instead of kitten ssh's own
-    share_connections no
   '';
 
   programs.kitty = {
