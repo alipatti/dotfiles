@@ -98,10 +98,13 @@ in
           "_nvim_peer"
         ];
         # uv keeps managed pythons and tools in ~/.local/share/uv and writes
-        # temp files there even for `uv run`
+        # temp files there even for `uv run`. pnpm keeps its content-addressable
+        # store in ~/.local/share/pnpm/store and otherwise falls back to a stray
+        # .pnpm-store in the project root
         filesystem.allowWrite = [
           "~/.cache/"
           "~/.local/share/uv/"
+          "~/.local/share/pnpm/store/"
           "~/Downloads/"
         ];
       };
@@ -165,7 +168,8 @@ in
       tui.terminal_title = [ ];
 
       # uv keeps managed pythons and tools in ~/.local/share/uv and writes to
-      # its cache even for `uv run`
+      # its cache even for `uv run`. pnpm keeps its store in
+      # ~/.local/share/pnpm/store and its metadata cache in ~/.cache/pnpm
       default_permissions = "default";
       permissions =
         let
@@ -173,11 +177,15 @@ in
             "~/.cache/uv" = "write";
             "~/.local/share/uv" = "write";
           };
+          pnpm = {
+            "~/.cache/pnpm" = "write";
+            "~/.local/share/pnpm/store" = "write";
+          };
         in
         {
           default = {
             extends = ":workspace";
-            filesystem = uv;
+            filesystem = uv // pnpm;
           };
           # read-only reviewers (skills/review/review.py) that can still run uv
           reviewer = {
