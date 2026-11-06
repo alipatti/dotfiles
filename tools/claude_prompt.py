@@ -21,7 +21,6 @@ STARSHIP_MODULES = [
 ]
 
 MODEL_ICON = "\U000f06a9"  # 󰚩
-WEEK_CUTOFF = 80
 
 # usage at or above these percentages is colored yellow and red
 YELLOW_CUTOFF = 75
@@ -71,22 +70,23 @@ def time_until(timestamp: int) -> str:
     return f"{minutes}m"
 
 
-def format_usage(label: str, percent: float, note: str | None = None) -> str:
+def format_percent(percent: float) -> str:
     percent = round(percent)
     shown = f"{percent}%"
 
     if percent >= RED_CUTOFF:
-        shown = f"\x1b[31m{shown}\x1b[0m"
-    elif percent >= YELLOW_CUTOFF:
-        shown = f"\x1b[33m{shown}\x1b[0m"
+        return f"\x1b[31m{shown}\x1b[0m"
 
-    return f"{label}: {shown}" + (f" ({note})" if note else "")
+    if percent >= YELLOW_CUTOFF:
+        return f"\x1b[33m{shown}\x1b[0m"
+
+    return shown
 
 
-def format_limit(label: str, limit: dict) -> str:
+def format_limit(limit: dict) -> str:
+    shown = format_percent(limit["used_percentage"])
     resets_at = limit.get("resets_at")
-    remaining = time_until(resets_at) if resets_at is not None else None
-    return format_usage(label, limit["used_percentage"], remaining)
+    return f"{shown} ({time_until(resets_at)})" if resets_at is not None else shown
 
 
 def main() -> None:
@@ -103,13 +103,15 @@ def main() -> None:
     usage = [f"{MODEL_ICON} {model}"]
 
     if context is not None:
-        usage.append(format_usage("context", context))
+        usage.append(f"context: {format_percent(context)}")
 
-    if five_hour.get("used_percentage") is not None:
-        usage.append(format_limit("usage", five_hour))
-
-    if round(week.get("used_percentage") or 0) > WEEK_CUTOFF:
-        usage.append(format_limit("week", week))
+    limits = [
+        format_limit(limit)
+        for limit in (five_hour, week)
+        if limit.get("used_percentage") is not None
+    ]
+    if limits:
+        usage.append("usage: " + ", ".join(limits))
 
     sections = [
         starship_module("directory", cwd),
