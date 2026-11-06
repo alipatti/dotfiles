@@ -94,6 +94,8 @@ In addition:
   or functions whose behavior isn't clear from the signature
   and a short summary.
   When examples are included, they should be complete and testable.
+- Document class attributes with a docstring on the line below the
+  attribute, not a `#` comment above it.
 
 ## Types
 
