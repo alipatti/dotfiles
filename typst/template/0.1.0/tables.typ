@@ -14,10 +14,9 @@
   sign + grouped + if digits > 0 { "." + fraction + "0" * (digits - fraction.len()) } + if percent { "%" }
 }
 
-// rule under the header and on the left of the given column indices
-#let rules(header-rows: 1, after-columns: (1,)) = (x, y) => (
+// rule on the left of the given column indices
+#let rules(after-columns: (1,)) = (x, y) => (
   left: if x in after-columns { 0.5pt } else { 0pt },
-  bottom: if y == header-rows - 1 { 0.5pt } else { 0pt },
 )
 
 // italic title just above a table, hanging slightly past its left edge
@@ -34,7 +33,9 @@
 // standard error. facet splits the rows into lettered panels by that column.
 // column-styles maps column names to `format-num` arguments; numbers default to 3
 // digits, or 0 for integers, and standard errors get one more digit than their
-// column. rule-after names columns followed by a rule.
+// column. with a group-delimiter, a header "group" + delimiter + "name" sets
+// "name" under a "group" header spanning the adjacent columns of that group.
+// rule-after names columns, or groups, followed by a rule.
 #let make-table(
   rows,
   facet: none,
@@ -42,12 +43,28 @@
   column-styles: (:),
   rule-after: auto,
   markup-cells: false,
+  group-delimiter: none,
 ) = {
   let names = rows.first().keys().filter(name => name != facet and not name.ends-with(se-suffix))
-  let rule-after = if rule-after == auto { (names.first(),) } else { rule-after }
-  for name in rule-after {
-    assert(name in names, message: "make-table: no column " + repr(name) + " to put a rule after")
+
+  // (group, label) of a column, where group is none for an ungrouped column
+  let split(name) = {
+    if group-delimiter == none or not name.contains(group-delimiter) { return (none, name) }
+    let (group, ..label) = name.split(group-delimiter)
+    (group, label.join(group-delimiter))
   }
+  let groups = names.map(name => split(name).first())
+
+  // a rule after a group goes after its last column
+  let last-column(name) = {
+    let index = names.position(n => n == name)
+    if index != none { return index }
+    let index = groups.rev().position(group => group == name)
+    assert(index != none, message: "make-table: no column or group " + repr(name) + " to put a rule after")
+    names.len() - 1 - index
+  }
+  let rule-after = if rule-after == auto { (names.first(),) } else { rule-after }
+  let after-columns = rule-after.map(name => last-column(name) + 1)
 
   let markup(text) = eval(text, mode: "markup")
   let format(value, style) = {
@@ -64,11 +81,37 @@
     let se-style = style + (digits: style.at("digits", default: 3) + 1)
     [#value \ #text(0.8em)[(#format(se, se-style))]]
   }
+
+  // runs of adjacent columns sharing a group, as (group, first column, column count)
+  let runs = groups
+    .enumerate()
+    .fold((), (runs, (x, group)) => {
+      if group != none and runs.len() > 0 and runs.last().first() == group {
+        let (_, start, count) = runs.pop()
+        runs.push((group, start, count + 1))
+      } else {
+        runs.push((group, x, 1))
+      }
+      runs
+    })
+  let grouped = groups.any(group => group != none)
+  let header-rows = if grouped { 2 } else { 1 }
+  let header = if not grouped { names.map(markup) } else {
+    // ungrouped columns span both header rows, and group names are underlined
+    let top = runs.map(((group, start, count)) => if group == none {
+      table.cell(rowspan: 2, markup(names.at(start)))
+    } else {
+      table.cell(colspan: count, underline(offset: 0.3em, markup(group)))
+    })
+    let labels = names.filter(name => split(name).first() != none).map(name => markup(split(name).last()))
+    (..top, ..labels)
+  }
+
   let body(rows) = table(
     columns: names.len(),
     align: (left,) + (center,) * (names.len() - 1),
-    stroke: rules(after-columns: rule-after.map(name => names.position(n => n == name) + 1)),
-    table.header(..names.map(markup)),
+    stroke: rules(after-columns: after-columns),
+    table.header(..header, table.hline(y: header-rows, stroke: 0.5pt)),
     ..rows.map(row => names.map(name => cell(row, name))).flatten(),
   )
 
