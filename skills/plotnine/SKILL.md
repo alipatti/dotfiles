@@ -8,7 +8,7 @@ description: "Load BEFORE writing or editing any Python code that imports plotni
 - Import as `import plotnine as pn` and reference everything as `pn.XXX`.
 - Use the helpers in `ap.plot` rather than reimplementing them.
   Install with
-  `uv add "alipatti[plot] @ git+https://github.com/alipatti/alipatti.py"`.
+  `uv add "alipatti[plot] @ git+https://github.com/alipatti/dotfiles#subdirectory=packages/python"`.
   This contains a theme, color palates, saving helpers, etc.
 
 ```python
