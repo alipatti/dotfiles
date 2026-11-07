@@ -159,7 +159,7 @@ in
   programs.codex = {
     enable = true;
     settings = {
-      model = "gpt-5.6-sol";
+      model = "gpt-6-astra";
       model_reasoning_effort = "medium";
       service_tier = "default";
       features.js_repl = false;
