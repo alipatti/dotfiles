@@ -1,0 +1,365 @@
+import os
+import pickle
+import warnings
+from collections.abc import Callable
+from datetime import datetime
+from pathlib import Path
+
+import polars as pl
+import pytest
+from joblib._store_backends import CacheWarning
+
+from alipatti.cache import (
+    _WRITE_LOCKS,
+    LAZY_PARQUET_FILENAME,
+    LAZY_TOKEN_FILENAME,
+    PARQUET_FILENAME,
+    MmapMode,
+    ParquetCache,
+)
+
+
+class Counter:
+    """Counts how many times a polars query actually executes."""
+
+    def __init__(self) -> None:
+        self.n = 0
+
+        # a closure rather than a method: joblib hashes a bound method's `self`,
+        # whose count changes after each execution
+        def query(n: int) -> pl.LazyFrame:
+            return pl.LazyFrame({"a": range(n)}).with_columns(
+                b=pl.col.a.map_batches(self.times_ten, return_dtype=pl.Int64)
+            )
+
+        self.query = query
+
+    def times_ten(self, s: pl.Series) -> pl.Series:
+        self.n += 1
+        return s * 10
+
+
+@pytest.fixture
+def cache(tmp_path: Path) -> ParquetCache:
+    return ParquetCache(tmp_path, verbose=0)
+
+
+@pytest.fixture
+def counter() -> Counter:
+    return Counter()
+
+
+def cached_files(cache: ParquetCache, pattern: str = "output*") -> list[str]:
+    return sorted(p.name for p in Path(str(cache.location)).rglob(pattern))
+
+
+def object_frame() -> pl.DataFrame:
+    return pl.DataFrame({"x": [object()]}, schema={"x": pl.Object})
+
+
+# dataframes
+
+
+def test_dataframe_is_cached_as_parquet(cache: ParquetCache):
+    """Store DataFrame results as parquet and reload them without recomputing."""
+    calls = []
+
+    @cache.cache
+    def frame(n: int) -> pl.DataFrame:
+        calls.append(n)
+        return pl.DataFrame({"a": range(n)})
+
+    first, second = frame(3), frame(3)
+
+    assert calls == [3]
+    assert isinstance(second, pl.DataFrame)
+    assert first.equals(second)
+    assert cached_files(cache) == [PARQUET_FILENAME]
+
+
+def test_other_types_fall_back_to_pickle(cache: ParquetCache):
+    """Pickle results that are not polars frames."""
+    frame = cache.cache(lambda: {"a": 1})
+
+    frame()
+
+    assert frame() == {"a": 1}
+    assert cached_files(cache) == ["output.pkl"]
+
+
+@pytest.mark.filterwarnings("ignore::joblib._store_backends.CacheWarning")
+def test_object_dataframe_falls_back_to_pickle(cache: ParquetCache):
+    """Hand DataFrames with Object columns, which parquet can't store, to joblib."""
+    frame = cache.cache(object_frame)
+
+    assert frame().shape == (1, 1)
+    assert cached_files(cache, "output.parquet*") == []
+
+
+@pytest.mark.parametrize("option", ["use_pyarrow", "lazy", "not_an_option"])
+def test_unsupported_parquet_options_raise(tmp_path: Path, option: str):
+    """Reject options not accepted by both write_parquet and sink_parquet."""
+    with pytest.raises(TypeError, match=option):
+        ParquetCache(tmp_path, parquet_options={option: True})
+
+
+def test_joblib_options_are_forwarded(tmp_path: Path):
+    """Pass compress and mmap_mode through to joblib's store backend."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # joblib warns that compress disables mmap
+        cache = ParquetCache(tmp_path, compress=3, mmap_mode="r")
+
+    backend = cache.store_backend
+    assert backend is not None
+    assert backend.compress == 3
+    assert backend.mmap_mode == "r"
+
+
+def test_parquet_options_are_applied(tmp_path: Path):
+    """Pass parquet_options through to the parquet writer."""
+    frame = pl.DataFrame({"a": range(100_000)}).cast(pl.String)
+
+    def cached_size(compression: str) -> int:
+        cache = ParquetCache(
+            tmp_path / compression,
+            verbose=0,
+            parquet_options={"compression": compression},
+        )
+        cache.cache(lambda: frame)()
+        (path,) = Path(str(cache.location)).rglob(PARQUET_FILENAME)
+        return path.stat().st_size
+
+    assert cached_size("uncompressed") > cached_size("zstd")
+
+
+def test_items_report_parquet_access_time(cache: ParquetCache):
+    """Report the parquet output's access time so LRU eviction works."""
+    cache.cache(lambda: pl.DataFrame({"a": [1]}))()
+    (parquet,) = Path(str(cache.location)).rglob(PARQUET_FILENAME)
+    os.utime(parquet, (0, 0))
+
+    (item,) = cache.store_backend.get_items()
+
+    assert item.last_access == datetime.fromtimestamp(0)  # noqa: DTZ006
+
+
+def test_load_message_is_printed(tmp_path: Path, capsys: pytest.CaptureFixture[str]):
+    """Print joblib's loading message on parquet cache hits when verbose."""
+    frame = ParquetCache(tmp_path, verbose=2).cache(lambda: pl.DataFrame({"a": [1]}))
+    frame()
+    capsys.readouterr()
+
+    frame()
+
+    assert "Loading" in capsys.readouterr().out
+
+
+# lazyframes
+
+
+def test_lazyframe_is_not_executed_until_collected(
+    cache: ParquetCache,
+    counter: Counter,
+):
+    """Return a LazyFrame without executing the query or writing the cache."""
+    lf = cache.cache(counter.query)(5)
+    lf.filter(pl.col.a > 2).collect_schema()
+
+    assert isinstance(lf, pl.LazyFrame)
+    assert counter.n == 0
+    assert cached_files(cache, LAZY_PARQUET_FILENAME) == []
+
+
+@pytest.mark.parametrize("mmap_mode", [None, "r"])
+def test_lazyframe_executes_once(
+    tmp_path: Path,
+    counter: Counter,
+    mmap_mode: MmapMode | None,
+):
+    """Execute the query once across collects, self-joins, and later calls."""
+    query = ParquetCache(tmp_path, verbose=0, mmap_mode=mmap_mode).cache(counter.query)
+
+    lf = query(5)
+    lf.join(lf, on="a").collect()
+    lf.collect()
+    query(5).collect()
+
+    assert counter.n == 1
+
+
+def test_lazyframe_cache_hit_scans_parquet(cache: ParquetCache, counter: Counter):
+    """Return a parquet scan on cache hits so downstream pushdown applies."""
+    query = cache.cache(counter.query)
+    query(5).collect()
+
+    hit = query(5)
+
+    assert "Parquet SCAN" in hit.explain()
+    assert cached_files(cache, "*.parquet") == [LAZY_PARQUET_FILENAME]
+
+
+@pytest.mark.parametrize(
+    "downstream",
+    [
+        lambda lf: lf.filter(pl.col.a > 2).select("b"),
+        lambda lf: lf.filter(pl.col.b > 10).head(2),
+        lambda lf: lf.select(pl.col.b.sum()),
+        lambda lf: lf.head(1),
+        lambda lf: lf.head(2).filter(pl.col.b > 5),
+    ],
+    ids=[
+        "filter-other-column",
+        "filter-then-head",
+        "aggregate",
+        "head",
+        "head-then-filter",
+    ],
+)
+@pytest.mark.parametrize("hit", [False, True], ids=["miss", "hit"])
+def test_lazyframe_results_match_uncached(
+    cache: ParquetCache,
+    counter: Counter,
+    downstream: Callable[[pl.LazyFrame], pl.LazyFrame],
+    hit: bool,
+):
+    """Produce the same results as the uncached query under pushdown."""
+    query = cache.cache(counter.query)
+
+    if hit:
+        query(6).collect()
+
+    expected = downstream(counter.query(6)).collect()
+    assert downstream(query(6)).collect().equals(expected)
+
+
+def test_lazyframe_is_picklable(cache: ParquetCache, counter: Counter):
+    """Pickle the returned LazyFrame, e.g. to pass it to another cached function."""
+    lf = cache.cache(counter.query)(3)
+
+    assert pickle.loads(pickle.dumps(lf)).collect()["b"].to_list() == [0, 10, 20]
+
+
+def test_unwritable_lazyframe_warns_and_returns_data(cache: ParquetCache):
+    """Warn and still return the result when a LazyFrame cannot be cached."""
+    lf = cache.cache(lambda: object_frame().lazy())()
+
+    with pytest.warns(CacheWarning):
+        result = lf.collect()
+
+    assert result.shape == (1, 1)
+    assert cached_files(cache, "output.lazy.parquet*") == []
+
+
+def test_clear_before_collect_does_not_populate_cache(
+    cache: ParquetCache,
+    counter: Counter,
+):
+    """Skip writing the cache for frames created before the cache was cleared."""
+    query = cache.cache(counter.query)
+    lf = query(3)
+    cache.clear(warn=False)
+
+    lf.collect()
+    query(3).collect()
+
+    assert counter.n == 2
+
+
+@pytest.mark.filterwarnings("ignore::joblib.memory.JobLibCollisionWarning")
+def test_stale_frame_does_not_populate_new_function_version(cache: ParquetCache):
+    """Skip writing the cache for frames returned by an outdated function version."""
+
+    @cache.cache
+    def version(x: int) -> pl.LazyFrame:
+        return pl.LazyFrame({"v": [1]})
+
+    old = version(0)
+
+    @cache.cache
+    def version(x: int) -> pl.LazyFrame:
+        return pl.LazyFrame({"v": [2]})
+
+    new = version(0)
+    old.collect()
+
+    assert new.collect()["v"].item() == 2
+    assert version(0).collect()["v"].item() == 2
+
+
+def test_failing_query_runs_once_and_leaves_no_files(cache: ParquetCache):
+    """Propagate query errors without rerunning the query or leaving temp files."""
+    calls = []
+
+    def fail(s: pl.Series) -> pl.Series:
+        calls.append(1)
+        raise ValueError("boom")
+
+    lf = cache.cache(
+        lambda: pl.LazyFrame({"a": [1]}).select(
+            pl.col.a.map_batches(fail, return_dtype=pl.Int64)
+        )
+    )()
+
+    with pytest.raises(Exception, match="boom"):
+        lf.collect()
+
+    assert len(calls) == 1
+    assert cached_files(cache, "output.lazy.parquet*") == []
+
+
+def test_forced_recompute_replaces_lazy_output(cache: ParquetCache, counter: Counter):
+    """Recompute and overwrite the cached result when forced with `.call`."""
+    query = cache.cache(counter.query)
+    query(3).collect()
+
+    lf, _ = query.call(3)
+    lf.collect()
+
+    assert counter.n == 2
+
+
+def test_function_level_mmap_mode(cache: ParquetCache, counter: Counter):
+    """Support mmap_mode set on an individual cached function."""
+    query = cache.cache(counter.query, mmap_mode="r")
+
+    assert query(3).collect()["b"].to_list() == [0, 10, 20]
+
+
+def test_corrupt_lazy_parquet_is_recomputed(cache: ParquetCache, counter: Counter):
+    """Recompute rather than return a scan of a corrupt cached parquet."""
+    query = cache.cache(counter.query)
+    query(3).collect()
+    (parquet,) = Path(str(cache.location)).rglob(LAZY_PARQUET_FILENAME)
+    parquet.write_bytes(b"not a parquet file")
+
+    assert query(3).collect()["b"].to_list() == [0, 10, 20]
+
+
+def test_shelving_lazy_result_fails_loudly(cache: ParquetCache, counter: Counter):
+    """Raise a clear error when loading a LazyFrame result that was never collected."""
+    shelved = cache.cache(counter.query).call_and_shelve(3)
+
+    with pytest.raises(RuntimeError, match="only cached once collected"):
+        shelved.get()
+
+
+def test_write_lock_is_released_after_caching(cache: ParquetCache, counter: Counter):
+    """Drop an entry's write lock once its result is on disk."""
+    cache.cache(counter.query)(3).collect()
+    (parquet,) = Path(str(cache.location)).rglob(LAZY_PARQUET_FILENAME)
+
+    assert parquet not in _WRITE_LOCKS
+
+
+def test_lazy_write_errors_propagate(cache: ParquetCache, counter: Counter):
+    """Raise, rather than silently skip caching, when the result can't be written."""
+    lf = cache.cache(counter.query)(3)
+    (token,) = Path(str(cache.location)).rglob(LAZY_TOKEN_FILENAME)
+    token.parent.chmod(0o500)
+
+    try:
+        # polars wraps errors raised inside io sources
+        with pytest.raises(pl.exceptions.ComputeError, match="PermissionError"):
+            lf.collect()
+    finally:
+        token.parent.chmod(0o700)
