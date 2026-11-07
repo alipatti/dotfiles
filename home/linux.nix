@@ -32,5 +32,5 @@ in
   };
 
   # linux location for the mac one in darwin.nix
-  xdg.dataFile."typst/packages/ali".source = link "typst";
+  xdg.dataFile."typst/packages/ali".source = link "packages/typst";
 }

@@ -14,7 +14,7 @@ imported as a namespace:
 #show: ali.template
 ```
 
-It lives in `~/.dotfiles/typst/template/`
+It lives in `~/.dotfiles/packages/typst/template/`
 and provides theorem environments (theorion), cetz/fletcher/subpar,
 math macros (`inner`, `to`, `toto`, ...), table helpers,
 and all document styling.
