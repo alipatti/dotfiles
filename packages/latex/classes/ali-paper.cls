@@ -24,6 +24,7 @@
 \RequirePackage{parskip} % space between paragraphs + no indentation
 \RequirePackage{graphicx} % insert external graphics
 \RequirePackage{pdflscape} % rotate pages for wide figures/tables
+\RequirePackage{amsmath} % \numberwithin, used when refs is on
 
 % place tables and figures at top of page by default
 % \RequirePackage{float}
