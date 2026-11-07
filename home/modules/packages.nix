@@ -4,12 +4,14 @@
 { config, pkgs, ... }:
 let
   # tectonic has no TEXINPUTS, so always search packages/latex for the classes and
-  # packages there. -Z is only accepted by the compile subcommand (or the v1
-  # cli, which is compile)
+  # packages there. search paths aren't recursive, so each subdirectory is listed.
+  # -Z is only accepted by the compile subcommand (or the v1 cli, which is compile)
+  latex = "${config.lib.dotfiles.root}/packages/latex";
   tectonic = pkgs.writeShellScriptBin "tectonic" ''
+    search="-Z search-path=${latex} -Z search-path=${latex}/classes -Z search-path=${latex}/resources"
     case " $* " in
-      *" -X "*) [[ " $* " == *" compile "* ]] && set -- "$@" -Z search-path=${config.lib.dotfiles.root}/packages/latex ;;
-      *) set -- "$@" -Z search-path=${config.lib.dotfiles.root}/packages/latex ;;
+      *" -X "*) [[ " $* " == *" compile "* ]] && set -- "$@" $search ;;
+      *) set -- "$@" $search ;;
     esac
     exec ${pkgs.tectonic}/bin/tectonic "$@"
   '';
