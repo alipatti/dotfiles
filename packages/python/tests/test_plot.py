@@ -9,6 +9,7 @@ from alipatti import plot
 from alipatti.plot import (
     PALETTE,
     _terminal_size,
+    center_panels,
     palette,
     show_terminal,
     theme_ali,
@@ -111,3 +112,21 @@ def test_show_terminal_writes_a_kitty_image(
     show_terminal(figure)
 
     assert stdout.getvalue().startswith("\n\x1b_Gf=100,a=T,c=")
+
+
+def test_center_panels_centers_a_composition_legend() -> None:
+    """Center a centered bottom legend under all of a composition's panels, not just
+    its own plot's."""
+    data = pd.DataFrame({"x": [1, 2, 3], "group": ["a", "b", "c"]})
+    bare = pn.ggplot(data, pn.aes("x", "x")) + pn.geom_point()
+    legend = bare + pn.aes(color="group") + pn.theme(legend_position="bottom")
+    composition = (bare | bare) / (legend | bare)
+
+    figure = center_panels(composition).draw()
+    figure.draw_without_rendering()
+    panels = [axes.get_position() for axes in figure.axes]
+    (box,) = [artist for artist in figure.artists if hasattr(artist, "xy_loc")]
+    extent = box.get_window_extent().transformed(figure.transFigure.inverted())
+
+    center = (min(p.x0 for p in panels) + max(p.x1 for p in panels)) / 2
+    assert (extent.x0 + extent.x1) / 2 == pytest.approx(center, abs=1e-3)
