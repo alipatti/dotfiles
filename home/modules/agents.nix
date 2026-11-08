@@ -39,7 +39,11 @@ in
   # the tab title comes from fish_title (see tools/kitty_tab_bar.py). set in
   # the shell: with it in settings.json's env, claude still retitled tabs
   # (that env seems to be applied after claude reads the flag)
-  home.sessionVariables.CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
+  home.sessionVariables = {
+    CLAUDE_CODE_DISABLE_TERMINAL_TITLE = "1";
+    # drop the cwd from the startup header; the status line already shows it
+    CLAUDE_CODE_HIDE_CWD = "1";
+  };
 
   # ~/.claude/settings.json is generated from this. claude code cannot write
   # to it, so toggles made through /config or /plugin have to be added here
