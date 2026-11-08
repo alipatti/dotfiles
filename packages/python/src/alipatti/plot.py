@@ -7,6 +7,7 @@ colours.
 
 import shutil
 import sys
+from collections import defaultdict
 from collections.abc import Generator, Iterator, Sequence
 from contextlib import contextmanager
 from copy import deepcopy
@@ -19,6 +20,7 @@ import matplotlib.pyplot as plt
 import plotnine as pn
 from matplotlib.figure import Figure as MplFigure
 from plotnine.composition import Compose
+from plotnine.iapi import outside_legend
 
 from alipatti.terminal import _cell_pixels, _kitty_escapes, terminal_colors
 
@@ -102,12 +104,14 @@ def save_figure(
     directory: Path | str = "figures",
     extensions: Sequence[str] | str = "pdf",
     center: bool = True,
+    center_shared_legend: bool = True,
 ) -> list[Path]:
     """
     Save `figure` to `{directory}/{name}.{extension}` for each extension.
 
     Math is set in FONT for the duration of the save, and with `center` the
-    panels are horizontally centered first. Returns the saved paths.
+    panels are horizontally centered first (see `center_panels`, which takes
+    `center_shared_legend`). Returns the saved paths.
     """
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
@@ -116,7 +120,9 @@ def save_figure(
 
     # centering draws the figure, so it also needs the math font
     with math_font():
-        figure = center_panels(figure) if center else figure
+        if center:
+            figure = center_panels(figure, center_shared_legend=center_shared_legend)
+
         for path in paths:
             figure.save(path, verbose=False)
 
@@ -161,15 +167,15 @@ def math_font() -> Iterator[None]:
         yield
 
 
-def center_panels(figure: Figure) -> Figure:
+def center_panels(figure: Figure, *, center_shared_legend: bool = True) -> Figure:
     """
     Set the right margin so the panels sit horizontally centered in the figure.
 
     The axis title and tick labels on the left push the panels right, so we draw
     the figure once, measure the gap between the figure edge and the leftmost
-    panel, and use that as the right margin. In a composition, centered top and
-    bottom legends are then centered on all the panels (see
-    `_center_composition_legends`).
+    panel, and use that as the right margin. In a composition with
+    `center_shared_legend`, a shared top or bottom legend is then centered on all
+    the panels (see `_center_composition_legends`).
     """
     with _drawn(figure) as (_, drawn):
         left = min(axes.get_position().x0 for axes in drawn.axes)
@@ -177,7 +183,10 @@ def center_panels(figure: Figure) -> Figure:
     margin = pn.theme(plot_margin_right=left)
 
     if isinstance(figure, Compose):
-        return _center_composition_legends(figure & margin)
+        centered = figure & margin
+        return (
+            _center_composition_legends(centered) if center_shared_legend else centered
+        )
 
     return figure + margin
 
@@ -206,50 +215,65 @@ def _leaf_plots(composition: Compose) -> Iterator[pn.ggplot]:
 
 def _center_composition_legends(composition: Compose) -> Compose:
     """
-    Center each centered top or bottom legend in `composition` on all its panels.
+    Center the shared top or bottom legend in `composition` on all its panels.
 
-    Plotnine centers such a legend on its own plot's panels, which in a composition
+    Plotnine centers a legend on its own plot's panels, which in a composition
     leaves a legend meant for the whole figure (e.g. one shared legend under the
-    last row) off to the side. Legends with any other justification are left alone.
+    last row) off to the side. A legend counts as shared if it is centered and no
+    other plot has a legend on the same side; all other legends are left alone.
     """
+    justifications: dict[int, dict[str, float]] = defaultdict(dict)
+
     with _drawn(composition) as (copy, drawn):
         panels = [axes.get_position() for axes in drawn.axes]
         center = (min(p.x0 for p in panels) + max(p.x1 for p in panels)) / 2
-        themes = [_legend_centering(spec.plot, center) for spec in copy.plotspecs]
+        plots = [spec.plot for spec in copy.plotspecs]
+
+        for side in ("top", "bottom"):
+            legends = [
+                (i, legend)
+                for i, plot in enumerate(plots)
+                if (legend := _legend(plot, side))
+            ]
+
+            match legends:
+                case [(i, legend)] if legend.justification == 0.5:
+                    justifications[i][f"legend_justification_{side}"] = (
+                        _centering_justification(plots[i], legend, center)
+                    )
 
     composition = deepcopy(composition)
-    for plot, theme in zip(_leaf_plots(composition), themes, strict=True):
-        plot += theme
+    leaves = list(_leaf_plots(composition))
+    for i, justification in justifications.items():
+        leaves[i] += pn.theme(**justification)
 
     return composition
 
 
-def _legend_centering(plot: pn.ggplot, center: float) -> pn.theme:
+def _legend(plot: pn.ggplot, side: Literal["top", "bottom"]) -> outside_legend | None:
+    """The legend drawn on `side` of drawn `plot`, if any."""
+    legends = plot.theme.targets.legends
+    return getattr(legends, side) if legends else None
+
+
+def _centering_justification(
+    plot: pn.ggplot,
+    legend: outside_legend,
+    center: float,
+) -> float:
     """
-    The justifications that center drawn `plot`'s centered top and bottom legends at
+    The justification that centers drawn `plot`'s top or bottom `legend` at
     `center` (in figure coordinates).
 
     Plotnine puts a legend of width w with justification j at
     `low + j * (high - w - low)`, where low and high bound the plot's panels. It
     doesn't clip j to [0, 1], so the legend can reach past them.
     """
-    figure_width = plot.figure.bbox.width
     low = min(axes.get_position().x0 for axes in plot.axs)
     high = max(axes.get_position().x1 for axes in plot.axs)
-    legends = getattr(plot.theme.targets, "legends", None)
+    width = legend.box.get_window_extent().width / plot.figure.bbox.width
 
-    justifications = {}
-    for side in ("top", "bottom"):
-        legend = legends and getattr(legends, side)
-
-        if not legend or legend.justification != 0.5:
-            continue
-
-        width = legend.box.get_window_extent().width / figure_width
-        justification = (center - width / 2 - low) / (high - width - low)
-        justifications[f"legend_justification_{side}"] = justification
-
-    return pn.theme(**justifications)
+    return (center - width / 2 - low) / (high - width - low)
 
 
 def _terminal_size(
