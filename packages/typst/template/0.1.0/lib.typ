@@ -173,6 +173,8 @@
   set figure(gap: 2em, placement: top)
   // space between floating figures and the body text (default 1.5em)
   set place(clearance: 2.5em)
+  // space around inline figures, which otherwise get only paragraph spacing
+  show figure: set block(spacing: 2em)
   // number images and tables in one sequence (figure 1, table 2, ...)
   // by stepping the other kind's counter alongside each figure
   show figure.where(kind: image): it => counter(figure.where(kind: table)).step() + it

@@ -97,9 +97,10 @@
   let grouped = groups.any(group => group != none)
   let header-rows = if grouped { 2 } else { 1 }
   let header = if not grouped { names.map(markup) } else {
-    // ungrouped columns span both header rows, and group names are underlined
+    // ungrouped columns span both header rows, sitting on the lower one beside the
+    // column labels, and group names are underlined
     let top = runs.map(((group, start, count)) => if group == none {
-      table.cell(rowspan: 2, markup(names.at(start)))
+      table.cell(rowspan: 2, align: bottom + if start == 0 { left } else { center }, markup(names.at(start)))
     } else {
       table.cell(colspan: count, underline(offset: 0.3em, markup(group)))
     })
