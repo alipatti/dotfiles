@@ -34,6 +34,13 @@
     };
 
     table-format.enabled = true;
+
+    # agent skills: reflow splits a !`command` line after the `!`, which
+    # breaks it, and a skill whose whole body is the prompt has no heading
+    per-file-ignores."**/skills/**/*.md" = [
+      "MD013"
+      "MD041"
+    ];
   };
 
   # format markdown claude edits with the config above. mkBefore keeps it
