@@ -13,12 +13,14 @@
     ../programs/fish
     ../programs/git
     ../programs/languages.nix
+    ../programs/latex.nix
     ../programs/nvim
     ../programs/packages.nix
     ../programs/prompt.nix
     ../programs/python
     ../programs/rumdl.nix
     ../programs/ssh.nix
+    ../programs/typst.nix
     ../programs/viewer.nix
   ];
 

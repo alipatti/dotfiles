@@ -26,6 +26,8 @@ let
   );
 in
 {
+  home.packages = [ pkgs.typst ];
+
   home.file."Library/Application Support/typst/packages/ali" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     source = packages;
   };
