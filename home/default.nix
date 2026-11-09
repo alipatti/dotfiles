@@ -2,11 +2,8 @@
 # ./profiles, and shared content is split by program in ./programs
 
 { config, lib, ... }:
-let
-  inherit (config.lib.dotfiles) link;
-in
 {
-  # shared by the modules above. both take a path literal (e.g. ./functions).
+  # shared by the modules in ./programs. both take a path literal (e.g. ./functions).
   # `live` turns it into the same path in the working tree, so programs read
   # the file as edited rather than a copy in the store, and `link` symlinks to
   # it so configs stay editable in place
@@ -33,13 +30,7 @@ in
   # `cargo install` binaries; rustup itself comes from nix
   home.sessionPath = [ "$HOME/.cargo/bin" ];
   home.sessionVariables = {
-    EDITOR = "nvim";
     TERMINAL = "kitty";
     DOTFILES = config.lib.dotfiles.root;
-  };
-
-  # ~/.config
-  xdg.configFile = {
-    "nvim".source = link ../nvim;
   };
 }

@@ -12,6 +12,7 @@
     ../programs/agents.nix
     ../programs/git.nix
     ../programs/languages.nix
+    ../programs/nvim
     ../programs/packages.nix
     ../programs/prompt.nix
     ../programs/rumdl.nix

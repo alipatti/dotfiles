@@ -1,6 +1,9 @@
 { lib, pkgs, ... }:
 {
-  home.packages = [ pkgs.rumdl ];
+  home.packages = [
+    pkgs.rumdl
+    pkgs.ruff # formats python code blocks, see code-block-tools below
+  ];
 
   xdg.configFile."rumdl/rumdl.toml".source = (pkgs.formats.toml { }).generate "rumdl.toml" {
     global.extend-enable = [ "table-format" ];

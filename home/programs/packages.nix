@@ -26,25 +26,6 @@ in
     # git
     git-crypt # encryption
 
-    # editor
-    neovim
-    tree-sitter
-
-    # language servers, enabled in nvim/plugin/lsp.lua. ty and ruff's servers
-    # run through uvx; ruff stays here for rumdl's code-block formatting
-    ruff
-    lua-language-server
-    yaml-language-server
-    taplo
-    vscode-langservers-extracted # json
-    fish-lsp
-    svelte-language-server
-    tailwindcss-language-server
-    tinymist
-    nixd # nix
-    nixfmt # used by nixd for formatting
-    texlab
-
     # command line tools
     coreutils # gnu versions, plus timeout, tac, shuf, etc. that macos lacks
     gnused # gnu sed, so `sed -i` matches linux

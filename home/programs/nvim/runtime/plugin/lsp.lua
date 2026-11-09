@@ -1,4 +1,4 @@
--- the servers themselves are installed by nix (see home/programs/packages.nix). the
+-- the servers themselves are installed by nix (see ../../default.nix). the
 -- keys are lspconfig names; values override lspconfig's default config
 local lsp_servers = {
 	-- through uvx so the editor matches `uvx ty check` and `uvx ruff check`
