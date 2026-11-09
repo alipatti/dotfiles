@@ -10,13 +10,14 @@
   imports = [
     # cherry-pick necessary parts
     ../programs/agents.nix
+    ../programs/fish
     ../programs/git.nix
     ../programs/languages.nix
     ../programs/nvim
     ../programs/packages.nix
     ../programs/prompt.nix
+    ../programs/python
     ../programs/rumdl.nix
-    ../programs/fish
     ../programs/ssh.nix
     ../programs/viewer.nix
   ];
