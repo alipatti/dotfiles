@@ -40,6 +40,14 @@
   pagebreak(weak: true)
 }
 
+// start the appendices: letter headings from A and reference them as "Appendix A",
+// applied to the rest of the document with `#show: ali.appendix`
+#let appendix(body) = {
+  counter(heading).update(0)
+  set heading(numbering: "A.1", supplement: [Appendix])
+  body
+}
+
 // run-in level-3 headings: show rules can't look ahead, so a flag marks
 // the blank line right after a heading to be dropped instead of starting a new paragraph
 #let after-runin = state("after-runin", false)

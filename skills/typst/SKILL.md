@@ -25,6 +25,8 @@ Refer to everything through the namespace
 except math macros: import those by name,
 since `$ali.var(X)$` is noisy in equations.
 
+Start appendices with `#show: ali.appendix`.
+
 There is no need to compile after every change.
 
 ## General Style
