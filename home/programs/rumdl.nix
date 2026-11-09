@@ -1,16 +1,28 @@
 { lib, pkgs, ... }:
 {
-  home.packages = [
-    pkgs.rumdl
-    pkgs.ruff # formats python code blocks, see code-block-tools below
-  ];
+  home.packages = [ pkgs.rumdl ];
 
   xdg.configFile."rumdl/rumdl.toml".source = (pkgs.formats.toml { }).generate "rumdl.toml" {
     global.extend-enable = [ "table-format" ];
 
+    # python code blocks are formatted by ruff through uvx, like everywhere
+    # else, rather than a ruff from nixpkgs. rumdl's built-in "ruff:format"
+    # can't be pointed at uvx, so this defines its own tool
     code-block-tools = {
       enabled = true;
-      languages.python.format = [ "ruff:format" ];
+      tools.uvx-ruff-format = {
+        command = [
+          (lib.getExe pkgs.uv)
+          "tool"
+          "run"
+          "ruff"
+          "format"
+          "-"
+        ];
+        stdin = true;
+        stdout = true;
+      };
+      languages.python.format = [ "uvx-ruff-format" ];
     };
 
     line-length = {
