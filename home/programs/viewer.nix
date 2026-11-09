@@ -8,7 +8,11 @@
   ...
 }:
 let
-  src = config.lib.dotfiles.live ../../apps/viewer;
+  # copied into the store, so the build below reruns whenever the sources change
+  src = builtins.path {
+    name = "viewer-source";
+    path = ../../apps/viewer;
+  };
   app = "$HOME/Applications/viewer.app";
 in
 {
@@ -21,15 +25,16 @@ in
 
   # this uses the system swiftc rather than nixpkgs', so the app links against
   # the current sdk. appkit leaves out newer features (window tiling shortcuts,
-  # the macos 26 look) for apps built against older ones. the binary is written
-  # last, so it also marks a finished build
+  # the macos 26 look) for apps built against older ones. the link to the
+  # sources it was built from is written last, so it also marks a finished build
   home.activation.viewer = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      bin=${app}/Contents/MacOS/viewer
-      if [ ! -x "$bin" ] || [ -n "$(find ${src}/viewer.swift ${src}/Info.plist -newer "$bin")" ]; then
-        run mkdir -p ${app}/Contents/MacOS
-        run cp ${src}/Info.plist ${app}/Contents/Info.plist
-        run /usr/bin/swiftc -O ${src}/viewer.swift -o "$bin"
+      built=${app}/Contents/Resources/source
+      if [ "$(readlink "$built")" != ${src} ]; then
+        run mkdir -p ${app}/Contents/MacOS ${app}/Contents/Resources
+        run cp -f ${src}/Info.plist ${app}/Contents/Info.plist
+        run /usr/bin/swiftc -O ${src}/viewer.swift -o ${app}/Contents/MacOS/viewer
+        run ln -sfn ${src} "$built"
       fi
     ''
   );

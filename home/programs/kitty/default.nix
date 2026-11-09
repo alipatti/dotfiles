@@ -1,20 +1,14 @@
 # kitty terminal. on macos the app bundle ends up in
 # ~/Applications/Home Manager Apps. docs: https://sw.kovidgoyal.net/kitty/conf/
 
-{
-  config,
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, lib, ... }:
 let
-  inherit (config.lib.dotfiles) live link;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-  split = live ./split.py;
+  split = "${./split.py}";
 in
 {
   # loaded by tab_bar_style = "custom"
-  xdg.configFile."kitty/tab_bar.py".source = link ./tab_bar.py;
+  xdg.configFile."kitty/tab_bar.py".source = ./tab_bar.py;
 
   # options for `kitten ssh`. docs: https://sw.kovidgoyal.net/kitty/kittens/ssh/
   xdg.configFile."kitty/ssh.conf".text = ''

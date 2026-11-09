@@ -8,7 +8,7 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) live link;
+  inherit (config.lib.dotfiles) link;
 
   # hosts claude code may reach, both from the sandbox and through WebFetch
   allowedDomains = [
@@ -131,7 +131,7 @@ in
 
       statusLine = {
         type = "command";
-        command = live ./statusline.py;
+        command = "${./statusline.py}";
       };
 
       enabledPlugins = {
