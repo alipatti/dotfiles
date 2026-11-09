@@ -3,7 +3,7 @@
 Personal Python helpers.
 
 ```sh
-uv add "alipatti @ git+https://github.com/alipatti/alipatti.py"
+uv add "alipatti @ git+https://github.com/alipatti/dotfiles#subdirectory=libraries/python"
 ```
 
 The package has a few extras

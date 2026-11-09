@@ -186,8 +186,8 @@ instead of raw dicts or dataclasses.
 ### alipatti
 
 The user's personal helper package
-(`~/.dotfiles/packages/python`, installed from
-`git+https://github.com/alipatti/dotfiles#subdirectory=packages/python`),
+(`~/.dotfiles/libraries/python`, installed from
+`git+https://github.com/alipatti/dotfiles#subdirectory=libraries/python`),
 with optional extras per submodule (e.g. `alipatti[plot]`).
 Import it as `import alipatti as ap` and reference submodules as `ap.plot`,
 `ap.cache`, etc.

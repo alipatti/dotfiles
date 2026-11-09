@@ -14,7 +14,7 @@ imported as a namespace:
 #show: ali.template
 ```
 
-It lives in `$DOTFILES/packages/typst/template/`.
+It lives in `$DOTFILES/libraries/typst/`.
 New documents use the newest version, the `version` in its `typst.toml`;
 leave existing imports alone.
 The template provides theorem environments (theorion),
