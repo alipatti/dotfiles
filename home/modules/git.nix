@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  inherit (config.lib.dotfiles) root;
+  inherit (config.lib.dotfiles) live;
 in
 {
   programs.git = {
@@ -48,6 +48,6 @@ in
   # (and `pre-commit install`) stop working. tags python package version
   # bumps; the script needs python 3.11+, which the system python isn't
   programs.git.hooks.post-commit = pkgs.writeShellScript "post-commit" ''
-    exec ${pkgs.python3}/bin/python3 ${root}/tools/git_tag_version.py "$@"
+    exec ${pkgs.python3}/bin/python3 ${live ../../tools/git_tag_version.py} "$@"
   '';
 }

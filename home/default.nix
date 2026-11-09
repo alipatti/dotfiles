@@ -1,7 +1,7 @@
 # per-user config shared across machines. platform-specific bits live in
 # this folder, and shared content is split by program in ./modules
 
-{ config, ... }:
+{ config, lib, ... }:
 let
   inherit (config.lib.dotfiles) link;
 in
@@ -13,10 +13,19 @@ in
     ../tools/viewer
   ];
 
-  # shared by the modules above. `link` symlinks straight into the repo so
-  # configs stay editable in place
-  lib.dotfiles.root = "${config.home.homeDirectory}/.dotfiles";
-  lib.dotfiles.link = path: config.lib.file.mkOutOfStoreSymlink "${config.lib.dotfiles.root}/${path}";
+  # shared by the modules above. both take a path literal (e.g. ./functions).
+  # `live` turns it into the same path in the working tree, so programs read
+  # the file as edited rather than a copy in the store, and `link` symlinks to
+  # it so configs stay editable in place
+  lib.dotfiles = {
+    root = "${config.home.homeDirectory}/.dotfiles";
+    live =
+      path:
+      assert lib.assertMsg (builtins.isPath path && builtins.pathExists path)
+        "lib.dotfiles.live: ${toString path} is not an existing path";
+      config.lib.dotfiles.root + lib.removePrefix (toString ../.) (toString path);
+    link = path: config.lib.file.mkOutOfStoreSymlink (config.lib.dotfiles.live path);
+  };
 
   home.stateVersion = "26.11";
 
@@ -38,6 +47,6 @@ in
 
   # ~/.config
   xdg.configFile = {
-    "nvim".source = link "nvim";
+    "nvim".source = link ../nvim;
   };
 }

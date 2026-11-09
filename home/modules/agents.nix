@@ -8,7 +8,7 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) root link;
+  inherit (config.lib.dotfiles) live link;
 
   # hosts claude code may reach, both from the sandbox and through WebFetch
   allowedDomains = [
@@ -127,7 +127,7 @@ in
 
       statusLine = {
         type = "command";
-        command = "${root}/tools/claude_prompt.py";
+        command = live ../../tools/claude_prompt.py;
       };
 
       enabledPlugins = {
@@ -205,8 +205,8 @@ in
   };
 
   home.file = {
-    ".claude/CLAUDE.md".source = link "home/modules/agents.md";
-    ".claude/skills".source = link "skills";
+    ".claude/CLAUDE.md".source = link ./agents.md;
+    ".claude/skills".source = link ../../skills;
     # enter inserts a newline and ctrl+enter takes over enter's default
     # submit, which queues mid-turn instead of interrupting like sendNow
     ".claude/keybindings.json".text = builtins.toJSON {
@@ -222,10 +222,10 @@ in
         }
       ];
     };
-    ".codex/AGENTS.md".source = link "home/modules/agents.md";
+    ".codex/AGENTS.md".source = link ./agents.md;
     # written as a real file by home.activation.codexConfig instead
     ".codex/config.toml".enable = false;
-    ".codex/skills".source = link "skills";
+    ".codex/skills".source = link ../../skills;
   };
 
   # write the generated codex config as a mutable file, keeping the project

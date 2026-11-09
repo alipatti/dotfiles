@@ -6,7 +6,7 @@ let
   # tectonic has no TEXINPUTS, so always search packages/latex for the classes and
   # packages there. search paths aren't recursive, so each subdirectory is listed.
   # -Z is only accepted by the compile subcommand (or the v1 cli, which is compile)
-  latex = "${config.lib.dotfiles.root}/packages/latex";
+  latex = config.lib.dotfiles.live ../../packages/latex;
   tectonic = pkgs.writeShellScriptBin "tectonic" ''
     search="-Z search-path=${latex} -Z search-path=${latex}/classes -Z search-path=${latex}/resources"
     case " $* " in

@@ -8,13 +8,13 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) link;
+  inherit (config.lib.dotfiles) live link;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-  split = "${config.lib.dotfiles.root}/tools/kitty_split.py";
+  split = live ../../tools/kitty_split.py;
 in
 {
   # loaded by tab_bar_style = "custom"
-  xdg.configFile."kitty/tab_bar.py".source = link "tools/kitty_tab_bar.py";
+  xdg.configFile."kitty/tab_bar.py".source = link ../../tools/kitty_tab_bar.py;
 
   # options for `kitten ssh`. docs: https://sw.kovidgoyal.net/kitty/kittens/ssh/
   xdg.configFile."kitty/ssh.conf".text = ''

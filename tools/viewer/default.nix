@@ -8,15 +8,15 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) link root;
-  src = "${root}/tools/viewer";
+  inherit (config.lib.dotfiles) live link;
+  src = live ./.;
   app = "$HOME/Applications/viewer.app";
 in
 {
   # at a fixed path, since kitty runs it on the mac for remote hosts. force
   # replaces the command an older build wrote here
   home.file.".local/bin/viewer" = {
-    source = link "tools/viewer/viewer.sh";
+    source = link ./viewer.sh;
     force = true;
   };
 

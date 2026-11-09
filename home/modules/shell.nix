@@ -2,7 +2,7 @@
 
 { config, lib, ... }:
 let
-  inherit (config.lib.dotfiles) root link;
+  inherit (config.lib.dotfiles) live link;
 in
 {
   # home-manager generates ~/.config/fish/config.fish. functions are
@@ -57,7 +57,7 @@ in
       activate_venv --quiet
 
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
-      set -l secrets ${root}/secrets.env
+      set -l secrets ${live ../../secrets.env}
       if string match -q 'text*' (file -b --mime-type $secrets)
           direnv dotenv fish $secrets | source
       end
@@ -112,7 +112,7 @@ in
   home.sessionVariables.MANPAGER = "sh -c 'col -bx | bat -l man -p'";
 
   xdg.configFile = {
-    "fish/functions".source = link "fish/functions";
+    "fish/functions".source = link ../../fish/functions;
   };
 
   home.file.".hushlogin".text = ""; # no "last login" line from login(1)
