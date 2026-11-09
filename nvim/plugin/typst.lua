@@ -4,7 +4,7 @@ vim.pack.add({
 	{ src = "https://github.com/alipatti/typst-preview.nvim", version = "single-port" },
 })
 
--- see tools/viewer
+-- see apps/viewer
 local viewer = vim.fn.executable("viewer") == 1
 
 require("typst-preview").setup({

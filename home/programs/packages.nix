@@ -62,6 +62,8 @@ in
     xz
     zstd
     p7zip # 7z
+    pdf2md # apps/pdf2md
+    llama-cpp # llama-server, used by pdf2md's ocr models
 
     # fonts. home-manager installs these in ~/Library/Fonts on macos and
     # through fontconfig on linux. the terminal font is set in kitty.nix

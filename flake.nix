@@ -27,6 +27,7 @@
       # shared by both hosts. per-user config is in ./home
       common = extra: {
         nixpkgs.config.allowUnfree = true;
+        nixpkgs.overlays = [ self.overlays.default ];
 
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
@@ -50,10 +51,18 @@
       # nix fmt
       formatter = forEachSystem (pkgs: pkgs.nixfmt-tree);
 
-      # nix flake check evaluates both hosts
+      # software written here (./apps), as pkgs.<name> through the overlay
+      overlays.default = final: prev: import ./apps final;
+      packages = forEachSystem (pkgs: import ./apps pkgs);
+
+      # nix flake check builds the apps and evaluates both hosts
       checks = {
-        aarch64-darwin.macbook = self.darwinConfigurations.macbook.system;
-        x86_64-linux.fridge = self.nixosConfigurations.fridge.config.system.build.toplevel;
+        aarch64-darwin = self.packages.aarch64-darwin // {
+          macbook = self.darwinConfigurations.macbook.system;
+        };
+        x86_64-linux = self.packages.x86_64-linux // {
+          fridge = self.nixosConfigurations.fridge.config.system.build.toplevel;
+        };
       };
 
       # sudo darwin-rebuild switch --flake ~/.dotfiles
@@ -79,6 +88,7 @@
         pkgs = import nixpkgs {
           system = "x86_64-linux";
           config.allowUnfree = true;
+          overlays = [ self.overlays.default ];
         };
         modules = [
           ./home

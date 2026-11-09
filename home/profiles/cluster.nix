@@ -17,6 +17,7 @@
     ../programs/rumdl.nix
     ../programs/shell.nix
     ../programs/ssh.nix
+    ../programs/viewer.nix
   ];
 
   # `trash`. macos has its own, and fridge gets it from linux.nix

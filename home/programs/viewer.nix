@@ -1,5 +1,5 @@
-# home-manager module for `viewer`, on every machine. the command is
-# viewer.sh, and on macos it opens viewer.app, which is built here
+# the viewer command (apps/viewer), on every machine. on macos it opens
+# viewer.app, which is built here
 
 {
   config,
@@ -8,15 +8,14 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) live link;
-  src = live ./.;
+  src = config.lib.dotfiles.live ../../apps/viewer;
   app = "$HOME/Applications/viewer.app";
 in
 {
   # at a fixed path, since kitty runs it on the mac for remote hosts. force
   # replaces the command an older build wrote here
   home.file.".local/bin/viewer" = {
-    source = link ./viewer.sh;
+    source = lib.getExe pkgs.viewer;
     force = true;
   };
 

@@ -3,7 +3,7 @@
 # run the script directly while developing. the script's `app` must be named
 # `name` (`App(name="pawprint")`), since completions are generated for it
 #
-#   pkgs.callPackage ../python-tool.nix { } "pawprint" ./pawprint.py
+#   pkgs.callPackage ./python-tool.nix { } "pawprint" ./pawprint/pawprint.py
 
 { lib, pkgs }:
 name: script:

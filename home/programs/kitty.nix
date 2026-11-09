@@ -18,7 +18,7 @@ in
 
   # options for `kitten ssh`. docs: https://sw.kovidgoyal.net/kitty/kittens/ssh/
   xdg.configFile."kitty/ssh.conf".text = ''
-    # lets remote programs (e.g. tools/viewer) use `kitten @` through
+    # lets remote programs (e.g. apps/viewer) use `kitten @` through
     # listen_on. with allow_remote_control = socket-only, this gives anything
     # on the remote host full control of kitty, so it's only for these hosts,
     # matched against the name given to kitten ssh
