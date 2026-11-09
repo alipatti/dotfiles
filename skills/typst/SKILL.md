@@ -9,15 +9,17 @@ Start every new document with the personal template,
 imported as a namespace:
 
 ```typst
-#import "@ali/template:0.1.0" as ali
+#import "@ali/template:<version>" as ali
 #import ali: cov, var // only the math macros the document uses
 #show: ali.template
 ```
 
-It lives in `~/.dotfiles/packages/typst/template/`
-and provides theorem environments (theorion), cetz/fletcher/subpar,
-math macros (`inner`, `to`, `toto`, ...), table helpers,
-and all document styling.
+It lives in `$DOTFILES/packages/typst/template/`.
+New documents use the newest version, the `version` in its `typst.toml`;
+leave existing imports alone.
+The template provides theorem environments (theorion),
+cetz/fletcher/subpar, math macros
+(`inner`, `to`, `toto`, ...), table helpers, and all document styling.
 Do not re-add set/show rules the template already handles.
 
 Refer to everything through the namespace

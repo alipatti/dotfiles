@@ -6,9 +6,6 @@
   lib,
   ...
 }:
-let
-  inherit (config.lib.dotfiles) link;
-in
 {
   imports = [ ../tools/pawprint ];
 
@@ -37,8 +34,6 @@ in
 
   home.file = {
     # mac-specific config locations
-    "Library/Application Support/typst/packages/ali".source = link "packages/typst";
-
     # make rga cache in ~/.cache
     "Library/Application Support/ripgrep-all/config.jsonc".text = builtins.toJSON {
       cache.path = "${config.xdg.cacheHome}/ripgrep-all";

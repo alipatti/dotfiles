@@ -1,9 +1,6 @@
 # per-user config that only makes sense on linux (gnome on fridge)
 
 { config, pkgs, ... }:
-let
-  inherit (config.lib.dotfiles) link;
-in
 {
   home.packages = with pkgs; [
     firefox
@@ -30,7 +27,4 @@ in
     "org/gnome/desktop/input-sources".xkb-options = [ "caps:escape" ];
     "org/gnome/shell".enabled-extensions = [ "appindicatorsupport@rgcjonas.gmail.com" ];
   };
-
-  # linux location for the mac one in darwin.nix
-  xdg.dataFile."typst/packages/ali".source = link "packages/typst";
 }

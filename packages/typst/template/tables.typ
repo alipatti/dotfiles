@@ -1,18 +1,6 @@
-// tables from csv data; make-table and format-num are exported by lib.typ
+// tables from csv data; make-table is exported by lib.typ
 
-// fixed decimals, thousands separators, and a real minus sign, e.g. format-num(-1234.5, digits: 1) = −1,234.5;
-// with percent, the value is a share shown in percent, e.g. format-num(0.0036, digits: 2, percent: true) = 0.36%.
-// digits defaults to 0 for integers (including integer strings from csvs) and 3 otherwise
-#let format-num(value, digits: auto, percent: false) = {
-  let integer = type(value) == int or (type(value) == str and not value.contains(regex("[.eE]")))
-  let digits = if digits == auto { if integer { 0 } else { 3 } } else { digits }
-  let x = float(value) * if percent { 100 } else { 1 }
-  let (whole, ..fraction) = str(calc.round(calc.abs(x), digits: digits)).split(".")
-  let fraction = fraction.at(0, default: "")
-  let grouped = whole.clusters().rev().chunks(3).map(group => group.rev().join()).rev().join(",")
-  let sign = if x < 0 and calc.round(x, digits: digits) != 0 { "−" } else { "" }
-  sign + grouped + if digits > 0 { "." + fraction + "0" * (digits - fraction.len()) } + if percent { "%" }
-}
+#import "format.typ": format-value
 
 // rule on the left of the given column indices
 #let rules(after-columns: (1,)) = (x, y) => (
@@ -67,12 +55,7 @@
   let after-columns = rule-after.map(name => last-column(name) + 1)
 
   let markup(text) = eval(text, mode: "markup")
-  let format(value, style) = {
-    if value.match(regex("^-?\\d*\\.?\\d+([eE][-+]?\\d+)?$")) == none {
-      return if markup-cells { markup(value) } else { value }
-    }
-    format-num(value, ..style)
-  }
+  let format(value, style) = format-value(value, markup: markup-cells, ..style)
   let cell(row, name) = {
     let style = column-styles.at(name, default: (:))
     let value = format(row.at(name), style)
