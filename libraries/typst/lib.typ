@@ -10,6 +10,9 @@
 // grow nested delimiters by depth
 #import "nested-delims.typ": nested-delims
 
+// space relations in display math
+#import "relation-spacing.typ": relation-spacing
+
 // tables from csv data
 #import "format.typ": format-num
 #import "tables.typ": make-table
@@ -34,6 +37,7 @@
 #let dto = $stretch(arrow.r)^d$
 #let asto = $stretch(arrow.r)^"a.s."$
 #let qmto = $stretch(arrow.r)^2$
+#let iid = $attach(~, t: "i.i.d.")$
 #let ind = $bb(1)$
 #let supp = $op("supp")$
 #let argmax = $op("arg" thin "max", limits: #true)$
@@ -95,27 +99,8 @@
   }
   set par(justify: true, leading: 0.6em, first-line-indent: 0em, spacing: 1em)
 
-  // add extra space around relations in display math
-  let relations = (
-    sym.eq,
-    sym.eq.not,
-    sym.lt,
-    sym.gt,
-    sym.lt.eq,
-    sym.gt.eq,
-    sym.tilde.op,
-    sym.approx,
-    sym.equiv,
-    sym.prop,
-  )
-  show math.equation.where(block: true): eq => relations.fold(eq, (acc, rel) => {
-    show rel: it => h(0.4em) + it + h(0.4em)
-    acc
-  })
-  show math.equation.where(block: true): eq => {
-    show sym.slash: it => h(0.15em) + it + h(0.15em)
-    eq
-  }
+  // extra space around relations in display math
+  show: relation-spacing
 
   // numbering
   set heading(numbering: "1.1")
