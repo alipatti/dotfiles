@@ -120,7 +120,8 @@ def command(run: Run, repo: Path, web: bool) -> list[str]:
             *(["--search"] if web else []),
             "exec",
             *([] if web else ['--config=web_search="disabled"']),
-            # read-only except uv and the temp dir; defined in home/modules/agents.nix
+            # read-only except uv and the temp dir; defined in
+            # home/programs/agents/default.nix
             '--config=default_permissions="reviewer"',
             *([] if web else ["--config=permissions.reviewer.network.enabled=false"]),
             "--ephemeral",
