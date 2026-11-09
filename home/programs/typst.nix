@@ -9,11 +9,13 @@
   ...
 }:
 let
-  inherit (config.lib.dotfiles) root live;
+  inherit (config.lib.dotfiles) live;
   source = ../../libraries/typst;
   package = (lib.importTOML (source + "/typst.toml")).package;
 
-  # version = last commit of that version, and where the package was then
+  # version = last commit of that version, and where the package was then.
+  # fetched from github rather than the local clone, so every host's config
+  # evaluates on any machine. the commit must be pushed before a rebuild
   releases = {
     "0.1.0" = {
       rev = "7097164507b5d522d64ea6338064e1fec6ef93fb";
@@ -25,7 +27,7 @@ let
     { rev, path }:
     "${
       builtins.fetchGit {
-        url = "file://${root}";
+        url = "https://github.com/alipatti/dotfiles";
         inherit rev;
       }
     }/${path}";
