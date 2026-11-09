@@ -36,9 +36,14 @@ let
   ];
 in
 {
-  # _nvim_peer (apps/nvim-peer), for the reload hook and the editor
-  # instructions in ./agents.md
-  home.packages = [ pkgs.nvim-peer ];
+  # the nvim-peer skill's script, as a command so the reload hook, sandbox
+  # exclusion and permission rule below can name it. copied into the store,
+  # and uv caches its dependencies after the first run
+  home.packages = [
+    (pkgs.writeShellScriptBin "_nvim_peer" ''
+      exec ${lib.getExe pkgs.uv} run --quiet --script ${./skills/nvim-peer/nvim_peer.py} "$@"
+    '')
+  ];
 
   # the tab title comes from fish_title (see ../kitty/tab_bar.py). set in
   # the shell: with it in settings.json's env, claude still retitled tabs
@@ -100,7 +105,7 @@ in
         # pdf2md talks to a local llama-server and nests codex's own
         # sandbox, neither of which works inside seatbelt. _nvim_peer connects
         # to nvim's socket, which seatbelt refuses; it only runs the fixed
-        # lua in apps/nvim-peer, never code passed to it
+        # lua in ./skills/nvim-peer, never code passed to it
         excludedCommands = [
           "pdf2md"
           "_nvim_peer"
@@ -122,7 +127,7 @@ in
           hooks = [
             {
               type = "command";
-              # reload buffers in the nvims in this kitty (apps/nvim-peer)
+              # reload buffers in the nvims in this kitty (./skills/nvim-peer)
               command = "_nvim_peer reload || true";
             }
           ];

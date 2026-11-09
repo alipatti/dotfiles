@@ -41,12 +41,5 @@
 ## Editor
 
 The user often has nvim open in another kitty window in the same tab.
-
-- Run `_nvim_peer info` to see their file, cursor, and selection,
-  e.g. when they say "this" or "here".
-- Run `_nvim_peer goto path:L[-L2]`
-  to select code in their editor that you are discussing.
-- Pipe json to `_nvim_peer annotate` to walk the user through code
-  or changes (see `_nvim_peer annotate --help` for the format).
-  Each call replaces the previous annotations.
-  Do not annotate unless the user asks for it.
+Load the nvim-peer skill when they say "this" or "here",
+or when you want to show them code in their editor.
