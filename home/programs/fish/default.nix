@@ -1,4 +1,4 @@
-# fish and the shell tools it uses. the prompt is in prompt.nix
+# fish and the shell tools it uses. the prompt is in ../prompt.nix
 
 { config, lib, ... }:
 let
@@ -6,7 +6,7 @@ let
 in
 {
   # home-manager generates ~/.config/fish/config.fish. functions are
-  # symlinked from ../../fish below
+  # symlinked from ./functions below
   programs.fish = {
     enable = true;
 
@@ -57,7 +57,7 @@ in
       activate_venv --quiet
 
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
-      set -l secrets ${live ../../secrets.env}
+      set -l secrets ${live ../../../secrets.env}
       if string match -q 'text*' (file -b --mime-type $secrets)
           direnv dotenv fish $secrets | source
       end
@@ -112,7 +112,7 @@ in
   home.sessionVariables.MANPAGER = "sh -c 'col -bx | bat -l man -p'";
 
   xdg.configFile = {
-    "fish/functions".source = link ../../fish/functions;
+    "fish/functions".source = link ./functions;
   };
 
   home.file.".hushlogin".text = ""; # no "last login" line from login(1)

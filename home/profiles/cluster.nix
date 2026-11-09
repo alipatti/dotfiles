@@ -16,7 +16,7 @@
     ../programs/packages.nix
     ../programs/prompt.nix
     ../programs/rumdl.nix
-    ../programs/shell.nix
+    ../programs/fish
     ../programs/ssh.nix
     ../programs/viewer.nix
   ];
