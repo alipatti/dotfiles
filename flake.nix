@@ -35,7 +35,7 @@
         home-manager.overwriteBackup = true;
         home-manager.users.ali.imports = [
           ./home
-          ./home/modules
+          ./home/programs
         ]
         ++ extra;
       };
@@ -61,7 +61,7 @@
         modules = [
           ./hosts/macbook
           home-manager.darwinModules.home-manager
-          (common [ ./home/darwin.nix ])
+          (common [ ./home/profiles/darwin.nix ])
         ];
       };
 
@@ -70,7 +70,7 @@
         modules = [
           ./hosts/fridge
           home-manager.nixosModules.home-manager
-          (common [ ./home/linux.nix ])
+          (common [ ./home/profiles/linux.nix ])
         ];
       };
 
@@ -82,7 +82,7 @@
         };
         modules = [
           ./home
-          ./home/cluster.nix
+          ./home/profiles/cluster.nix
         ];
       };
     };

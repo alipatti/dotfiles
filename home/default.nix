@@ -1,12 +1,12 @@
 # per-user config shared across machines. platform-specific bits live in
-# this folder, and shared content is split by program in ./modules
+# ./profiles, and shared content is split by program in ./programs
 
 { config, lib, ... }:
 let
   inherit (config.lib.dotfiles) link;
 in
 {
-  # tools that don't fit a module in ./modules, on every machine
+  # tools that don't fit a module in ./programs, on every machine
   imports = [
     ../tools/nvim_peer
     ../tools/pdf2md

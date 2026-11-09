@@ -9,14 +9,14 @@
 {
   imports = [
     # cherry-pick necessary parts
-    ./modules/agents.nix
-    ./modules/git.nix
-    ./modules/languages.nix
-    ./modules/packages.nix
-    ./modules/prompt.nix
-    ./modules/rumdl.nix
-    ./modules/shell.nix
-    ./modules/ssh.nix
+    ../programs/agents.nix
+    ../programs/git.nix
+    ../programs/languages.nix
+    ../programs/packages.nix
+    ../programs/prompt.nix
+    ../programs/rumdl.nix
+    ../programs/shell.nix
+    ../programs/ssh.nix
   ];
 
   # `trash`. macos has its own, and fridge gets it from linux.nix

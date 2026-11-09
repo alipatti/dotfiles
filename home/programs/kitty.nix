@@ -23,7 +23,7 @@ in
     # on the remote host full control of kitty, so it's only for these hosts,
     # matched against the name given to kitten ssh
     # needs kitten ssh's own ControlMaster (share_connections, on by default),
-    # which overrides the one in home/modules/ssh.nix. its socket is at
+    # which overrides the one in home/programs/ssh.nix. its socket is at
     # /tmp/kssh-rdir-$UID/kssh-$KITTY_PID-%C on macos
     hostname fridge
     forward_remote_control yes

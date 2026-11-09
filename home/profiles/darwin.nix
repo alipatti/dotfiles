@@ -7,7 +7,7 @@
   ...
 }:
 {
-  imports = [ ../tools/pawprint ];
+  imports = [ ../../tools/pawprint ];
 
   # on nixos this docker stuff is handled by virtualisation.docker
   home.packages = with pkgs; [
