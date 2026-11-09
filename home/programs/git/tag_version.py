@@ -35,7 +35,7 @@ def get_version(commit: str) -> str | None:
     try:
         version = tomllib.loads(pyproject).get("project", {}).get("version")
     except tomllib.TOMLDecodeError as e:
-        print(f"git_tag_version: could not parse pyproject.toml at {commit}: {e}")
+        print(f"tag_version: could not parse pyproject.toml at {commit}: {e}")
         return None
 
     return version if isinstance(version, str) else None

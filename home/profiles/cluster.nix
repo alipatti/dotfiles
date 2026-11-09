@@ -11,7 +11,7 @@
     # cherry-pick necessary parts
     ../programs/agents.nix
     ../programs/fish
-    ../programs/git.nix
+    ../programs/git
     ../programs/languages.nix
     ../programs/nvim
     ../programs/packages.nix

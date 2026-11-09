@@ -1,7 +1,4 @@
-{ config, pkgs, ... }:
-let
-  inherit (config.lib.dotfiles) live;
-in
+{ pkgs, ... }:
 {
   programs.git = {
     enable = true;
@@ -46,8 +43,9 @@ in
 
   # sets core.hooksPath, so these apply to every repo and per-repo .git/hooks
   # (and `pre-commit install`) stop working. tags python package version
-  # bumps; the script needs python 3.11+, which the system python isn't
+  # bumps; the script needs python 3.11+, which the system python isn't.
+  # the script is copied into the store, so changes need a rebuild
   programs.git.hooks.post-commit = pkgs.writeShellScript "post-commit" ''
-    exec ${pkgs.python3}/bin/python3 ${live ../../tools/git_tag_version.py} "$@"
+    exec ${pkgs.python3}/bin/python3 ${./tag_version.py} "$@"
   '';
 }
