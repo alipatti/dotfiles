@@ -33,6 +33,7 @@ in
   home.sessionVariables = {
     EDITOR = "nvim";
     TERMINAL = "kitty";
+    DOTFILES = config.lib.dotfiles.root;
   };
 
   # ~/.config
