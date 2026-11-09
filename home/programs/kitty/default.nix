@@ -10,11 +10,11 @@
 let
   inherit (config.lib.dotfiles) live link;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-  split = live ../../tools/kitty_split.py;
+  split = live ./split.py;
 in
 {
   # loaded by tab_bar_style = "custom"
-  xdg.configFile."kitty/tab_bar.py".source = link ../../tools/kitty_tab_bar.py;
+  xdg.configFile."kitty/tab_bar.py".source = link ./tab_bar.py;
 
   # options for `kitten ssh`. docs: https://sw.kovidgoyal.net/kitty/kittens/ssh/
   xdg.configFile."kitty/ssh.conf".text = ''
@@ -23,7 +23,7 @@ in
     # on the remote host full control of kitty, so it's only for these hosts,
     # matched against the name given to kitten ssh
     # needs kitten ssh's own ControlMaster (share_connections, on by default),
-    # which overrides the one in home/programs/ssh.nix. its socket is at
+    # which overrides the one in ../ssh.nix. its socket is at
     # /tmp/kssh-rdir-$UID/kssh-$KITTY_PID-%C on macos
     hostname fridge
     forward_remote_control yes
@@ -47,7 +47,7 @@ in
       tab_bar_min_tabs = 1;
       tab_bar_margin_width = 5;
       tab_bar_margin_height = "15 10";
-      # pills drawn by tools/kitty_tab_bar.py from the title fish_title sets
+      # pills drawn by ./tab_bar.py from the title fish_title sets
       tab_bar_style = "custom";
       active_tab_font_style = "bold";
       tab_bar_background = "none";

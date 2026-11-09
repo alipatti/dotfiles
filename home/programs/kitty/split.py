@@ -6,7 +6,7 @@ side) when the tab is wide and fat (stacked) when it is narrow, leaving
 the stack layout if the tab was zoomed. run via
 `remote_control_script` so no remote control permission is needed.
 
-kitty also loads this file as a watcher (see kitty.nix), so on_resize
+kitty also loads this file as a watcher (see default.nix), so on_resize
 reflows tall/fat when the window is resized.
 """
 

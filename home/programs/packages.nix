@@ -47,7 +47,7 @@ in
     llama-cpp # llama-server, used by pdf2md's ocr models
 
     # fonts. home-manager installs these in ~/Library/Fonts on macos and
-    # through fontconfig on linux. the terminal font is set in kitty.nix
+    # through fontconfig on linux. the terminal font is set in ./kitty
     lmodern # latin modern
     newcomputermodern # typst's default text font
   ];

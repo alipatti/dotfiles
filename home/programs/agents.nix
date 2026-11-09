@@ -40,7 +40,7 @@ in
   # instructions in ./agents.md
   home.packages = [ pkgs.nvim-peer ];
 
-  # the tab title comes from fish_title (see tools/kitty_tab_bar.py). set in
+  # the tab title comes from fish_title (see ./kitty/tab_bar.py). set in
   # the shell: with it in settings.json's env, claude still retitled tabs
   # (that env seems to be applied after claude reads the flag)
   home.sessionVariables = {

@@ -1,7 +1,7 @@
 function fish_title
     # see e.g. https://github.com/fish-shell/fish-shell/blob/master/share/functions/fish_title.fish
-    # renders as `[host] path | command`. tools/kitty_tab_bar.py relies on the
-    # leading `[` to color remote tabs
+    # renders as `[host] path | command`. home/programs/kitty/tab_bar.py
+    # relies on the leading `[` to color remote tabs
 
     # ssh
     if set -q SSH_TTY
