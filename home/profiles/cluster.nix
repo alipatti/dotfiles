@@ -9,7 +9,7 @@
 {
   imports = [
     # cherry-pick necessary parts
-    ../programs/agents.nix
+    ../programs/agents
     ../programs/fish
     ../programs/git
     ../programs/languages.nix

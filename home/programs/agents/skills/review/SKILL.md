@@ -43,7 +43,7 @@ report format), so leave those out.
 ## 3. Run
 
 ```bash
-~/.dotfiles/skills/review/review.py "$DIR" -C /path/to/repo -f psets/3.typ
+~/.claude/skills/review/review.py "$DIR" -C /path/to/repo -f psets/3.typ
 ```
 
 - Run it outside your sandbox (both CLIs need network),

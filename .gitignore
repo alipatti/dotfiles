@@ -2,8 +2,8 @@
 __pycache__
 
 # claude's synced skills, and where they go once syncing is disabled
-skills/synced
-skills/.trash
+home/programs/agents/skills/synced
+home/programs/agents/skills/.trash
 
 # binary spell files from nvim
 *.spl
