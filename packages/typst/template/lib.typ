@@ -14,6 +14,9 @@
 #import "format.typ": format-num
 #import "tables.typ": make-table
 
+// single values from csv data
+#import "data.typ": find-row, format-cell
+
 // macros
 #let todo(x) = "TODO: " + x
 #let inner(x, y) = $chevron.l #x, #y chevron.r$

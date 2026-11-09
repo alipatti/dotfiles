@@ -14,6 +14,7 @@ let
 
   # version = last commit of that version
   releases = {
+    "0.1.0" = "7097164507b5d522d64ea6338064e1fec6ef93fb";
   };
 
   current = (lib.importTOML ../../${template}/typst.toml).package.version;

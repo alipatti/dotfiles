@@ -1,5 +1,6 @@
 // tables from csv data; make-table is exported by lib.typ
 
+#import "columns.typ": resolve-styles, rule-columns
 #import "format.typ": format-value
 
 // rule on the left of the given column indices
@@ -15,23 +16,28 @@
 ))
 
 // a table from csv rows read with `csv(..., row-type: dictionary)`, whose header
-// names the columns. header names and facet values are typst markup, e.g.
-// "$tau$"; other text cells are too with markup-cells. the first column labels
-// the rows. a column named "x" + se-suffix is set below column "x" as its
-// standard error. facet splits the rows into lettered panels by that column.
-// column-styles maps column names to `format-num` arguments; numbers default to 3
-// digits, or 0 for integers, and standard errors get one more digit than their
-// column. with a group-delimiter, a header "group" + delimiter + "name" sets
-// "name" under a "group" header spanning the adjacent columns of that group.
-// rule-after names columns, or groups, followed by a rule.
+// names the columns and whose first column labels the rows
 #let make-table(
   rows,
+  // column whose values split the rows into lettered panels
   facet: none,
+  // a column named "x" + se-suffix is set in parentheses below column "x" as its standard error
   se-suffix: "_se",
-  column-styles: (:),
-  rule-after: auto,
-  markup-cells: false,
+  // a header "group" + delimiter + "name" sets "name" under a "group" header
+  // spanning the adjacent columns of that group
   group-delimiter: none,
+  // maps keys to `format-num` arguments; numbers default to 3 digits, or 0 for
+  // integers, and standard errors get one more digit than their column. keys match
+  // columns by segments (see columns.typ), so "RMSE" styles every "group::RMSE".
+  // styles of longer keys override shorter ones
+  column-styles: (:),
+  // keys, matched as in column-styles, with a rule after the columns they match;
+  // default: the first column
+  rule-after: auto,
+  // row labels with a rule above every row carrying them, in every panel
+  rule-above: (),
+  // evaluate non-numeric body cells as typst markup, like the header and facet values
+  markup-cells: true,
 ) = {
   let names = rows.first().keys().filter(name => name != facet and not name.ends-with(se-suffix))
 
@@ -43,21 +49,20 @@
   }
   let groups = names.map(name => split(name).first())
 
-  // a rule after a group goes after its last column
-  let last-column(name) = {
-    let index = names.position(n => n == name)
-    if index != none { return index }
-    let index = groups.rev().position(group => group == name)
-    assert(index != none, message: "make-table: no column or group " + repr(name) + " to put a rule after")
-    names.len() - 1 - index
-  }
   let rule-after = if rule-after == auto { (names.first(),) } else { rule-after }
-  let after-columns = rule-after.map(name => last-column(name) + 1)
+  let after-columns = rule-columns(names, rule-after, group-delimiter)
+  let styles = resolve-styles(names, column-styles, group-delimiter)
+
+  let labels = rows.map(row => row.at(names.first()))
+  for label in rule-above {
+    assert(label in labels, message: "make-table: no row " + repr(label) + " to put a rule above")
+  }
 
   let markup(text) = eval(text, mode: "markup")
   let format(value, style) = format-value(value, markup: markup-cells, ..style)
-  let cell(row, name) = {
-    let style = column-styles.at(name, default: (:))
+  let cell(row, x) = {
+    let name = names.at(x)
+    let style = styles.at(x)
     let value = format(row.at(name), style)
     let se = row.at(name + se-suffix, default: none)
     if se == none { return value }
@@ -96,7 +101,13 @@
     align: (left,) + (center,) * (names.len() - 1),
     stroke: rules(after-columns: after-columns),
     table.header(..header, table.hline(y: header-rows, stroke: 0.5pt)),
-    ..rows.map(row => names.map(name => cell(row, name))).flatten(),
+    ..rows
+      .enumerate()
+      .map(((y, row)) => {
+        let rule = if row.at(names.first()) in rule-above { (table.hline(y: header-rows + y, stroke: 0.5pt),) } else { () }
+        rule + range(names.len()).map(x => cell(row, x))
+      })
+      .flatten(),
   )
 
   if facet == none { return body(rows) }

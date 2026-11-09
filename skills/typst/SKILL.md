@@ -128,15 +128,21 @@ $
 - The csv _is_ the content of table: the code chooses its columns,
   their order, and their display names.
   The header becomes the table header,
-  and header names and facet values may be Typst markup (e.g. `$tau$`).
+  and header names, facet values and text cells are Typst markup (e.g. `$tau$`).
 - Put a column's standard error in a column named `<column>_se`;
   `make-table` sets it in parentheses below the estimate.
 - To split one table into lettered panels ("Panel A: ..."),
   include a column to `facet`.
+- To group columns under a spanning header,
+  name them `group::column` and pass `group-delimiter: "::"`.
 - Pass per-column formatting with `column-styles`
   (`ali.format-num` arguments: `digits`, `percent`).
   Numbers default to 3 digits, integers to 0.
-- Mark column groups with `rule-after` (column names);
+  A key matches a contiguous run of a column's `::` segments,
+  so `"RMSE"` styles every `group::RMSE` and `"group"` every column in the group;
+  longer keys override shorter ones.
+- Mark column groups with `rule-after` (keys matched as in `column-styles`)
+  and row groups with `rule-above` (row labels, i.e. first-column values);
   there is no need for other rules.
 - Wrap the result in `#figure` with a caption that defines every symbol.
 - The figure's kind is inferred, so no need to pass `kind: table`.
@@ -162,9 +168,16 @@ $
   Have the analysis code write them to a json file next to its csvs,
   load it with `json(...)`, and format with `ali.format-num`
   (integers default to 0 digits, other numbers to 3).
+- To quote a value from a table's csv,
+  use `ali.format-cell(rows, key, column, ..style)`,
+  which formats it as `make-table` would.
+  The key is a row label or a dictionary of column values;
+  `ali.find-row(rows, key)` returns the raw row for arithmetic.
 
 ```typst
 #let settings = json("numbers/settings.json")
+#let estimates = csv("numbers/estimates.csv", row-type: dictionary)
 
-We keep #ali.format-num(settings.draws) draws.
+We keep #ali.format-num(settings.draws) draws,
+and the slice sampler's ESS per second for $tau$ is #ali.format-cell(estimates, (Sampler: "Slice", Parameter: "$tau$"), "ESS / Sec.").
 ```
