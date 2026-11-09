@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
 # usage: ./setup [host]  (e.g. ./setup macbook; defaults to the hostname)
+#
+# anything that isn't macos or nixos is a cluster, configured by its entry in
+# home/profiles/cluster.nix. the default name there is the hostname without
+# trailing digits (adroit5 -> adroit)
 
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
 host=${1:-$(hostname -s)}
-
-# hostnames that get the rootless cluster config. matches on regex.
-clusters='cluster|adroit'
 
 if [ "$(uname)" = Darwin ]; then
     if ! xcode-select -p >/dev/null 2>&1; then
@@ -37,7 +38,8 @@ elif [ -f /etc/NIXOS ]; then
     # so rerun it to restore links that went missing since the last change
     sudo systemctl restart "home-manager-$USER.service"
 
-elif [[ $(hostname) =~ $clusters ]]; then
+else
+    cluster=${1:-$(hostname -s | sed 's/[0-9]*$//')}
     chroot=$HOME/.local/bin/nix-user-chroot
     store=$HOME/.cache/nix
 
@@ -60,7 +62,7 @@ elif [[ $(hostname) =~ $clusters ]]; then
     # env var rather than a flag so home-manager's inner nix build sees it too
     in_chroot '. ~/.nix-profile/etc/profile.d/nix.sh &&
         export NIX_CONFIG="experimental-features = nix-command flakes" &&
-        nix run home-manager -- switch -b bak --impure --flake .#cluster'
+        nix run home-manager -- switch -b bak --flake .#'"$cluster"
 
     # login shells enter the chroot and start fish. this has to be a real file:
     # anything home-manager writes is a symlink into /nix, which doesn't exist

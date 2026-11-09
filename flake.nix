@@ -24,6 +24,8 @@
       ...
     }:
     let
+      cluster = import ./home/profiles/cluster.nix;
+
       # shared by both hosts. per-user config is in ./home, and the profile
       # (./home/profiles) picks which programs a host gets
       common = profile: {
@@ -55,14 +57,17 @@
       overlays.default = final: prev: import ./apps final;
       packages = forEachSystem (pkgs: import ./apps pkgs);
 
-      # nix flake check builds the apps and evaluates both hosts
+      # nix flake check builds the apps and evaluates every host and cluster
       checks = {
         aarch64-darwin = self.packages.aarch64-darwin // {
           macbook = self.darwinConfigurations.macbook.system;
         };
-        x86_64-linux = self.packages.x86_64-linux // {
-          fridge = self.nixosConfigurations.fridge.config.system.build.toplevel;
-        };
+        x86_64-linux =
+          self.packages.x86_64-linux
+          // nixpkgs.lib.mapAttrs (_: c: c.activationPackage) self.homeConfigurations
+          // {
+            fridge = self.nixosConfigurations.fridge.config.system.build.toplevel;
+          };
       };
 
       # sudo darwin-rebuild switch --flake ~/.dotfiles
@@ -83,17 +88,25 @@
         ];
       };
 
-      # standalone home-manager for clusters without root. see ./setup
-      homeConfigurations.cluster = home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs {
-          system = "x86_64-linux";
-          config.allowUnfree = true;
-          overlays = [ self.overlays.default ];
-        };
-        modules = [
-          ./home
-          ./home/profiles/cluster.nix
-        ];
-      };
+      # standalone home-manager for clusters without root, one per entry in
+      # ./home/profiles/cluster.nix. see ./setup
+      homeConfigurations = nixpkgs.lib.mapAttrs (
+        _: username:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+            overlays = [ self.overlays.default ];
+          };
+          modules = [
+            ./home
+            cluster.module
+            {
+              home.username = username;
+              home.homeDirectory = "/home/${username}";
+            }
+          ];
+        }
+      ) cluster.clusters;
     };
 }
