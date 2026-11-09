@@ -7,6 +7,8 @@
   ...
 }:
 {
+  imports = [ ../programs ];
+
   # on nixos this docker stuff is handled by virtualisation.docker
   home.packages = with pkgs; [
     pawprint

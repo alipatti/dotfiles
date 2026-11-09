@@ -2,6 +2,8 @@
 
 { config, pkgs, ... }:
 {
+  imports = [ ../programs ];
+
   home.packages = with pkgs; [
     firefox
     slack

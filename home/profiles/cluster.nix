@@ -8,7 +8,7 @@
 }:
 {
   imports = [
-    # cherry-pick necessary parts
+    # cherry-pick necessary parts. the other profiles import all of ../programs
     ../programs/agents
     ../programs/fish
     ../programs/git

@@ -24,8 +24,9 @@
       ...
     }:
     let
-      # shared by both hosts. per-user config is in ./home
-      common = extra: {
+      # shared by both hosts. per-user config is in ./home, and the profile
+      # (./home/profiles) picks which programs a host gets
+      common = profile: {
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [ self.overlays.default ];
 
@@ -36,9 +37,8 @@
         home-manager.overwriteBackup = true;
         home-manager.users.ali.imports = [
           ./home
-          ./home/programs
-        ]
-        ++ extra;
+          profile
+        ];
       };
 
       forEachSystem =
@@ -70,7 +70,7 @@
         modules = [
           ./hosts/macbook
           home-manager.darwinModules.home-manager
-          (common [ ./home/profiles/darwin.nix ])
+          (common ./home/profiles/darwin.nix)
         ];
       };
 
@@ -79,7 +79,7 @@
         modules = [
           ./hosts/fridge
           home-manager.nixosModules.home-manager
-          (common [ ./home/profiles/linux.nix ])
+          (common ./home/profiles/linux.nix)
         ];
       };
 
