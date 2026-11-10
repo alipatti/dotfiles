@@ -4,9 +4,6 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    # documents. tectonic and typst have their own modules
-    pandoc
-
     # git
     git-crypt # encryption
 

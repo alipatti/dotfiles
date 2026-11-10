@@ -33,7 +33,6 @@ in
       # other
       vim = "nvim";
       ipy = "ipython";
-      npm = "pnpm";
       ssh.function = "ssh_abbr";
     };
 

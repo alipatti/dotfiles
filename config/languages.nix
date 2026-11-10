@@ -1,11 +1,9 @@
-# language toolchains and their config. python has its own module in ./python
+# language toolchains and their config. python and js have their own modules
+# in ./python and ./web.nix
 
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    nodejs # js
-    pnpm # js
-    R # r
     rustup # rust; also provides rust-analyzer via `rustup component add rust-analyzer`
   ];
 
