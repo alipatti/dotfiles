@@ -5,9 +5,12 @@
   # cluster name = my home directory there (the username is its last part).
   # ./setup picks the entry from the hostname with trailing digits dropped
   # (adroit5 -> adroit), or from its argument (./setup cannon)
-  clusters = {
+  clusters = rec {
     adroit = "/home/ap1741";
     cannon = "/n/home13/alipatti";
+    # cannon login nodes (login.rc.fas.harvard.edu picks one of these)
+    boslogin = cannon;
+    holylogin = cannon;
   };
 
   module =
