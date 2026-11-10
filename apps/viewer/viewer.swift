@@ -1,7 +1,7 @@
 // webkit window for local preview servers (typst-preview, notebooks, ...) and pdfs
 //
 // usage: viewer <url-or-file>...
-// home/programs/viewer.nix builds viewer.app, and the viewer command
+// config/viewer.nix builds viewer.app, and the viewer command
 // (viewer.sh) passes documents to the running app with `open`. the window
 // shows one document at a time, and a pill of buttons along the bottom
 // switches between them

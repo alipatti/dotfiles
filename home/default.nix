@@ -1,9 +1,10 @@
-# per-user config shared across machines. platform-specific bits live in
-# ./profiles, and shared content is split by program in ./programs
+# per-user config shared across machines. platform-specific bits live beside
+# this file (linux.nix, darwin.nix, cluster.nix), and per-program modules in
+# ../config
 
 { config, lib, ... }:
 {
-  # shared by the modules in ./programs. both take a path literal (e.g. ./functions).
+  # shared by the modules in ../config. both take a path literal (e.g. ./functions).
   # `live` turns it into the same path in the working tree, so programs read
   # the file as edited rather than a copy in the store, and `link` symlinks to
   # it so configs stay editable in place

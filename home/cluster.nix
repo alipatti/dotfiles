@@ -17,20 +17,20 @@
     { pkgs, ... }:
     {
       imports = [
-        # cherry-pick necessary parts. the other profiles import all of ../programs
-        ../programs/agents
-        ../programs/fish
-        ../programs/git
-        ../programs/languages.nix
-        ../programs/latex.nix
-        ../programs/nvim
-        ../programs/packages.nix
-        ../programs/prompt.nix
-        ../programs/python
-        ../programs/rumdl.nix
-        ../programs/ssh.nix
-        ../programs/typst.nix
-        ../programs/viewer.nix
+        # cherry-pick necessary parts. the other profiles import all of ../config
+        ../config/agents
+        ../config/fish
+        ../config/git
+        ../config/languages.nix
+        ../config/latex.nix
+        ../config/nvim
+        ../config/packages.nix
+        ../config/prompt.nix
+        ../config/python
+        ../config/rumdl.nix
+        ../config/ssh.nix
+        ../config/typst.nix
+        ../config/viewer.nix
       ];
 
       # `trash`. macos has its own, and fridge gets it from linux.nix

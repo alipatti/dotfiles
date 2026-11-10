@@ -3,7 +3,7 @@
 # usage: ./setup [host]  (e.g. ./setup macbook; defaults to the hostname)
 #
 # anything that isn't macos or nixos is a cluster, configured by its entry in
-# home/profiles/cluster.nix. the default name there is the hostname without
+# home/cluster.nix. the default name there is the hostname without
 # trailing digits (adroit5 -> adroit)
 
 set -euo pipefail

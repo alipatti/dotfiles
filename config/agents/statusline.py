@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-# the modules on the right side of the starship prompt (see home/programs/prompt.nix)
+# the modules on the right side of the starship prompt (see config/prompt.nix)
 STARSHIP_MODULES = [
     "rust",
     "python",

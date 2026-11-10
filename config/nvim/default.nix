@@ -1,12 +1,10 @@
-# neovim. the config in ./runtime is linked to ~/.config/nvim
-
 { config, pkgs, ... }:
 {
   home.packages = with pkgs; [
     neovim
     tree-sitter
 
-    # language servers, enabled in ./runtime/plugin/lsp.lua. ty and ruff's
+    # language servers, enabled in ./plugin/lsp.lua. ty and ruff's
     # servers run through uvx
     lua-language-server
     yaml-language-server
@@ -23,5 +21,5 @@
 
   home.sessionVariables.EDITOR = "nvim";
 
-  xdg.configFile."nvim".source = config.lib.dotfiles.link ./runtime;
+  xdg.configFile."nvim".source = config.lib.dotfiles.link ./.;
 }

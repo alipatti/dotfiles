@@ -2,7 +2,7 @@
 
 { config, pkgs, ... }:
 {
-  imports = [ ../programs ];
+  imports = [ ../config ];
 
   home.packages = with pkgs; [
     firefox

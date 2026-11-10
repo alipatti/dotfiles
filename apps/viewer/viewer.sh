@@ -5,7 +5,7 @@
 # over kitten ssh, urls open on the mac instead. the remote asks kitty to run
 # `viewer --attach` there, which forwards a loopback url's port through kitten
 # ssh's shared connection and opens it. needs forward_remote_control, see
-# home/programs/kitty.nix
+# config/kitty.nix
 #
 # usage: viewer <url-or-file>...
 set -eu

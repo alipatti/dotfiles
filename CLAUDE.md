@@ -1,9 +1,11 @@
 # Layout
 
 - `hosts/<host>/`: system config per machine.
-- `home/`: home-manager config.
-  - `profiles/`: per-platform module selection.
-  - `programs/`: one module per program.
+- `home/`: home-manager entry points.
+  `default.nix` is shared,
+  and `<platform>.nix` picks modules from `config/`.
+- `config/`: home-manager modules, one per program
+  (`x.nix`, or `x/default.nix` with its files beside it).
 - `apps/`: software written here (CLI or GUI).
 - `libraries/`: source imported by other code or documents.
 

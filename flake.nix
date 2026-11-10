@@ -24,10 +24,10 @@
       ...
     }:
     let
-      cluster = import ./home/profiles/cluster.nix;
+      cluster = import ./home/cluster.nix;
 
-      # shared by both hosts. per-user config is in ./home, and the profile
-      # (./home/profiles) picks which programs a host gets
+      # shared by both hosts. per-user config is in ./home, and the platform file
+      # (./home/<platform>.nix) picks which modules in ./config a host gets
       common = profile: {
         nixpkgs.config.allowUnfree = true;
         nixpkgs.overlays = [ self.overlays.default ];
@@ -75,7 +75,7 @@
         modules = [
           ./hosts/macbook
           home-manager.darwinModules.home-manager
-          (common ./home/profiles/darwin.nix)
+          (common ./home/darwin.nix)
         ];
       };
 
@@ -84,12 +84,12 @@
         modules = [
           ./hosts/fridge
           home-manager.nixosModules.home-manager
-          (common ./home/profiles/linux.nix)
+          (common ./home/linux.nix)
         ];
       };
 
       # standalone home-manager for clusters without root, one per entry in
-      # ./home/profiles/cluster.nix. see ./setup
+      # ./home/cluster.nix. see ./setup
       homeConfigurations = nixpkgs.lib.mapAttrs (
         _: home:
         home-manager.lib.homeManagerConfiguration {

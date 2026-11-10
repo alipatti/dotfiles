@@ -6,7 +6,7 @@
 """Inspect and drive the nvim open in another window of this kitty tab.
 
 Each nvim inside kitty listens at ~/.cache/nvim/kitty/<kitty pid>-<window id>.sock,
-with `ssh` for the pid over kitten ssh (see home/programs/nvim/runtime/init.lua).
+with `ssh` for the pid over kitten ssh (see config/nvim/init.lua).
 Commands fail unless exactly one is running in the tab.
 """
 

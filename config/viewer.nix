@@ -11,7 +11,7 @@ let
   # copied into the store, so the build below reruns whenever the sources change
   src = builtins.path {
     name = "viewer-source";
-    path = ../../apps/viewer;
+    path = ../apps/viewer;
   };
   app = "$HOME/Applications/viewer.app";
 in

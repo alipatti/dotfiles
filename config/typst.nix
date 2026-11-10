@@ -10,7 +10,7 @@
 }:
 let
   inherit (config.lib.dotfiles) live;
-  source = ../../libraries/typst;
+  source = ../libraries/typst;
   package = (lib.importTOML (source + "/typst.toml")).package;
 
   # version = last commit of that version, and where the package was then.

@@ -70,7 +70,7 @@
   virtualisation.docker.enable = true;
   programs.steam.enable = true;
 
-  # desktop sessions are in ./desktop.nix, user config in ../../home/profiles/linux.nix
+  # desktop sessions are in ./desktop.nix, user config in ../../home/linux.nix
 
   users.users.ali = {
     isNormalUser = true;

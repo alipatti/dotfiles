@@ -60,7 +60,7 @@ in
       report_cwd
 
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
-      set -l secrets ${live ../../../secrets.env}
+      set -l secrets ${live ../../secrets.env}
       if string match -q 'text*' (file -b --mime-type $secrets)
           direnv dotenv fish $secrets | source
       end

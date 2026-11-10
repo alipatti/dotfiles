@@ -12,7 +12,7 @@ in
   pawprint = pythonTool "pawprint" ./pawprint/pawprint.py;
 
   # the viewer command. on macos it opens viewer.app, which
-  # home/programs/viewer.nix builds
+  # config/viewer.nix builds
   viewer = pkgs.runCommand "viewer" { meta.mainProgram = "viewer"; } ''
     install -Dm755 ${./viewer/viewer.sh} $out/bin/viewer
   '';
