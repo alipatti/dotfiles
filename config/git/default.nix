@@ -17,15 +17,10 @@
       pull.rebase = "merges";
     };
 
+    # tool-specific ignores live with the tool's config
     ignores = [
       ".DS_Store"
-      "__pycache__/"
-      # nix-direnv's cached dev shells
-      ".direnv/"
       "*.local.*"
-      "**/.claude/.cc-writes/"
-      "**/.claude/settings.local.json"
-      "**/.claude/worktrees/"
       ";"
     ];
   };

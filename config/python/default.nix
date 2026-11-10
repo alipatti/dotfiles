@@ -7,6 +7,8 @@ in
 
   home.sessionVariables.POLARS_ENGINE_AFFINITY = "streaming";
 
+  programs.git.ignores = [ "__pycache__/" ];
+
   # link only the config pieces so ipython's runtime files (history, logs,
   # pid) stay out of the repo
   home.file = {

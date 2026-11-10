@@ -83,6 +83,8 @@ in
       hide_env_diff = true;
     };
   };
+  # nix-direnv's cached dev shells
+  programs.git.ignores = [ ".direnv/" ];
   programs.fzf = {
     enable = true;
     # most recent first, like fish's own history

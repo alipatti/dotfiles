@@ -167,6 +167,12 @@ in
     };
   };
 
+  programs.git.ignores = [
+    "**/.claude/.cc-writes/"
+    "**/.claude/settings.local.json"
+    "**/.claude/worktrees/"
+  ];
+
   # ~/.codex/config.toml is copied from this on each switch (see
   # home.activation.codexConfig) so codex can still record project trust
   programs.codex = {
