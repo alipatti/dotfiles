@@ -19,7 +19,7 @@ import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 from cyclopts import App
 from cyclopts.types import ExistingFile
@@ -282,6 +282,11 @@ def pawprint(
             sys.exit(f"Couldn't send {file} to {SERVER} ({address}): {error}.")
 
         print(f"Sent {file} to {queue} as {netid}.")
+
+
+@app.command(name="--completions", show=False)
+def completions(shell: Literal["fish", "zsh", "bash"] = "fish"):
+    print(app.generate_completion(shell=shell))
 
 
 if __name__ == "__main__":

@@ -1,61 +1,24 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.12,<3.14"
-# dependencies = ["marker-pdf", "pypdfium2", "cyclopts", "loguru", "pydantic"]
-# ///
-"""Convert a PDF to markdown plus images with marker, then have an LLM fix each chunk of pages.
-
-Marker gets layout, tables, figures, and display math mostly right but garbles inline math.
-Lines that look garbled are flagged, and an OpenAI model (run through `codex exec` with no
-tools) returns replacements for wrong line ranges as structured output, along with short
-descriptions of each figure that make it findable by search.
-"""
-
-import hashlib
-import json
-import os
 import re
 import shutil
 import subprocess
-import time
 from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 from pathlib import Path
 
 import pypdfium2
-from cyclopts import App
 from loguru import logger
-from pydantic import BaseModel, ConfigDict
 
-OPENAI_MODEL: str = "gpt-6-luna"
-REASONING_EFFORT: str = "low"
+from pdf2md.codex import OPENAI_MODEL, Fix, run_codex
+from pdf2md.pages import IMAGE_LINK, PAGE_MARKER, join_pages, render_pages
+
 PAGES_PER_CHUNK: int = 2
 PASSES: int = 2  # passes after the first only run while some lines still look garbled
-CALL_TIMEOUT: int = 180  # seconds; most calls take under a minute, a few stall for many
-PAGE_IMAGE_DPI: int = 110
-CACHE_DIR: Path = (
-    Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "pdf2md"
-)
 
-# codex features that give the model tools; it only needs the prompt and the images
-CODEX_TOOLS: tuple[str, ...] = (
-    "shell_tool",
-    "unified_exec",
-    "view_image",
-    "image_generation",
-    "multi_agent",
-    "plugins",
-    "apps",
-    "browser_use",
-    "computer_use",
-    "sleep_tool",
-    "tool_suggest",
-    "skill_search",
-    "goals",
-)
+DESCRIPTION_LABEL = "*Generated figure description:*"
+BARE_DOLLAR = re.compile(r"(?<!\\)\$")
 
-PAGE_SEPARATOR = re.compile(r"\n\n\{(\d+)\}-{48}\n\n")
-PAGE_MARKER = "<!-- page"
+LINE_PREFIX = re.compile(r"^\d+!?\| ", re.MULTILINE)
+WORD = re.compile(r"[a-zA-Z]{3,}")
 
 # spans that are fine as far as math goes: footnote markers (linked or at the start of a
 # footnote), latex (but not escaped currency), links, html anchors, and minus signs in
@@ -66,13 +29,6 @@ CLEAN_SPANS = re.compile(
     r"|\]\([^)]*\)|</?span[^>]*>|−(?=\s?\d)"
 )
 GARBLED_MATH = re.compile(r"<su[bp]>|[Α-ωϕ′ℓˆ˜←-⇿∀-⋿]")
-
-IMAGE_LINK = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
-DESCRIPTION_LABEL = "*Generated figure description:*"
-BARE_DOLLAR = re.compile(r"(?<!\\)\$")
-
-LINE_PREFIX = re.compile(r"^\d+!?\| ", re.MULTILINE)
-WORD = re.compile(r"[a-zA-Z]{3,}")
 
 PROMPT = """\
 Below is a machine transcription (marker OCR) of pages {first}-{last} of a PDF, one line per
@@ -111,78 +67,6 @@ aren't needed."""
 
 NO_FIGURES_TASK = "Leave `figures` empty."
 
-app = App(name="pdf2md")
-
-
-class Strict(BaseModel):
-    # structured output needs `additionalProperties: false` in the schema
-    model_config = ConfigDict(extra="forbid")
-
-
-class Fix(Strict):
-    """Replace lines `start` through `end` (inclusive) with `text`."""
-
-    start: int
-    end: int
-    text: str
-
-
-class Figure(Strict):
-    image: str
-    description: str
-
-
-class Response(Strict):
-    fixes: list[Fix]
-    figures: list[Figure]
-
-
-def run_marker(pdf: Path, out: Path, force_ocr: bool) -> str:
-    """Run marker with page separators, save its images into `out`, and return its markdown."""
-    from marker.converters.pdf import PdfConverter
-    from marker.models import create_model_dict
-    from marker.output import convert_if_not_rgb, text_from_rendered
-
-    converter = PdfConverter(
-        artifact_dict=create_model_dict(),
-        config={"paginate_output": True, "force_ocr": force_ocr},
-    )
-    markdown, _, images = text_from_rendered(converter(str(pdf)))
-
-    for name, image in images.items():
-        convert_if_not_rgb(image).save(out / name)
-
-    return markdown
-
-
-def split_pages(markdown: str) -> dict[int, str]:
-    """Map 1-indexed page numbers to their markdown, using marker's page separators."""
-    _, *parts = PAGE_SEPARATOR.split(markdown)
-    return {int(n) + 1: text.strip() for n, text in batched(parts, 2)}
-
-
-def join_pages(pages: dict[int, str]) -> str:
-    return (
-        "\n\n".join(f"{PAGE_MARKER} {n} -->\n\n{text}" for n, text in pages.items())
-        + "\n"
-    )
-
-
-def render_pages(
-    document: pypdfium2.PdfDocument,
-    page_numbers: list[int],
-    directory: Path,
-) -> list[str]:
-    """Render pages as PNGs into `directory` and return their file names."""
-    directory.mkdir(parents=True, exist_ok=True)
-    names = [f"page-{n:03}.png" for n in page_numbers]
-
-    for n, name in zip(page_numbers, names):
-        page = document[n - 1].render(scale=PAGE_IMAGE_DPI / 72)
-        page.to_pil().save(directory / name)
-
-    return names
-
 
 def is_garbled(line: str) -> bool:
     return bool(GARBLED_MATH.search(CLEAN_SPANS.sub("", line)))
@@ -195,46 +79,6 @@ def numbered(lines: list[str]) -> str:
         for i, line in enumerate(lines)
         if line.strip()
     )
-
-
-def run_codex(prompt: str, images: list[str], directory: Path) -> Response:
-    """Run one tool-less `codex exec` call in `directory` and return its structured output.
-
-    A call that stalls past `CALL_TIMEOUT` is retried once.
-    """
-    (directory / "schema.json").write_text(json.dumps(Response.model_json_schema()))
-    command = [
-        "codex", "exec", prompt,
-        "--model", OPENAI_MODEL,
-        "--config", f'model_reasoning_effort="{REASONING_EFFORT}"',
-        *(arg for tool in CODEX_TOOLS for arg in ("--disable", tool)),
-        "--ignore-user-config",
-        "--ignore-rules",
-        "--sandbox", "read-only",
-        "--skip-git-repo-check",
-        "--ephemeral",
-        "--output-schema", "schema.json",
-        "--output-last-message", "result.json",
-        *(arg for image in images for arg in ("--image", image)),
-    ]  # fmt: skip
-
-    for attempt in range(2):
-        try:
-            subprocess.run(
-                command,
-                cwd=directory,
-                stdin=subprocess.DEVNULL,
-                capture_output=True,
-                check=True,
-                timeout=CALL_TIMEOUT,
-            )
-            break
-        except subprocess.TimeoutExpired:
-            if attempt:
-                raise
-            logger.warning(f"{directory.name} stalled, retrying")
-
-    return Response.model_validate_json((directory / "result.json").read_text())
 
 
 def fix_chunk(
@@ -381,65 +225,3 @@ def fix_pages(
     )
     with ThreadPoolExecutor(len(chunks)) as pool:
         return "\n".join(pool.map(fix_chunk, chunks, page_images, figures, directories))
-
-
-def digest(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()[:16]
-
-
-@app.default
-def main(
-    pdf: Path,
-    *,
-    fix: bool = True,
-    force_ocr: bool = False,
-    refresh: bool = False,
-    out: Path | None = None,
-):
-    """Convert PDF to markdown plus figure images and print the markdown's path.
-
-    Results are cached in CACHE_DIR by the PDF's hash: marker's output once per PDF, and
-    the fixed markdown once per version of this script, so reruns are instant and editing
-    the prompt or settings reuses marker's output. `--refresh` redoes both.
-
-    The markdown links its figures by relative path, so `--out` copies it together with
-    its figures into OUT and prints that path instead.
-    """
-    pdf_dir = CACHE_DIR / digest(pdf.read_bytes())
-    marker_dir = pdf_dir / ("marker-force-ocr" if force_ocr else "marker")
-    if refresh:
-        shutil.rmtree(pdf_dir, ignore_errors=True)
-    marker_dir.mkdir(parents=True, exist_ok=True)
-
-    marker_path = marker_dir / "marker.md"
-    if not marker_path.exists():
-        logger.info(f"Running marker on {pdf.name}")
-        start = time.monotonic()
-        marker_path.write_text(run_marker(pdf, marker_dir, force_ocr))
-        logger.info(f"Marker done in {time.monotonic() - start:.0f}s")
-
-    key = digest(Path(__file__).read_bytes()) if fix else "unfixed"
-    markdown_path = marker_dir / f"{key}.md"
-
-    if not markdown_path.exists():
-        pages = split_pages(marker_path.read_text())
-        markdown = (
-            fix_pages(pdf, pages, marker_dir, pdf_dir / f"work-{key}")
-            if fix
-            else join_pages(pages)
-        )
-        markdown_path.write_text(markdown)
-
-    if out:
-        out.mkdir(parents=True, exist_ok=True)
-        markdown = markdown_path.read_text()
-        markdown_path = out / f"{pdf.stem}.md"
-        markdown_path.write_text(markdown)
-        for image in IMAGE_LINK.findall(markdown):
-            shutil.copy(marker_dir / image, out / image)
-
-    print(markdown_path)
-
-
-if __name__ == "__main__":
-    app()

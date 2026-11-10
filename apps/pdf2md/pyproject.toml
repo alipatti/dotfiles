@@ -1,0 +1,14 @@
+[project]
+name = "pdf2md"
+version = "0.1.0"
+description = "Convert PDFs to markdown with marker, then fix garbled math with an LLM"
+authors = [{ name = "Alistair Pattison" }]
+requires-python = ">=3.12,<3.14"
+dependencies = ["marker-pdf", "pypdfium2", "cyclopts", "loguru", "pydantic"]
+
+[project.scripts]
+pdf2md = "pdf2md.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"

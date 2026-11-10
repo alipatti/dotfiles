@@ -1,57 +1,31 @@
-# builds a command from a cyclopts script with a pep 723 header, with fish
-# completions. both come from the committed script, so changes need a rebuild;
-# run the script directly while developing. the script's `app` must be named
-# `name` (`App(name="pawprint")`), since completions are generated for it
+# builds a command from a cyclopts app: either a script with a pep 723 header
+# or a uv project directory with the command in `[project.scripts]`. uv
+# installs the dependencies on first run, so nix never sees them. the app must
+# have a `--completions` command that prints its fish completions, which fish
+# runs the first time it completes the command in a session
 #
 #   pkgs.callPackage ./python-tool.nix { } "pawprint" ./pawprint/pawprint.py
+#   pkgs.callPackage ./python-tool.nix { } "pdf2md" ./pdf2md
 
 { lib, pkgs }:
-name: script:
+name: source:
 let
-  # the toml between `# /// script` and `# ///` (pep 723)
-  metadata = lib.pipe (builtins.readFile script) [
-    (lib.splitString "# /// script\n")
-    (lib.flip builtins.elemAt 1)
-    (lib.splitString "# ///\n")
-    builtins.head
-    (lib.splitString "\n")
-    (map (lib.removePrefix "#"))
-    (lib.concatStringsSep "\n")
-    builtins.fromTOML
-  ];
+  uv = lib.getExe pkgs.uv;
 
-  # pep 503 names, e.g. "Python_Dateutil>=2" -> "python-dateutil", which is how
-  # nixpkgs names most python packages
-  normalize =
-    dependency:
-    lib.pipe dependency [
-      (builtins.match "([A-Za-z0-9._-]+).*")
-      builtins.head
-      lib.toLower
-      (builtins.replaceStrings [ "_" "." ] [ "-" "-" ])
-    ];
-
-  # the declared dependencies that nixpkgs has. the rest must be imported
-  # inside functions so the module loads without them
-  python = pkgs.python3.withPackages (
-    ps:
-    lib.pipe (metadata.dependencies or [ ]) [
-      (map normalize)
-      (builtins.filter (name: ps ? ${name}))
-      (map (name: ps.${name}))
-    ]
-  );
+  run =
+    if lib.pathIsDirectory source then
+      ''
+        # the store is read-only, so the environment lives in the cache
+        export UV_PROJECT_ENVIRONMENT="''${XDG_CACHE_HOME:-$HOME/.cache}/python-tool-venvs/${name}"
+        exec ${uv} run --project ${source} --locked ${name} "$@"
+      ''
+    else
+      ''exec ${uv} run --script ${source} "$@"'';
 in
-pkgs.runCommand name { } ''
-  mkdir -p $out/bin $out/share/fish/vendor_completions.d
+pkgs.runCommand name { meta.mainProgram = name; } ''
+  install -Dm755 ${pkgs.writeShellScript name run} $out/bin/${name}
 
-  install -m755 ${script} $out/bin/${name}
-
-  ${python.interpreter} -c '
-  import importlib.util
-  spec = importlib.util.spec_from_file_location("tool", "${script}")
-  tool = importlib.util.module_from_spec(spec)
-  spec.loader.exec_module(tool)
-  print(tool.app.generate_completion(shell="fish"))
-  ' > $out/share/fish/vendor_completions.d/${name}.fish
+  mkdir -p $out/share/fish/vendor_completions.d
+  echo '${name} --completions fish | source' \
+    > $out/share/fish/vendor_completions.d/${name}.fish
 ''

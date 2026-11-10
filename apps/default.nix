@@ -6,7 +6,7 @@ let
   pythonTool = pkgs.callPackage ./python-tool.nix { };
 in
 {
-  pdf2md = pythonTool "pdf2md" ./pdf2md/pdf2md.py;
+  pdf2md = pythonTool "pdf2md" ./pdf2md;
 
   # princeton's student print queues. mac only: it uses the keychain and ipconfig
   pawprint = pythonTool "pawprint" ./pawprint/pawprint.py;
