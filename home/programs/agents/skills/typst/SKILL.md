@@ -15,19 +15,17 @@ imported as a namespace:
 ```
 
 It lives in `$DOTFILES/libraries/typst/`.
-New documents use the newest version, the `version` in its `typst.toml`;
-leave existing imports alone.
+New documents use the newest version, the `version` in its `typst.toml`.
+Leave existing imports alone.
 The template provides theorem environments (theorion),
 cetz/fletcher/subpar, math macros
 (`inner`, `to`, `toto`, ...), table helpers, and all document styling.
-Do not re-add set/show rules the template already handles.
+Do not reimplement set/show rules the template already provides.
 
 Refer to everything through the namespace
 (`ali.make-table`, `ali.format-num`, `ali.clearpage()`),
-except math macros: import those by name,
-since `$ali.var(X)$` is noisy in equations.
-
-Start appendices with `#show: ali.appendix`.
+except math macros.
+Import those by name: `$ali.var(X)$` is noisy in equations.
 
 There is no need to compile after every change.
 
@@ -38,23 +36,66 @@ There is no need to compile after every change.
   If more detail is needed, it will be requested.
 - Prefer algebraic-flavored exposition: maps, spaces, commutative diagrams
   (using `fletcher`).
+- Use plain connecting prose,
+  e.g. "From lecture, ...", "We know that ...", "Therefore, ...", "So ...".
+- Don't overly formalize.
+- In general, prefer common words to jargon when jargon is not needed,
+  e.g. "distribution" over "law".
+- Prefer a short list when checking or listing several assumptions
+  or conditions rather than cramming them all inline.
 - Place each sentence on its own line in the source file.
+- Start appendices with `#show: ali.appendix`.
+
+### Punctuation
+
 - Use commas only where grammar or clarity requires them.
   For example, do not put a comma before a trailing prepositional phrase:
   write "The acceptance rate
   and speed of each sampler over the retained draws" rather than "The
   acceptance rate and speed of each sampler, over the retained draws".
+- Do not use semicolons.
 
-## Formatting Math
+## Writing Math
 
-- Default to display math; inline math is the exception.
-  Inline math is for naming objects, not for stating results.
-  Displays are indented two spaces, with the delimiters on their own lines.
+### Display vs Inline
+
+- Display results, derivations, and anything the argument turns on.
+  Inline short facts that only name or describe an object.
+- Keep the prose leading into a display short;
+  if it needs more than one or two inline expressions,
+  display one of them or reconsider the framing.
+- Displays are indented two spaces, with the delimiters on their own lines.
+
+Bad:
+
+```typst
+Its moments are $EE(X) = mu = m$, $var(X) = sigma^2 + tau^2 = s$, and $cov(X, Y) = rho$.
+```
+
+Good:
+
+```typst
+Its moments are
+$
+  EE(X) & = mu = m, \
+  var(X) & = sigma^2 + tau^2 = s, \
+  cov(X, Y) & = rho.
+$
+```
+
+### Math in Prose
+
 - Math is part of the prose.
   Display blocks should end with appropriate punctuation:
   for example a comma when they lead into a separate clause,
   or a period when they end a sentence.
 - Never start a sentence with a mathematical symbol.
+- When invoking a lemma or earlier result,
+  apply it in exactly its stated form.
+- Introduce notation only at the point where it's needed.
+
+### Long Displays
+
 - When simplifying complicated expressions or showing
   that two things are equal, use "Oklahoma" style:
   Place the initial object on the left-hand side of the first line,
@@ -62,16 +103,23 @@ There is no need to compile after every change.
   lines (so the rendered text looks like the outline of Oklahoma.) Never
   simplify both sides of the equation simultaneously.
   See below for an example.
+- For a non-obvious equality, show one or two intermediate lines
+  and highlight groupings with parentheses, `dot`s, etc.
+- When several items share a relation, align on it.
 
 ### Notation
 
 - Use parentheses for grouping and function application.
   Use other groupings (e.g. `[`, `{`) only when explicitly necessary.
-- Use `$EE(...)$` for expectation
-  (blackboard + parentheses, not square brackets).
+- Use `$EE(...)$` for expectation (not square brackets).
+- Use `$cal(N)$` for the normal distribution.
+- Use `$exp(...)$` rather than `$e^(...)$`
+  when the exponent is more than a symbol.
+- Inside `sqrt`, use `slash` for small fractions, e.g. `$sqrt(2 slash n)$`.
 - Use the provided template's macros
-  (`to`, `toto`, `inner`, ...) instead of raw symbols,
+  (`to`, `toto`, `inner`, `iid`, ...) instead of raw symbols,
   imported by name.
+- Be careful with subscripts: $f_k(x)$ is rendered with all of $k(x)$ as a subscript. Use $f_k (x)$ instead.
 
 ### Minimal Math Example
 
@@ -94,25 +142,6 @@ $
 $
 // we add "The estimator ..." to avoid starting a sentence with a symbol
 The estimator $hat(alpha)$ is consistent by the continuous mapping theorem.
-```
-
-### Inline vs. Display
-
-Bad:
-
-```typst
-Its moments are $EE(X) = mu = m$, $var(X) = sigma^2 + tau^2 = s$, and $cov(X, Y) = rho$.
-```
-
-Good:
-
-```typst
-Its moments are
-$
-  EE(X) & = mu = m, \
-  var(X) & = sigma^2 + tau^2 = s, \
-  cov(X, Y) & = rho.
-$
 ```
 
 ## Tables

@@ -1,6 +1,7 @@
 ---
 name: review
 description: "Load BEFORE giving substantive review or feedback on a body of work: code (a file, module, branch, or PR), proofs, problem sets, or papers. Triggers include 'review', 'critique', 'audit', 'look over', 'give feedback on', 'check my proof', 'what's wrong with this', 'is this ready'. Not for one-off checks like 'check the logs' or 'is this command right'. Small items are reviewed directly; larger ones are split into tasks, run through Claude and Codex reviewers in parallel, and merged."
+disable-model-invocation: true
 ---
 
 # Parallel review
