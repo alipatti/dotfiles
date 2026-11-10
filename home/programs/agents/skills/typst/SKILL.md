@@ -61,8 +61,8 @@ There is no need to compile after every change.
 
 - Display results, derivations, and anything the argument turns on.
   Inline short facts that only name or describe an object.
-- Keep the prose leading into a display short;
-  if it needs more than one or two inline expressions,
+- Keep the prose leading into a display short.
+  If it needs more than one or two inline expressions,
   display one of them or reconsider the framing.
 - Displays are indented two spaces, with the delimiters on their own lines.
 
@@ -129,7 +129,9 @@ $
 - Use the provided template's macros
   (`to`, `toto`, `inner`, `iid`, ...) instead of raw symbols,
   imported by name.
-- Be careful with subscripts: $f_k(x)$ is rendered with all of $k(x)$ as a subscript. Use $f_k (x)$ instead.
+- Be careful with subscripts:
+  $f_k(x)$ is rendered with all of $k(x)$ as a subscript.
+  Use $f_k (x)$ instead.
 
 ### Minimal Math Example
 
@@ -168,7 +170,7 @@ The estimator $hat(alpha)$ is consistent by the continuous mapping theorem.
   their order, and their display names.
   The header becomes the table header,
   and header names, facet values and text cells are Typst markup (e.g. `$tau$`).
-- Put a column's standard error in a column named `<column>_se`;
+- Put a column's standard error in a column named `<column>_se`.
   `make-table` sets it in parentheses below the estimate.
 - To split one table into lettered panels ("Panel A: ..."),
   include a column to `facet`.
@@ -178,11 +180,11 @@ The estimator $hat(alpha)$ is consistent by the continuous mapping theorem.
   (`ali.format-num` arguments: `digits`, `percent`).
   Numbers default to 3 digits, integers to 0.
   A key matches a contiguous run of a column's `::` segments,
-  so `"RMSE"` styles every `group::RMSE` and `"group"` every column in the group;
-  longer keys override shorter ones.
+  so `"RMSE"` styles every `group::RMSE` and `"group"` every column in the group.
+  Longer keys override shorter ones.
 - Mark column groups with `rule-after` (keys matched as in `column-styles`)
-  and row groups with `rule-above` (row labels, i.e. first-column values);
-  there is no need for other rules.
+  and row groups with `rule-above` (row labels, i.e. first-column values).
+  There is no need for other rules.
 - Wrap the result in `#figure` with a caption that defines every symbol.
 - The figure's kind is inferred, so no need to pass `kind: table`.
 
@@ -210,7 +212,7 @@ The estimator $hat(alpha)$ is consistent by the continuous mapping theorem.
 - To quote a value from a table's csv,
   use `ali.format-cell(rows, key, column, ..style)`,
   which formats it as `make-table` would.
-  The key is a row label or a dictionary of column values;
+  The key is a row label or a dictionary of column values.
   `ali.find-row(rows, key)` returns the raw row for arithmetic.
 - `ali.format-num` also works inside math,
   e.g. `$[#ali.format-num(x), #ali.format-num(y)]$`.

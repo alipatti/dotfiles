@@ -48,9 +48,10 @@
   pagebreak(weak: true)
 }
 
-// start the appendices: letter headings from A and reference them as "Appendix A",
-// applied to the rest of the document with `#show: ali.appendix`
+// start the appendices on a new page: letter headings from A and reference them as
+// "Appendix A", applied to the rest of the document with `#show: ali.appendix`
 #let appendix(body) = {
+  clearpage()
   counter(heading).update(0)
   set heading(numbering: "A.1", supplement: [Appendix])
   body
