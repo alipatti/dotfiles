@@ -1,5 +1,3 @@
-# per-user config that only makes sense on a mac
-
 {
   config,
   pkgs,

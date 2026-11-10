@@ -1,5 +1,3 @@
-# python: uv and ipython. the ipython config is in ./ipython
-
 { config, pkgs, ... }:
 let
   inherit (config.lib.dotfiles) link;

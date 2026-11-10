@@ -1,5 +1,4 @@
-# language toolchains and their config. python and js have their own modules
-# in ./python and ./web.nix
+# python and js have their own modules in ./python and ./web.nix
 
 { pkgs, ... }:
 {

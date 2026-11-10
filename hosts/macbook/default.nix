@@ -1,5 +1,4 @@
-# machine-wide config for the mac. everything here runs as root at
-# `darwin-rebuild switch`. per-user files live in ../../home.
+# everything here runs as root at `darwin-rebuild switch`
 
 { pkgs, lib, ... }:
 

@@ -1,6 +1,5 @@
-# papis bibliography manager. on macos papis looks for its config in
-# ~/Library/Application Support, so point it at the xdg file home-manager
-# writes instead
+# on macos papis looks for its config in ~/Library/Application Support,
+# so point it at the xdg file home-manager writes instead
 
 { config, ... }:
 let

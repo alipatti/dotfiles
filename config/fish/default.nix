@@ -1,4 +1,4 @@
-# fish and the shell tools it uses. the prompt is in ../prompt.nix
+# the prompt is in ../prompt.nix
 
 { config, lib, ... }:
 let

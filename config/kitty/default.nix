@@ -1,5 +1,5 @@
-# kitty terminal. on macos the app bundle ends up in
-# ~/Applications/Home Manager Apps. docs: https://sw.kovidgoyal.net/kitty/conf/
+# on macos the app bundle ends up in ~/Applications/Home Manager Apps.
+# docs: https://sw.kovidgoyal.net/kitty/conf/
 
 { pkgs, lib, ... }:
 let

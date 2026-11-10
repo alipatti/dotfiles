@@ -1,4 +1,6 @@
-# Layout
+# Dotfiles
+
+## Layout
 
 - `hosts/<host>/`: system config per machine.
 - `home/`: home-manager entry points.
@@ -9,8 +11,12 @@
 - `apps/`: software written here (CLI or GUI).
 - `libraries/`: source imported by other code or documents.
 
-Scripts that programs run are copied into the store (`"${./script.py}"`),
-not linked, so they keep working until the next switch.
+## Convention
+
+- Don't begin a file with a comment describing the file's purpose
+  when it's already obvious from the name and content.
+- Scripts that programs run are copied into the store (`"${./script.py}"`),
+  not linked.
 
 ## Deploying
 

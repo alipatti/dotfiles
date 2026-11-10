@@ -1,5 +1,3 @@
-# latex through tectonic, with the classes and packages in libraries/latex
-
 { config, pkgs, ... }:
 let
   # tectonic has no TEXINPUTS, so always search libraries/latex for the classes and

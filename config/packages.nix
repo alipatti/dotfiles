@@ -1,5 +1,4 @@
-# packages and fonts. programs with home-manager modules are enabled in
-# their own files instead
+# programs with home-manager modules are enabled in their own files instead
 
 { pkgs, ... }:
 {

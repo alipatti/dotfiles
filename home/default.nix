@@ -1,7 +1,3 @@
-# per-user config shared across machines. platform-specific bits live beside
-# this file (linux.nix, darwin.nix, cluster.nix), and per-program modules in
-# ../config
-
 { config, lib, ... }:
 {
   # shared by the modules in ../config. both take a path literal (e.g. ./functions).

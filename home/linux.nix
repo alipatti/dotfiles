@@ -1,5 +1,3 @@
-# per-user config that only makes sense on linux (gnome on fridge)
-
 { config, pkgs, ... }:
 {
   imports = [ ../config ];
