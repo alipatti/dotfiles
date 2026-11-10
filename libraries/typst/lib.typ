@@ -42,6 +42,8 @@
 #let supp = $op("supp")$
 #let argmax = $op("arg" thin "max", limits: #true)$
 
+#let tcite(key, ..args) = cite(key, form: "prose", ..args)
+
 // equivalent of latex's \clearpage: place pending floats, then start a new page
 #let clearpage() = {
   place.flush()
