@@ -54,7 +54,9 @@ else
         if [ -n "${NIX_CHROOT:-}" ]; then bash -c "$1"; else "$chroot" "$store" bash -c "$1"; fi
     }
 
-    if [ ! -d "$store/store" ]; then
+    # no ~/.nix-profile means no install or an interrupted one, so start over
+    if [ ! -L ~/.nix-profile ]; then
+        if [ -d "$store" ]; then chmod -R u+w "$store" && rm -rf "$store"; fi
         mkdir -p "$store"
         in_chroot 'curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon --no-modify-profile'
     fi
