@@ -1,3 +1,5 @@
+import signal
+import sys
 import tempfile
 from pathlib import Path
 from typing import Annotated, Literal
@@ -60,6 +62,10 @@ def _convert(
 ):
     """Convert PDFs already copied to this machine's cache by `main`."""
     from pdf2md.convert import configure_logging, convert_pdf
+
+    # exit normally on hangup or kill, so surya's atexit handlers stop its servers
+    for signal_number in (signal.SIGHUP, signal.SIGTERM):
+        signal.signal(signal_number, lambda number, _: sys.exit(128 + number))
 
     configure_logging()
     for pdf_hash in hashes:
