@@ -14,12 +14,7 @@
   };
 
   module =
-    {
-      config,
-      pkgs,
-      lib,
-      ...
-    }:
+    { pkgs, ... }:
     {
       imports = [
         # cherry-pick necessary parts. the other profiles import all of ../programs
@@ -46,17 +41,13 @@
       # driver setup needs sudo. gpu work uses module/pip cuda, not nix
       targets.genericLinux.gpu.enable = false;
 
+      # no garbage collection on switch: the flake inputs aren't gc roots, so it
+      # would delete nixpkgs and every ./setup would re-unpack it onto nfs. run
+      # `nix-collect-garbage -d` by hand when the home quota gets tight
       nix.package = pkgs.nix;
       nix.settings.experimental-features = [
         "nix-command"
         "flakes"
       ];
-
-      # collect garbage on every switch. nix.gc.automatic needs a systemd user
-      # timer, which login nodes don't run. -d also drops old generations, so
-      # there is no rollback, but the store stays under quota
-      home.activation.gc = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-        run ${config.nix.package}/bin/nix-collect-garbage -d
-      '';
     };
 }

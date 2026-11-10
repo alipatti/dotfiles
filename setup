@@ -61,10 +61,12 @@ else
         in_chroot 'curl -fsSL https://nixos.org/nix/install | sh -s -- --no-daemon --no-modify-profile'
     fi
 
-    # env var rather than a flag so home-manager's inner nix build sees it too
+    # build and run the activation script directly. the home-manager cli is
+    # built against its own pinned nixpkgs, a second ~200 MiB download onto nfs
     in_chroot '. ~/.nix-profile/etc/profile.d/nix.sh &&
         export NIX_CONFIG="experimental-features = nix-command flakes" &&
-        nix run home-manager -- switch -b bak --flake .#'"$cluster"
+        export HOME_MANAGER_BACKUP_EXT=bak &&
+        "$(nix build --no-link --print-out-paths .#homeConfigurations.'"$cluster"'.activationPackage)"/activate'
 
     # login shells enter the chroot and start fish. this has to be a real file:
     # anything home-manager writes is a symlink into /nix, which doesn't exist
