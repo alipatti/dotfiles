@@ -69,17 +69,24 @@ There is no need to compile after every change.
 Bad:
 
 ```typst
-Its moments are $EE(X) = mu = m$, $var(X) = sigma^2 + tau^2 = s$, and $cov(X, Y) = rho$.
+Since
+$
+  // trivial facts don't need a display
+  EE(Z_j^2) & = 1, \
+  var(Z_j^2) & = 2,
+$
+// the result is what the argument turns on, so it shouldn't be inline
+the CLT gives $(W_m - m) slash sqrt(2 m) => cal(N)(0, 1)$.
 ```
 
 Good:
 
 ```typst
-Its moments are
+// short facts that describe an object are inline
+Since $Z_j^2$ has mean 1 and variance 2, the CLT gives
 $
-  EE(X) & = mu = m, \
-  var(X) & = sigma^2 + tau^2 = s, \
-  cov(X, Y) & = rho.
+  // the result gets a display
+  (W_m - m) / sqrt(2 m) => cal(N)(0, 1).
 $
 ```
 
@@ -90,6 +97,9 @@ $
   for example a comma when they lead into a separate clause,
   or a period when they end a sentence.
 - Never start a sentence with a mathematical symbol.
+- Keep inline math to the objects themselves
+  and say logic in words,
+  e.g. "$x_i$ and $u_i$ are independent", not "$x_i perp u_i$".
 - When invoking a lemma or earlier result,
   apply it in exactly its stated form.
 - Introduce notation only at the point where it's needed.
@@ -202,11 +212,16 @@ The estimator $hat(alpha)$ is consistent by the continuous mapping theorem.
   which formats it as `make-table` would.
   The key is a row label or a dictionary of column values;
   `ali.find-row(rows, key)` returns the raw row for arithmetic.
+- `ali.format-num` also works inside math,
+  e.g. `$[#ali.format-num(x), #ali.format-num(y)]$`.
+  For a document-wide style, partially apply it:
+  `#let num = ali.format-num.with(digits: 2)`.
 
 ```typst
 #let settings = json("numbers/settings.json")
 #let estimates = csv("numbers/estimates.csv", row-type: dictionary)
 
 We keep #ali.format-num(settings.draws) draws,
-and the slice sampler's ESS per second for $tau$ is #ali.format-cell(estimates, (Sampler: "Slice", Parameter: "$tau$"), "ESS / Sec.").
+and the slice sampler's ESS per second for $tau$ is
+#ali.format-cell(estimates, (Sampler: "Slice", Parameter: "$tau$"), "ESS / Sec.").
 ```
