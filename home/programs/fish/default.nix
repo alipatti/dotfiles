@@ -56,6 +56,9 @@ in
       # automatic venv activation
       activate_venv --quiet
 
+      # report the cwd to the terminal now and on every cd
+      report_cwd
+
       # secrets are git-crypt encrypted, so skip the file until it is unlocked
       set -l secrets ${live ../../../secrets.env}
       if string match -q 'text*' (file -b --mime-type $secrets)
