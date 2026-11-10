@@ -18,6 +18,11 @@
       "flakes"
     ];
     settings.trusted-users = [ "ali" ];
+    # prebuilt cuda packages, so pkgsCuda.llama-cpp isn't compiled locally
+    settings.substituters = [ "https://cache.nixos-cuda.org" ];
+    settings.trusted-public-keys = [
+      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+    ];
     gc.automatic = true;
     gc.options = "--delete-older-than 30d";
     optimise.automatic = true;
@@ -67,6 +72,8 @@
     # spawning bash three times on every shell start
     useBabelfish = true;
   };
+  # llama-server on the gpu, which marker runs its ocr model in for pdf2md
+  environment.systemPackages = [ pkgs.pkgsCuda.llama-cpp ];
   virtualisation.docker.enable = true;
   programs.steam.enable = true;
 

@@ -36,7 +36,9 @@ class Marker(Step):
 
         converter = PdfConverter(
             artifact_dict=create_model_dict(),
-            config={"paginate_output": True, "force_ocr": self.ocr},
+            # marker picks its vlm layout model on a gpu, whose output llama.cpp garbles,
+            # and the rf-detr one otherwise
+            config={"paginate_output": True, "force_ocr": self.ocr, "mode": "fast"},
         )
         markdown, _, images = text_from_rendered(converter(str(document.pdf)))
 
