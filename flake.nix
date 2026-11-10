@@ -91,7 +91,7 @@
       # standalone home-manager for clusters without root, one per entry in
       # ./home/profiles/cluster.nix. see ./setup
       homeConfigurations = nixpkgs.lib.mapAttrs (
-        _: username:
+        _: home:
         home-manager.lib.homeManagerConfiguration {
           pkgs = import nixpkgs {
             system = "x86_64-linux";
@@ -102,8 +102,8 @@
             ./home
             cluster.module
             {
-              home.username = username;
-              home.homeDirectory = "/home/${username}";
+              home.username = baseNameOf home;
+              home.homeDirectory = home;
             }
           ];
         }

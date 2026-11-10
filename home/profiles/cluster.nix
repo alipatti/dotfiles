@@ -2,10 +2,12 @@
 # home-manager config per entry in `clusters`, each with `module`
 
 {
-  # cluster name = my username there. ./setup picks the entry from the
-  # hostname with trailing digits dropped (adroit5 -> adroit)
+  # cluster name = my home directory there (the username is its last part).
+  # ./setup picks the entry from the hostname with trailing digits dropped
+  # (adroit5 -> adroit), or from its argument (./setup cannon)
   clusters = {
-    adroit = "ap1741";
+    adroit = "/home/ap1741";
+    cannon = "/n/home13/alipatti";
   };
 
   module =
