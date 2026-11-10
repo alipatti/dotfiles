@@ -34,6 +34,7 @@ in
       vim = "nvim";
       ipy = "ipython";
       ssh.function = "ssh_abbr";
+      ksf = "kitten ssh fridge";
     };
 
     # runs after the starship/zoxide/fzf integrations
