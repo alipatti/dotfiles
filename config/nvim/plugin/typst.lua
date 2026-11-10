@@ -25,3 +25,15 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
 		vim.api.nvim_exec_autocmds("TextChanged", { buffer = ev.buf })
 	end,
 })
+
+-- record submission.typ as the main file so tinymist's lockDatabase
+-- resolution compiles it when editing included sections (see lsp.lua)
+vim.api.nvim_create_autocmd("BufWritePost", {
+	pattern = "submission.typ",
+	callback = function(ev)
+		local dir = vim.fs.dirname(ev.match)
+		if not vim.uv.fs_stat(dir .. "/tinymist.lock") then
+			vim.system({ "tinymist", "compile", "--save-lock", "submission.typ" }, { cwd = dir })
+		end
+	end,
+})

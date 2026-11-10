@@ -44,6 +44,9 @@ in
 {
   home.packages = [ pkgs.typst ];
 
+  # written by the nvim autocmd in plugin/typst.lua, so no need to commit it
+  programs.git.ignores = [ "tinymist.lock" ];
+
   home.file."Library/Application Support/typst/packages/ali" =
     lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
       {

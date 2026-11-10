@@ -21,7 +21,12 @@ local lsp_servers = {
 			end
 		end,
 	},
-	tinymist      = {},
+	tinymist      = {
+		settings = {
+			-- resolve the main file of included sections from tinymist.lock
+			projectResolution = "lockDatabase",
+		},
+	},
 	nixd          = {},
 	rust_analyzer = {
 		settings = {
