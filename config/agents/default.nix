@@ -102,8 +102,8 @@ in
       sandbox = {
         enabled = true;
         network.allowedDomains = allowedDomains;
-        # pdf2md talks to a local llama-server and nests codex's own
-        # sandbox, neither of which works inside seatbelt. _nvim_peer connects
+        # pdf2md reaches its conversion host over ssh, which seatbelt blocks
+        # (it can't even resolve tailscale names). _nvim_peer connects
         # to nvim's socket, which seatbelt refuses; it only runs the fixed
         # lua in ./skills/nvim-peer, never code passed to it
         excludedCommands = [

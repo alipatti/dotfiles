@@ -65,7 +65,7 @@ def read_source(path: Path) -> str:
 
     print(f"converting {path} with pdf2md (slow on long pdfs; cached)", file=sys.stderr)
     markdown = subprocess.run(
-        ["pdf2md", path],
+        ["pdf2md", path, "--on", "fridge"],
         check=True,
         capture_output=True,
         text=True,

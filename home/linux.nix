@@ -10,6 +10,7 @@
     trashy
     wl-clipboard # clipboard for the tailscale systray
     gcc # rustup toolchains and uv sdists need a c compiler
+    llama-cpp-vulkan # llama-server on the gpu, which marker runs its ocr model in for pdf2md
   ];
 
   xdg.mimeApps = {

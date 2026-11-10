@@ -986,6 +986,10 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "cyclopts" },
+]
+
+[package.optional-dependencies]
+server = [
     { name = "loguru" },
     { name = "marker-pdf" },
     { name = "pydantic" },
@@ -995,11 +999,12 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "cyclopts" },
-    { name = "loguru" },
-    { name = "marker-pdf" },
-    { name = "pydantic" },
-    { name = "pypdfium2" },
+    { name = "loguru", marker = "extra == 'server'" },
+    { name = "marker-pdf", marker = "extra == 'server'" },
+    { name = "pydantic", marker = "extra == 'server'" },
+    { name = "pypdfium2", marker = "extra == 'server'" },
 ]
+provides-extras = ["server"]
 
 [[package]]
 name = "pdftext"

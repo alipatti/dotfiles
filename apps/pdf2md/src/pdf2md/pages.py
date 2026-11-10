@@ -1,3 +1,4 @@
+import os
 import re
 from itertools import batched
 from pathlib import Path
@@ -13,6 +14,10 @@ IMAGE_LINK = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
 def run_marker(pdf: Path, out: Path, force_ocr: bool) -> str:
     """Run marker with page separators, save its images into `out`, and return its markdown."""
+    # surya runs its ocr model in llama-server, or with an nvidia gpu by default in vllm
+    # through docker, which needs the nvidia container toolkit
+    os.environ.setdefault("SURYA_INFERENCE_BACKEND", "llamacpp")
+
     from marker.converters.pdf import PdfConverter
     from marker.models import create_model_dict
     from marker.output import convert_if_not_rgb, text_from_rendered
