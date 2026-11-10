@@ -1,5 +1,7 @@
 import subprocess
 from dataclasses import dataclass
+from importlib.metadata import version
+from pathlib import Path
 
 from pdf2md.document import Document
 from pdf2md.steps.base import Step, StepResult
@@ -20,7 +22,10 @@ RUMDL_SETTINGS: tuple[str, ...] = (
 class Rumdl(Step):
     """Format the markdown with rumdl."""
 
-    def run(self, document: Document) -> StepResult:
+    def key(self) -> dict:
+        return super().key() | {"rumdl": version("rumdl")}
+
+    def run(self, document: Document, out: Path) -> StepResult:
         formatted = subprocess.run(
             [
                 "rumdl", "fmt", "--no-config", "--quiet", "-",

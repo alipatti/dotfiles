@@ -14,18 +14,13 @@ PACKAGE_DIR = Path(__file__).parent
 
 @cache
 def code_digest(*paths: str) -> str:
-    """Hash of the package's files at `paths` (files or folders, relative to the package)."""
+    """Hash of the files at `paths` (files or folders; relative ones are in the package)."""
     files = sorted(
         file
         for path in map(PACKAGE_DIR.joinpath, paths)
         for file in (path.rglob("*.py") if path.is_dir() else [path])
     )
     return digest(b"".join(file.read_bytes() for file in files))
-
-
-def identity(component: object, code: str) -> dict:
-    """What determines a source's or step's output besides its input: class, kwargs, code."""
-    return {"class": type(component).__name__, "fields": vars(component), "code": code}
 
 
 def cached[T: BaseModel](

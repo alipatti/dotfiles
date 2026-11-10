@@ -1,5 +1,4 @@
 import json
-import re
 import subprocess
 import tempfile
 import time
@@ -9,22 +8,6 @@ from pathlib import Path
 
 from loguru import logger
 from pydantic import BaseModel, ConfigDict
-
-# spans that are fine as far as math goes: footnote markers (linked or at the start of a
-# footnote), latex (but not escaped currency), links, html anchors, and minus signs in
-# numbers
-CLEAN_SPANS = re.compile(
-    r"(?:\[|^|</span>)<sup>[^<]{1,4}</sup>"
-    r"|(?<!\\)\$\$.*?(?<!\\)\$\$|(?<!\\)\$[^$]+(?<!\\)\$"
-    r"|\]\([^)]*\)|</?span[^>]*>|−(?=\s?\d)"
-)
-GARBLED_MATH = re.compile(r"<su[bp]>|[Α-ωϕ′ℓˆ˜←-⇿∀-⋿]")
-
-
-def is_garbled(line: str) -> bool:
-    """Whether a line has math outside LaTeX, e.g. html sub/superscripts or greek."""
-    return bool(GARBLED_MATH.search(CLEAN_SPANS.sub("", line)))
-
 
 CALL_TIMEOUT: int = 60  # seconds; most calls take seconds, a few stall for minutes
 PARALLEL_CALLS: int = 16

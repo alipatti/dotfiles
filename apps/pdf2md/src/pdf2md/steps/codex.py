@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pypdfium2
 
-from pdf2md.document import Document, find_pages
-from pdf2md.steps._helpers import CLEAN_SPANS, Strict, is_garbled, parallel, run_codex
-from pdf2md.steps.base import Fix, Fixer
+from pdf2md.document import CLEAN_SPANS, Document, find_pages, is_garbled
+from pdf2md.steps.base import Fix, LLMFixer
+from pdf2md.steps.llm import Strict, parallel
 
 PAGES_PER_CHUNK: int = 2
 PAGE_IMAGE_DPI: int = 110
@@ -59,7 +59,7 @@ class Chunk:
 
 
 @dataclass
-class Codex(Fixer):
+class Codex(LLMFixer):
     """Have an LLM compare chunks of pages against their images and fix wrong lines.
 
     Lines that look like garbled math are flagged in the prompt. With `only_garbled`, only
@@ -68,8 +68,6 @@ class Codex(Fixer):
     """
 
     only_garbled: bool = False
-    model: str = "gpt-6-luna"
-    effort: str = "low"
 
     def fixes(self, document: Document) -> Iterable[Fix]:
         lines = document.lines
@@ -117,7 +115,7 @@ class Codex(Fixer):
             images=", ".join(image.name for image in images),
             lines=numbered(chunk.lines),
         )
-        return run_codex(prompt, images, Fixes, self.model, self.effort).fixes
+        return self.ask(prompt, images, Fixes).fixes
 
     def accepts(self, fix: Fix, original: list[str]) -> bool:
         """Whether `text` plausibly replaces `original`, to catch fixes at the wrong lines.

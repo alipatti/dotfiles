@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 from cyclopts import App, Parameter
 from cyclopts.types import ExistingFile
 
-from pdf2md.remote import Host, PipelineName, digest, source_digest, status
+from pdf2md.remote import Host, PipelineName, digest, status
 
 app = App(name="pdf2md")
 
@@ -31,21 +31,24 @@ def main(
     on
         SSH host to do the conversion on.
     out
-        Directory for the markdown and its figures, instead of a temporary one per PDF.
+        Directory to put a folder in for each PDF, named after it, with its markdown
+        and figures. Defaults to a temporary directory.
     pipeline
         default: marker, then LLM fixes and figure descriptions. raw: marker only.
         ocr and ocr-raw: the same, but marker OCRs every page.
     """
     status(f"Hashing {len(pdfs)} PDF(s)")
     by_hash = {digest(pdf.read_bytes()): pdf for pdf in pdfs}
-    version = source_digest()
 
     host = Host(on)
-    host.upload(by_hash, version)
-    host.convert(list(by_hash), version, pipeline)
+    host.upload(by_hash)
+    host.convert(list(by_hash), pipeline)
 
+    # a folder per PDF, since marker names figures the same way for every PDF
     for pdf_hash, pdf in by_hash.items():
-        directory = out or Path(tempfile.gettempdir(), "pdf2md", pdf_hash)
+        directory = (
+            out / pdf.stem if out else Path(tempfile.gettempdir(), "pdf2md", pdf_hash)
+        )
         print(host.download(pdf_hash, pipeline, directory, pdf.stem))
 
 

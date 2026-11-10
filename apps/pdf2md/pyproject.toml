@@ -7,7 +7,7 @@ requires-python = ">=3.12,<3.14"
 dependencies = ["cyclopts"]
 
 [project.optional-dependencies]
-# for `pdf2md convert`, which runs on the host given by `--on`
+# for `pdf2md _convert`, which runs on the host given by `--on`
 server = ["marker-pdf", "pypdfium2", "loguru", "pydantic", "rumdl"]
 
 [project.scripts]

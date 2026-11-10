@@ -1,26 +1,48 @@
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
-from itertools import batched
 from pathlib import Path
 
 from pydantic import BaseModel
 
-PAGE_SEPARATOR = re.compile(r"\n\n\{(\d+)\}-{48}\n\n")
-PAGE_MARKER = "<!-- page"
 PAGE_COMMENT = re.compile(r"^<!-- page (\d+) -->$")
 IMAGE_LINK = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
+# spans that are fine as far as math goes: footnote markers (linked or at the start of a
+# footnote), latex (but not escaped currency), links, html anchors, and minus signs in
+# numbers
+CLEAN_SPANS = re.compile(
+    r"(?:\[|^|</span>)<sup>[^<]{1,4}</sup>"
+    r"|(?<!\\)\$\$.*?(?<!\\)\$\$|(?<!\\)\$[^$]+(?<!\\)\$"
+    r"|\]\([^)]*\)|</?span[^>]*>|−(?=\s?\d)"
+)
+GARBLED_MATH = re.compile(r"<su[bp]>|[Α-ωϕ′ℓˆ˜←-⇿∀-⋿]")
 
-def split_pages(markdown: str) -> dict[int, str]:
-    """Map 1-indexed page numbers to their markdown, using marker's page separators."""
-    _, *parts = PAGE_SEPARATOR.split(markdown)
-    return {int(n) + 1: text.strip() for n, text in batched(parts, 2)}
+
+class Document(BaseModel):
+    """Markdown with `<!-- page N -->` markers, as passed from step to step."""
+
+    markdown: str
+    """Image links point at figure files by absolute path until the result is written."""
+    pdf: Path
+    """The PDF it was converted from, for steps that look at the pages."""
+
+    @property
+    def lines(self) -> list[str]:
+        return self.markdown.splitlines()
+
+
+def relink(markdown: str, target: Callable[[str], str]) -> str:
+    """Replace each image link's target `t` with `target(t)`."""
+    return IMAGE_LINK.sub(
+        lambda link: link[0].replace(f"({link[1]})", f"({target(link[1])})"),
+        markdown,
+    )
 
 
 def join_pages(pages: dict[int, str]) -> str:
     return (
-        "\n\n".join(f"{PAGE_MARKER} {n} -->\n\n{text}" for n, text in pages.items())
-        + "\n"
+        "\n\n".join(f"<!-- page {n} -->\n\n{text}" for n, text in pages.items()) + "\n"
     )
 
 
@@ -44,15 +66,6 @@ def find_pages(lines: list[str]) -> list[Page]:
     return [Page(n, start, end) for (start, n), end in zip(starts, ends)]
 
 
-class Document(BaseModel):
-    """Markdown with `<!-- page N -->` markers, as passed from a source through each step."""
-
-    markdown: str
-    pdf: Path
-    """The PDF it was converted from, for steps that look at the pages."""
-    figures: Path | None = None
-    """The folder holding the figure files the markdown links, by relative path."""
-
-    @property
-    def lines(self) -> list[str]:
-        return self.markdown.splitlines()
+def is_garbled(line: str) -> bool:
+    """Whether a line has math outside LaTeX, e.g. html sub/superscripts or greek."""
+    return bool(GARBLED_MATH.search(CLEAN_SPANS.sub("", line)))

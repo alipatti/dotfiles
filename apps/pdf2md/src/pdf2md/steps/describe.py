@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from pdf2md.document import IMAGE_LINK, Document, find_pages
-from pdf2md.steps._helpers import Strict, parallel, run_codex
-from pdf2md.steps.base import Fix, Fixer
+from pdf2md.steps.base import Fix, LLMFixer
+from pdf2md.steps.llm import Strict, parallel
 
 DESCRIPTION_LABEL = "*Generated figure description:*"
 BARE_DOLLAR = re.compile(r"(?<!\\)\$")
@@ -29,34 +29,23 @@ class Description(Strict):
 @dataclass(frozen=True)
 class Figure:
     line: int
-    image: str
+    image: Path
     page: list[str]
 
 
 @dataclass
-class Describe(Fixer):
+class Describe(LLMFixer):
     """Add a short, searchable description below each figure's image link."""
-
-    model: str = "gpt-6-luna"
-    effort: str = "low"
 
     def fixes(self, document: Document) -> Iterable[Fix]:
         lines = document.lines
         figures = [
-            Figure(line=i, image=image, page=lines[page.start : page.end])
+            Figure(line=i, image=Path(image), page=lines[page.start : page.end])
             for page in find_pages(lines)
             for i in range(page.start, page.end)
             for image in IMAGE_LINK.findall(lines[i])
         ]
-        folder = document.figures
-        if not figures or not folder:
-            return
-
-        descriptions = parallel(
-            lambda f: self.describe(f, folder),
-            figures,
-            lambda f: f.image,
-        )
+        descriptions = parallel(self.describe, figures, lambda f: f.image.name)
 
         # assumes one figure per line, as marker writes them
         for figure, description in zip(figures, descriptions):
@@ -69,9 +58,6 @@ class Describe(Fixer):
                 reason="figure description",
             )
 
-    def describe(self, figure: Figure, folder: Path) -> str:
-        prompt = PROMPT.format(image=figure.image, page="\n".join(figure.page))
-        image = folder / figure.image
-        return run_codex(
-            prompt, [image], Description, self.model, self.effort
-        ).description
+    def describe(self, figure: Figure) -> str:
+        prompt = PROMPT.format(image=figure.image.name, page="\n".join(figure.page))
+        return self.ask(prompt, [figure.image], Description).description
