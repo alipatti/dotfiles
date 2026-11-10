@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -60,6 +60,7 @@
 
   # misc
   programs.nix-ld.enable = true; # needed for uv
+  programs.nix-ld.libraries = [ config.hardware.nvidia.package ]; # libcuda for pip cuda wheels
   programs.fish = {
     enable = true;
     # translate the bash init snippets to fish at build time instead of
