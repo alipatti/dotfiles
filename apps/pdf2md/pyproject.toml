@@ -8,7 +8,7 @@ dependencies = ["cyclopts"]
 
 [project.optional-dependencies]
 # for `pdf2md convert`, which runs on the host given by `--on`
-server = ["marker-pdf", "pypdfium2", "loguru", "pydantic"]
+server = ["marker-pdf", "pypdfium2", "loguru", "pydantic", "rumdl"]
 
 [project.scripts]
 pdf2md = "pdf2md.cli:app"

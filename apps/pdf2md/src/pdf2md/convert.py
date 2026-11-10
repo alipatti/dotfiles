@@ -1,57 +1,98 @@
-import os
 import shutil
+import sys
 import time
 from pathlib import Path
+from typing import get_args
 
 from loguru import logger
 
-from pdf2md.fix import fix_pages
-from pdf2md.pages import IMAGE_LINK, join_pages, run_marker, split_pages
-from pdf2md.remote import OUTPUT_NAME, source_digest
+from pdf2md.cache import CACHE_DIR, cached
+from pdf2md.document import IMAGE_LINK, Document
+from pdf2md.remote import OUTPUT_NAME, PipelineName
+from pdf2md.sources.base import Source
+from pdf2md.sources.marker import Marker
+from pdf2md.steps.base import Step, StepResult
+from pdf2md.steps.codex import Codex
+from pdf2md.steps.describe import Describe
+from pdf2md.steps.rumdl import Rumdl
 
-CACHE_DIR: Path = (
-    Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "pdf2md"
+type Pipeline = tuple[Source, tuple[Step, ...]]
+
+FIX: tuple[Step, ...] = (
+    Rumdl(),
+    Codex(),
+    Codex(only_garbled=True),
+    Describe(),
+    Rumdl(),
 )
+PIPELINES: dict[PipelineName, Pipeline] = {
+    "default": (Marker(), FIX),
+    "raw": (Marker(), (Rumdl(),)),
+    "ocr": (Marker(ocr=True), FIX),
+    "ocr-raw": (Marker(ocr=True), (Rumdl(),)),
+}
+assert set(PIPELINES) == set(get_args(PipelineName))
 
 
-def convert_pdf(pdf_hash: str, fix: bool, force_ocr: bool, refresh: bool) -> None:
-    """Convert a PDF in the cache's inbox, leaving its markdown and figures in <hash>/out.
+def configure_logging() -> None:
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        format="<green>{time:HH:mm:ss}</green> {message}",
+        colorize=sys.stderr.isatty(),
+    )
 
-    Marker's output is cached once per PDF, and the fixed markdown once per version of the
-    source, so reruns are instant and editing the prompt or settings reuses marker's
-    output. `refresh` redoes both.
-    """
-    pdf = CACHE_DIR / "inbox" / f"{pdf_hash}.pdf"
-    pdf_dir = CACHE_DIR / pdf_hash
-    marker_dir = pdf_dir / ("marker-force-ocr" if force_ocr else "marker")
-    if refresh:
-        shutil.rmtree(pdf_dir, ignore_errors=True)
-    marker_dir.mkdir(parents=True, exist_ok=True)
 
-    marker_path = marker_dir / "marker.md"
-    if not marker_path.exists():
-        logger.info(f"Running marker on {pdf_hash}")
+def run_pipeline(
+    pipeline: Pipeline,
+    pdf: Path,
+    pdf_hash: str,
+) -> Document:
+    """Run the source and each step in turn, caching each one's output by its inputs."""
+    source, steps = pipeline
+
+    start = time.monotonic()
+    document, hit = cached(
+        {"pdf": pdf_hash, **source.key()},
+        lambda out: source.convert(pdf, out),
+        Document,
+    )
+    logger.info(f"{source!r} ({'cached' if hit else elapsed(start)})")
+
+    for step in steps:
         start = time.monotonic()
-        marker_path.write_text(run_marker(pdf, marker_dir, force_ocr))
-        logger.info(f"Marker done in {time.monotonic() - start:.0f}s")
-
-    key = source_digest() if fix else "unfixed"
-    markdown_path = marker_dir / f"{key}.md"
-
-    if not markdown_path.exists():
-        pages = split_pages(marker_path.read_text())
-        markdown = (
-            fix_pages(pdf, pages, marker_dir, pdf_dir / f"work-{key}")
-            if fix
-            else join_pages(pages)
+        result, hit = cached(
+            {"input": document.model_dump(mode="json"), **step.key()},
+            lambda _, step=step, document=document: step.run(document),
+            StepResult,
         )
-        markdown_path.write_text(markdown)
+        document = result.document
+
+        applied = sum(r.applied for r in result.records)
+        fixes = f"{applied}/{len(result.records)} fixes, " if result.records else ""
+        logger.info(f"{step!r} ({fixes}{'cached' if hit else elapsed(start)})")
+
+    return document
+
+
+def elapsed(start: float) -> str:
+    return f"{time.monotonic() - start:.0f}s"
+
+
+def convert_pdf(
+    pdf_hash: str,
+    pipeline: PipelineName,
+) -> None:
+    """Run a pipeline on pdfs/<hash>.pdf and write the result to results/<hash>/<pipeline>/."""
+    pdf = CACHE_DIR / "pdfs" / f"{pdf_hash}.pdf"
+    document = run_pipeline(PIPELINES[pipeline], pdf, pdf_hash)
+
+    result = CACHE_DIR / "results" / pdf_hash / pipeline
+    shutil.rmtree(result, ignore_errors=True)
+    result.mkdir(parents=True)
+    (result / OUTPUT_NAME).write_text(document.markdown)
 
     # the markdown links its figures by relative path, so they're copied beside it
-    out = pdf_dir / "out"
-    shutil.rmtree(out, ignore_errors=True)
-    out.mkdir()
-    markdown = markdown_path.read_text()
-    (out / OUTPUT_NAME).write_text(markdown)
-    for image in IMAGE_LINK.findall(markdown):
-        shutil.copy(marker_dir / image, out / image)
+    for image in IMAGE_LINK.findall(document.markdown):
+        if document.figures:
+            shutil.copy(document.figures / image, result / image)

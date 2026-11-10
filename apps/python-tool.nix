@@ -2,7 +2,8 @@
 # or a uv project directory with the command in `[project.scripts]`. uv
 # installs the dependencies on first run, so nix never sees them. the app must
 # have a `--completions` command that prints its fish completions, which fish
-# runs the first time it completes the command in a session
+# runs the first time it completes the command in a session, silenced so
+# uv reinstalling the project after an update doesn't print over the prompt
 #
 #   pkgs.callPackage ./python-tool.nix { } "pawprint" ./pawprint/pawprint.py
 #   pkgs.callPackage ./python-tool.nix { } "pdf2md" ./pdf2md
@@ -26,6 +27,6 @@ pkgs.runCommand name { meta.mainProgram = name; } ''
   install -Dm755 ${pkgs.writeShellScript name run} $out/bin/${name}
 
   mkdir -p $out/share/fish/vendor_completions.d
-  echo '${name} --completions fish | source' \
+  echo '${name} --completions fish 2>/dev/null | source' \
     > $out/share/fish/vendor_completions.d/${name}.fish
 ''
