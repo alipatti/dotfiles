@@ -99,10 +99,12 @@
   set list(indent: 1em, marker: context box(width: 0.4em, height: 0.07em, fill: text.fill, baseline: -0.26em))
   set enum(indent: 1em)
   // term lists as hanging paragraphs: "_term_. description" with wrapped lines indented
+  // (padding with a negative first-line indent rather than `par(hanging-indent: ..)`,
+  // which drops display math and other blocks in the description)
   show terms: it => context {
     let spacing = if it.spacing != auto { it.spacing } else if it.tight { par.leading } else { par.spacing }
     set par(spacing: spacing)
-    block(inset: (left: 1em), it.children.map(item => par(hanging-indent: 1.5em, emph(item.term) + [. ] + item.description)).join())
+    block(inset: (left: 1em), it.children.map(item => pad(left: 1.5em)[#h(-1.5em)#emph(item.term). #item.description]).join())
   }
   set par(justify: true, leading: 0.6em, first-line-indent: 0em, spacing: 1em)
 
