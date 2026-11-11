@@ -51,11 +51,15 @@
 }
 
 // start the appendices on a new page: letter headings from A and reference them as
-// "Appendix A", applied to the rest of the document with `#show: ali.appendix`
+// "Appendix A", and number figures and tables afresh as A1, A2, ...
+// applied to the rest of the document with `#show: ali.appendix`
 #let appendix(body) = {
   clearpage()
   counter(heading).update(0)
+  counter(figure.where(kind: image)).update(0)
+  counter(figure.where(kind: table)).update(0)
   set heading(numbering: "A.1", supplement: [Appendix])
+  set figure(numbering: n => "A" + str(n))
   body
 }
 
