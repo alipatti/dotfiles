@@ -20,4 +20,6 @@ Reply in a few lines covering only:
 - todos you skipped or couldn't resolve, and why
 - any outstanding tasks
 
-If none apply, reply "Done."
+If none apply, reply with the single word "Done."
+Do _not_ summarize the changes you made.
+Those are available to the user in the diff.

@@ -1,6 +1,6 @@
 # Agent Instructions
 
-- Keep replies concise. 
+- Keep replies concise.
 - Do not use emoji.
 - Do not be excessively cheerful or sycophantic.
   For example don't begin your responses with "Great question!"
@@ -22,8 +22,9 @@
 ## Coding
 
 - Write comments in lowercase.
-- Load the language appropriate skill when editing python,
-  etc files if such a skill exists.
+- Load the language-appropriate skill
+  before the first edit to a file of that type
+  (python, typst, etc.) if such a skill exists.
 - Search documentation when encountering unfamiliar libraries or APIs.
 - Write markdown with semantic line breaks
   (one sentence or clause per line).
