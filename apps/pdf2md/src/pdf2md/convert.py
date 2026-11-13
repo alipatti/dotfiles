@@ -8,7 +8,7 @@ from loguru import logger
 
 from pdf2md.cache import CACHE_DIR, cached
 from pdf2md.document import IMAGE_LINK, Document, relink
-from pdf2md.remote import OUTPUT_NAME, PipelineName, SourceName
+from pdf2md.machines import OUTPUT_NAME, PipelineName, SourceName, results
 from pdf2md.steps.base import Step, StepResult
 from pdf2md.steps.codex import Codex
 from pdf2md.steps.degarble import Degarble
@@ -81,7 +81,7 @@ def convert_pdf(
     pdf = CACHE_DIR / "pdfs" / f"{pdf_hash}.pdf"
     document = run_pipeline((SOURCES[source], *PIPELINES[pipeline]), pdf)
 
-    result = CACHE_DIR / "results" / pdf_hash / source / pipeline
+    result = CACHE_DIR / results(pdf_hash, source, pipeline)
     shutil.rmtree(result, ignore_errors=True)
     result.mkdir(parents=True)
     # copy the figures beside the markdown, and link them by name

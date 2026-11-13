@@ -8,7 +8,7 @@ import pytest
 
 import pdf2md.cache
 from pdf2md.convert import PIPELINES, SOURCES, run_pipeline
-from pdf2md.remote import PipelineName, SourceName, digest
+from pdf2md.machines import PipelineName, SourceName, digest
 
 SNIPPETS = sorted((Path(__file__).parent / "roundtrip").glob("*.md"))
 # a first-line comment listing sources the snippet is expected to fail with

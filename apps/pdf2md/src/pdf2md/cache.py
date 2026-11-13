@@ -6,7 +6,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from pdf2md.remote import CACHE, digest
+from pdf2md.machines import CACHE, digest
 
 CACHE_DIR: Path = Path.home() / CACHE
 PACKAGE_DIR = Path(__file__).parent

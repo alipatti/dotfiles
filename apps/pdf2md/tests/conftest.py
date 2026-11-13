@@ -2,7 +2,7 @@ from typing import get_args
 
 import pytest
 
-from pdf2md.remote import PipelineName, SourceName
+from pdf2md.machines import PipelineName, SourceName
 
 PDF_ENGINES = ("typst", "tectonic")
 
