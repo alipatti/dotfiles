@@ -17,9 +17,7 @@ def one_machine(arguments: ArgumentCollection) -> None:
         raise ValueError("Pass either --local or --on HOST.")
 
 
-MACHINE = Group(
-    "Machine", help="Where to convert. Exactly one is required.", validator=one_machine
-)
+MACHINE = Group("Machine", help="Exactly one is required.", validator=one_machine)
 
 
 @app.default
@@ -27,36 +25,33 @@ def main(
     pdfs: Annotated[list[ExistingFile], Parameter(negative=())],
     *,
     on: Annotated[str | None, Parameter(group=MACHINE)] = None,
-    local: Annotated[bool, Parameter(group=MACHINE, negative=())] = False,
+    local: Annotated[
+        bool, Parameter(group=MACHINE, negative=(), show_default=False)
+    ] = False,
     out: Path | None = None,
     source: SourceName = "marker",
     pipeline: PipelineName = "default",
 ):
     """Convert PDFs to markdown plus figure images and print their paths.
 
-    For a host, the PDFs and this package's source are copied to it, it converts them,
-    and the markdown and its figures are copied back. Each step's output is cached by its
-    inputs, so reruns only redo what changed.
+    Each step's output is cached by its inputs, so reruns only redo what changed.
 
     Parameters
     ----------
     pdfs
         PDFs to convert.
     on
-        SSH host to do the conversion on.
+        SSH host to convert on.
     local
-        Convert on this machine. Marker needs its models and llama-server, and is slow
-        without a GPU; pdftotext needs nothing.
+        Convert on this machine.
     out
-        Directory to put a folder in for each PDF, named after it, with its markdown
-        and figures. Defaults to a temporary directory.
+        Directory for a folder per PDF. Defaults to a temporary directory.
     source
-        What makes the first draft. marker: layout, tables, figures, and display math.
-        ocr: marker, but OCRing every page. pdftotext: the PDF's text layer, which is
-        much faster but has no figures or tables and flattens sub/superscripts.
+        marker: layout, tables, and figures. ocr: marker, OCRing every page.
+        pdftotext: text only, but fast.
     pipeline
-        What happens to the draft. default: rule-based math fixes, then LLM fixes and
-        figure descriptions. degarble: rule-based math fixes only. raw: formatting only.
+        default: rule-based and LLM fixes, and figure descriptions.
+        degarble: rule-based math fixes. raw: formatting only.
     """
     status(f"Hashing {len(pdfs)} PDF(s)")
     by_hash = {digest(pdf.read_bytes()): pdf for pdf in pdfs}
