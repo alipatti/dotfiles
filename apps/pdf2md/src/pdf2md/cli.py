@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 from cyclopts import App, Parameter
 from cyclopts.types import ExistingFile
 
-from pdf2md.remote import Host, PipelineName, digest, status
+from pdf2md.remote import Host, PipelineName, SourceName, digest, status
 
 app = App(name="pdf2md")
 
@@ -18,6 +18,7 @@ def main(
     *,
     on: str,
     out: Path | None = None,
+    source: SourceName = "marker",
     pipeline: PipelineName = "default",
 ):
     """Convert PDFs to markdown plus figure images on another machine and print their paths.
@@ -35,29 +36,34 @@ def main(
     out
         Directory to put a folder in for each PDF, named after it, with its markdown
         and figures. Defaults to a temporary directory.
+    source
+        What makes the first draft. marker: layout, tables, figures, and display math.
+        ocr: marker, but OCRing every page. pdftotext: the PDF's text layer, which is
+        much faster but has no figures or tables and flattens sub/superscripts.
     pipeline
-        default: marker, then LLM fixes and figure descriptions. raw: marker only.
-        ocr and ocr-raw: the same, but marker OCRs every page.
+        What happens to the draft. default: rule-based math fixes, then LLM fixes and
+        figure descriptions. degarble: rule-based math fixes only. raw: formatting only.
     """
     status(f"Hashing {len(pdfs)} PDF(s)")
     by_hash = {digest(pdf.read_bytes()): pdf for pdf in pdfs}
 
     host = Host(on)
     host.upload(by_hash)
-    host.convert(list(by_hash), pipeline)
+    host.convert(list(by_hash), source, pipeline)
 
     # a folder per PDF, since marker names figures the same way for every PDF
     for pdf_hash, pdf in by_hash.items():
         directory = (
             out / pdf.stem if out else Path(tempfile.gettempdir(), "pdf2md", pdf_hash)
         )
-        print(host.download(pdf_hash, pipeline, directory, pdf.stem))
+        print(host.download(pdf_hash, source, pipeline, directory, pdf.stem))
 
 
 @app.command(name="_convert", show=False)
 def _convert(
     hashes: list[str],
     *,
+    source: SourceName = "marker",
     pipeline: PipelineName = "default",
 ):
     """Convert PDFs already copied to this machine's cache by `main`."""
@@ -69,7 +75,7 @@ def _convert(
 
     configure_logging()
     for pdf_hash in hashes:
-        convert_pdf(pdf_hash, pipeline)
+        convert_pdf(pdf_hash, source, pipeline)
 
 
 @app.command(name="--completions", show=False)

@@ -1,14 +1,14 @@
 [project]
 name = "pdf2md"
 version = "0.1.0"
-description = "Convert PDFs to markdown with marker, then fix garbled math with an LLM"
+description = "Convert PDFs to markdown"
 authors = [{ name = "Alistair Pattison" }]
 requires-python = ">=3.12,<3.14"
 dependencies = ["cyclopts"]
 
 [project.optional-dependencies]
 # for `pdf2md _convert`, which runs on the host given by `--on`
-server = ["marker-pdf", "pypdfium2", "loguru", "pydantic", "rumdl"]
+server = ["marker-pdf", "pypdfium2", "loguru", "pydantic", "rumdl", "docutils"]
 
 [project.scripts]
 pdf2md = "pdf2md.cli:app"
@@ -16,3 +16,9 @@ pdf2md = "pdf2md.cli:app"
 [build-system]
 requires = ["uv_build>=0.12,<0.13"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pypandoc-binary>=1.17",
+    "pytest>=9.2.0",
+]

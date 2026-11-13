@@ -18,7 +18,7 @@ let
       ''
         # the store is read-only, so the environment lives in the cache
         export UV_PROJECT_ENVIRONMENT="''${XDG_CACHE_HOME:-$HOME/.cache}/python-tool-venvs/${name}"
-        exec ${uv} run --project ${source} --locked ${name} "$@"
+        exec ${uv} run --project ${source} --locked --no-dev ${name} "$@"
       ''
     else
       ''exec ${uv} run --script ${source} "$@"'';

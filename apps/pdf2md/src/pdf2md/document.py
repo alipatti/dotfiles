@@ -8,15 +8,18 @@ from pydantic import BaseModel
 PAGE_COMMENT = re.compile(r"^<!-- page (\d+) -->$")
 IMAGE_LINK = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 
-# spans that are fine as far as math goes: footnote markers (linked or at the start of a
-# footnote), latex (but not escaped currency), links, html anchors, and minus signs in
-# numbers
-CLEAN_SPANS = re.compile(
+# spans that are fine as far as math goes and mustn't be edited: footnote markers (linked
+# or at the start of a footnote), latex (but not escaped currency), links, and html anchors
+PROTECTED_SPANS = re.compile(
     r"(?:\[|^|</span>)<sup>[^<]{1,4}</sup>"
     r"|(?<!\\)\$\$.*?(?<!\\)\$\$|(?<!\\)\$[^$]+(?<!\\)\$"
-    r"|\]\([^)]*\)|</?span[^>]*>|−(?=\s?\d)"
+    r"|\]\([^)]*\)|</?span[^>]*>"
 )
-GARBLED_MATH = re.compile(r"<su[bp]>|[Α-ωϕ′ℓˆ˜←-⇿∀-⋿]")
+# plus minus signs in numbers, which are fine in prose
+CLEAN_SPANS = re.compile(rf"{PROTECTED_SPANS.pattern}|−(?=\s?\d)")
+GARBLED_MATH = re.compile(
+    r"<su[bp]>|[Α-ωϕ′ℓℂℕℚℝℤˆ˜\u0302-\u0308\u20d7←-⇿∀-⋿\U0001d400-\U0001d7ff]"
+)
 
 
 class Document(BaseModel):

@@ -31,8 +31,9 @@ def source_digest() -> str:
     return digest(b"".join(p.read_bytes() for p in files))
 
 
-# defined here rather than with the pipelines, so the client doesn't import their dependencies
-PipelineName = Literal["default", "raw", "ocr", "ocr-raw"]
+# defined here rather than with the steps, so the client doesn't import their dependencies
+SourceName = Literal["marker", "ocr", "pdftotext"]
+PipelineName = Literal["default", "degarble", "raw"]
 
 
 def run(command: list[str], action: str) -> None:
@@ -79,7 +80,12 @@ class Host:
                 action="copy the PDFs to",
             )  # fmt: skip
 
-    def convert(self, hashes: list[str], pipeline: PipelineName) -> None:
+    def convert(
+        self,
+        hashes: list[str],
+        source: SourceName,
+        pipeline: PipelineName,
+    ) -> None:
         """Run `pdf2md _convert` from the uploaded source, with its server dependencies."""
         # the source arrives read-only from the nix store, since rsync on macos can't
         # change modes, so make it writable for deleting by hand. uv resolves a relative
@@ -90,8 +96,9 @@ class Host:
         ) + shlex.join(
             [
                 "uv", "run", "--project", f"{CACHE}/code/{self.version}",
-                "--locked", "--extra", "server",
-                "pdf2md", "_convert", *hashes, "--pipeline", pipeline,
+                "--locked", "--no-dev", "--extra", "server",
+                "pdf2md", "_convert", *hashes,
+                "--source", source, "--pipeline", pipeline,
             ]
         )  # fmt: skip
         # a terminal on the host passes ctrl-c on to the conversion, and lets marker show
@@ -103,6 +110,7 @@ class Host:
     def download(
         self,
         pdf_hash: str,
+        source: SourceName,
         pipeline: PipelineName,
         directory: Path,
         stem: str,
@@ -112,7 +120,7 @@ class Host:
         directory.mkdir(parents=True, exist_ok=True)
         self.rsync(
             "-rt",
-            f"{self.name}:{CACHE}/results/{pdf_hash}/{pipeline}/",
+            f"{self.name}:{CACHE}/results/{pdf_hash}/{source}/{pipeline}/",
             f"{directory}/",
             action="copy the markdown from",
         )
