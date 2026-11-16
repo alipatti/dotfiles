@@ -6,7 +6,7 @@
     ./hardware.nix
     ./desktop.nix
     ./services
-    ./storage.nix
+    # ./storage.nix # not live yet: pool not created
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";
