@@ -1,33 +1,20 @@
-# reachable at smb://fridge/storage over tailscale, or found in finder's
-# sidebar on the local network via avahi
+# smb://fridge/<user>
 {
   services.samba = {
     enable = true;
-    openFirewall = true;
     settings = {
-      # better behavior with macos clients (resource forks, finder metadata)
+      # macos client support
       global = {
         "vfs objects" = "catia fruit streams_xattr";
         "fruit:metadata" = "stream";
         "fruit:posix_rename" = "yes";
       };
-      storage = {
-        path = "/storage";
-        "read only" = false;
-        # NOTE: create user with
-        # sudo smbpasswd -a ali
-        "valid users" = "ali";
+      # NOTE: add user with `sudo smbpasswd -a ali`
+      homes = {
+        browseable = "no"; # list as username, not "homes"
+        "read only" = "no";
+        "valid users" = "%S"; # only the owner
       };
-    };
-  };
-
-  services.avahi = {
-    enable = true;
-    nssmdns4 = true;
-    publish = {
-      enable = true;
-      addresses = true; # allow .local
-      userServices = true; # needed for samba
     };
   };
 }
