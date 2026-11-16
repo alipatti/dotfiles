@@ -31,6 +31,7 @@
   # bootloader
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.systemd-boot.enable = true;
+  boot.tmp.cleanOnBoot = true;
 
   # networking
   networking.hostName = "fridge";
