@@ -6,7 +6,7 @@
     ./hardware.nix
     ./desktop.nix
     ./services
-    # ./nas.nix # TODO: fix this (currently breaks system)
+    ./storage.nix
   ];
 
   nixpkgs.hostPlatform = "x86_64-linux";

@@ -1,82 +1,31 @@
-{ pkgs, lib, ... }:
-
-let
-  uuids = [
-    "1562653e-05ee-4b0b-8227-b88c2f11a4ab"
-    "3e3deb36-9126-4528-a18a-2a9701374b10"
-    "430dba61-fc90-48c6-a114-52398cd5b192"
-    "54f8e608-8c2f-463b-b967-c6a649688bbf"
-    "57adfbb4-47eb-4878-89c0-9c4750684bb9"
-    "b0cf688c-38b3-4d8c-8385-5c362b3c6bba"
-    "bbab62ae-0520-4e7c-8d43-9c2f9c4c44b0"
-    "cb85c0d8-b25a-461f-bb4c-bd0637f60c87"
-  ];
-in
+# the 8 sas disks as one raidz2 pool, mounted at /storage, with a partition of
+# the nvme as a read cache (l2arc). writes are buffered in ram, so only reads
+# need the cache.
+#
+# pool creation is a one-time step, run after this config is deployed:
+#   sudo zpool create -o ashift=12 \
+#     -O mountpoint=/storage -O compression=lz4 -O atime=off \
+#     -O xattr=sa -O acltype=posixacl -O recordsize=1M \
+#     tank raidz2 /dev/disk/by-id/<8 disks>
+#   sudo chown ali:users /storage
+# and once the nvme has a free partition (root has to be shrunk offline first):
+#   sudo zpool add tank cache /dev/disk/by-id/<nvme partition>
 {
-  environment.systemPackages = with pkgs; [
-    mergerfs
-  ];
+  boot.supportedFilesystems = [ "zfs" ];
+  networking.hostId = "faba0154"; # required by zfs, any random 8 hex digits
+  boot.zfs.extraPools = [ "tank" ];
+  boot.zfs.forceImportRoot = false; # root isn't on zfs; the default goes false in 26.11
 
-  fileSystems =
-    # mount physicsl disks by uuid
-    # https://wiki.nixos.org/wiki/Filesystems
-    builtins.listToAttrs (
-      lib.imap0 (i: uuid: {
-        name = "/mnt/disk${toString i}";
-        value = {
-          device = "/dev/disk/by-uuid/${uuid}";
-          fsType = "ext4";
-        };
-      }) uuids
-    )
-    # create pooled virtual disk with mergerfs
-    # https://www.reddit.com/r/NixOS/comments/18dxmwi
-    // {
-      "/storage" = {
-        fsType = "fuse.mergerfs";
-        device = "/mnt/disk*"; # mergerfs allows globs
-        options = [
-          # TODO: check whether these are the options i want
-          "cache.files=partial"
-          "dropcacheonclose=true"
-          "category.create=lfs"
-        ];
-        # don't mount until physical disks have mounted
-        depends = lib.imap0 (i: _uuid: "/mnt/disk${toString i}") uuids;
-      };
-    };
+  boot.extraModprobeConfig = ''
+    # leave most of the 32gb ram to polars
+    options zfs zfs_arc_max=${toString (8 * 1024 * 1024 * 1024)}
+    # cache sequential reads (parquet scans) in l2arc, which skips them by default
+    options zfs l2arc_noprefetch=0
+    # fill l2arc at 256mb/s instead of the default 8mb/s
+    options zfs l2arc_write_max=${toString (256 * 1024 * 1024)}
+    options zfs l2arc_write_boost=${toString (512 * 1024 * 1024)}
+  '';
 
-  # enable samba file sharing
-  # https://wiki.nixos.org/wiki/Samba
-  services.samba = {
-    enable = true;
-    openFirewall = true;
-    settings = {
-      drive_pool = {
-        path = "/storage";
-        "read only" = false;
-        # NOTE: create user with
-        # sudo smbpasswd -a ali
-        "valid users" = "ali";
-      };
-      test = {
-        path = "/home/ali/Screenshots/";
-        "read only" = false;
-        # NOTE: create user with
-        # sudo smbpasswd -a ali
-        "valid users" = "ali";
-      };
-    };
-  };
-
-  # advertise services
-  services.avahi = {
-    enable = true;
-    nssmdns4 = true;
-    publish = {
-      enable = true;
-      addresses = true; # allow .local
-      userServices = true; # needed for samba
-    };
-  };
+  services.zfs.autoScrub.enable = true; # monthly
+  services.zfs.trim.enable = true;
 }
