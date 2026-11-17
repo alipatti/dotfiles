@@ -4,13 +4,13 @@
 <meta name="color-scheme" content="light dark">
 <title>Fridge Dashboard</title>
 <link rel="stylesheet" href="style.css">
-<body class="bg-canvas p-4 font-sans text-sm text-ink antialiased">
+<body class="p-4 text-sm antialiased">
 <header class="sticky top-4 z-10 mb-4 flex flex-wrap justify-between gap-4">
   <div class="panel flex items-center gap-3 py-1 pr-1 pl-3.5">
     <strong>fridge</strong>
-    <div id="ranges" class="flex rounded-lg bg-fill p-0.5" role="radiogroup" aria-label="Range"></div>
+    <div id="ranges" class="segmented" role="radiogroup" aria-label="Range"></div>
     <span class="text-muted">smooth</span>
-    <div id="smoothing" class="flex rounded-lg bg-fill p-0.5" role="radiogroup" aria-label="Smoothing"></div>
+    <div id="smoothing" class="segmented" role="radiogroup" aria-label="Smoothing"></div>
   </div>
   <ul id="legend" class="panel flex flex-wrap items-center gap-x-4 gap-y-1 px-3.5 py-2 text-muted"></ul>
 </header>
@@ -20,10 +20,10 @@ import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
 
 // one colour per unit shown
 const style = getComputedStyle(document.documentElement);
-const PALETTE = [1, 2, 3, 4, 5, 6].map((i) => style.getPropertyValue(`--color-palette-${i}`).trim());
+const PALETTE = [1, 2, 3, 4, 5, 6].map((i) => style.getPropertyValue(`--color-chart-${i}`).trim());
 const RANGES = { "1h": 1, "6h": 6, "24h": 24, "7d": 168, "30d": 720 };
 // trailing mean, in minutes
-const SMOOTHING = { off: 0, "5m": 5, "30m": 30, "2h": 120 };
+const SMOOTHING = { off: 0, "5m": 5, "30m": 30 };
 const bytes = (x) => {
   const i = Math.max(0, Math.min(4, Math.floor(Math.log10(Math.abs(x)) / 3)));
   return `${+(x / 1000 ** i).toPrecision(3)} ${["B", "KB", "MB", "GB", "TB"][i]}`;
@@ -45,11 +45,11 @@ let rows = [];
 const cards = Object.entries(METRICS).map(([title, [key, format]]) => {
   const card = document.createElement("section");
   card.className = "panel p-3.5";
-  // the tooltip is html over the plot, styled like transit-maps' station tooltip
+  // the tooltip is html over the plot, so it can use the theme
   card.innerHTML = `<h2 class="mb-2 font-semibold">${title}</h2>
     <div class="relative">
       <div></div>
-      <div class="pointer-events-none absolute z-10 hidden w-max rounded-lg bg-card/95 px-2.5 py-1.5 shadow-(--shadow-menu) backdrop-blur-xl"></div>
+      <div class="popover pointer-events-none absolute z-10 hidden w-max rounded-lg px-2.5 py-1.5"></div>
     </div>`;
   charts.append(card);
   const [plot, tip] = card.lastElementChild.children;
@@ -144,7 +144,7 @@ async function load() {
 function segmented(control, options, chosen, choose) {
   control.replaceChildren(...Object.entries(options).map(([label, value]) => {
     const button = document.createElement("button");
-    button.className = "cursor-pointer rounded-md px-2.5 py-1 text-muted hover:text-ink aria-checked:segment-on";
+    button.className = "segment";
     button.textContent = label;
     button.role = "radio";
     button.ariaChecked = value === chosen;

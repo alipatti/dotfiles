@@ -1,67 +1,95 @@
-/* shared tailwind theme
+/* shared tailwind theme, macos-like, following the system's light or dark appearance
 
      @import "tailwindcss";
      @import "./theme.css";
-*/
+
+   colours are by role (bg-canvas, bg-card, text-ink, text-muted, border-line, ...).
+   utilities: panel (a raised card), popover (a floating menu or tooltip), and segmented
+   with segment (a role=radiogroup of role=radio buttons, the aria-checked one raised) */
 
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  --color-accent: #007aff; /* links, focus rings, checkmarks */
   /* surfaces */
   --color-canvas: #f5f5f7; /* the window */
-  --color-card: #fff; /* panels */
+  --color-card: #fff; /* raised surfaces: panels, menus */
   --color-control: #fff; /* a raised control, e.g. the chosen segment */
   --color-fill: #f0f0f0; /* fields and segmented controls */
+  --color-hover: rgb(0 0 0 / 0.04); /* under a hovered menu item or plain button */
   --color-line: rgb(0 0 0 / 0.1); /* hairline borders */
   /* text, strongest first */
   --color-ink: #171717;
   --color-muted: #737373;
+  --color-faint: #a3a3a3;
 }
 
 /* static, so the variables are emitted even when no class uses them (e.g. a script reads
    them for a plot) */
 @theme static {
-  /* discrete colours for plots: alipatti.plot.PALETTE
+  /* categorical colours for data: alipatti.plot.PALETTE
      (libraries/python/src/alipatti/plot.py), copied by hand. eventually the colours
      should be defined in one place, but not yet */
-  --color-palette-1: #eb6834;
-  --color-palette-2: #2a78d6;
-  --color-palette-3: #1baf7a;
-  --color-palette-4: #eda100;
-  --color-palette-5: #e87ba4;
-  --color-palette-6: #008300;
+  --color-chart-1: #eb6834;
+  --color-chart-2: #2a78d6;
+  --color-chart-3: #1baf7a;
+  --color-chart-4: #eda100;
+  --color-chart-5: #e87ba4;
+  --color-chart-6: #008300;
 }
 
-/* shadows, used as shadow-(--shadow-panel) etc. (theme shadows would be inlined into
-   the utilities, out of the dark scheme's reach) */
 :root {
-  color-scheme: light dark;
+  color-scheme: light dark; /* native controls and scrollbars follow the scheme */
+  /* shadows, used as shadow-(--shadow-panel) etc. (theme shadows would be inlined into
+     the utilities, out of the dark scheme's reach) */
   --shadow-panel: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 2px 8px rgb(0 0 0 / 0.08);
   --shadow-control: 0 0 0 0.5px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.12);
-  --shadow-menu: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 8px 24px rgb(0 0 0 / 0.14);
+  --shadow-popover: 0 0 0 0.5px rgb(0 0 0 / 0.12), 0 8px 24px rgb(0 0 0 / 0.14);
 }
 
 /* raised surfaces get lighter rather than shadowed, as in macos's dark appearance */
 @media (prefers-color-scheme: dark) {
   :root {
+    --color-accent: #0a84ff;
     --color-canvas: #1e1e1e;
     --color-card: #2c2c2e;
     --color-control: #5a5a5e;
     --color-fill: rgb(255 255 255 / 0.08);
+    --color-hover: rgb(255 255 255 / 0.06);
     --color-line: rgb(255 255 255 / 0.1);
     --color-ink: #e8e8ea;
     --color-muted: #98989d;
+    --color-faint: #76767b;
     --shadow-panel: 0 0 0 0.5px rgb(255 255 255 / 0.12), 0 2px 10px rgb(0 0 0 / 0.35);
     --shadow-control: 0 0 0 0.5px rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.35);
-    --shadow-menu: 0 0 0 0.5px rgb(255 255 255 / 0.14), 0 8px 24px rgb(0 0 0 / 0.5);
+    --shadow-popover: 0 0 0 0.5px rgb(255 255 255 / 0.14), 0 8px 24px rgb(0 0 0 / 0.5);
   }
 }
 
-/* raised card */
+/* the canvas behind everything, also when the page overscrolls */
+@layer base {
+  html {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+  }
+}
+
 @utility panel {
   @apply rounded-xl bg-card shadow-(--shadow-panel);
 }
 
-/* selected segment in segmented control */
-@utility segment-on {
-  @apply bg-control text-ink shadow-(--shadow-control);
+/* corners and padding are left to the caller */
+@utility popover {
+  @apply bg-card/95 shadow-(--shadow-popover) backdrop-blur-xl;
+}
+
+@utility segmented {
+  @apply flex rounded-lg bg-fill p-0.5;
+}
+
+@utility segment {
+  @apply cursor-pointer rounded-md px-2.5 py-1 text-muted hover:text-ink;
+
+  &[aria-checked="true"] {
+    @apply bg-control text-ink shadow-(--shadow-control);
+  }
 }
