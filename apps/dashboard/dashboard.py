@@ -13,6 +13,7 @@ import socket
 import subprocess
 import threading
 import time
+from collections import Counter
 from datetime import UTC, date, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -40,9 +41,11 @@ GAUGES = ["MemoryCurrent", "TasksCurrent"]
 # from the unit's memory.stat, not systemd: page cache it hasn't used lately, which the
 # kernel frees first. MemoryCurrent minus this is the working set, as in docker stats
 INACTIVE_FILE = "MemoryInactiveFile"
+# from nvidia-smi: vram of the unit's compute processes (cuda etc., not graphics)
+GPU_MEMORY = "GPUMemoryUsed"
 SCHEMA = pl.Schema(
     {"ts": pl.Datetime("ms", "UTC"), "unit": pl.String, "name": pl.String}
-    | dict.fromkeys([*COUNTERS, *GAUGES, INACTIVE_FILE], pl.Int64)
+    | dict.fromkeys([*COUNTERS, *GAUGES, INACTIVE_FILE, GPU_MEMORY], pl.Int64)
 )
 
 # held while appending to or reading the live csv
@@ -100,6 +103,32 @@ def inactive_file(cgroup: str) -> int | None:
     )
 
 
+def gpu_memory() -> Counter[str]:
+    """Bytes of vram used by compute processes, by their cgroup."""
+    try:
+        listing = subprocess.run(
+            ["nvidia-smi", "--query-compute-apps=pid,used_memory"]
+            + ["--format=csv,noheader,nounits"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError):
+        return Counter()
+
+    used = Counter()
+
+    for line in listing.splitlines():
+        pid, mib = line.split(", ")
+        cgroup = Path(f"/proc/{pid}/cgroup")
+
+        # the process may have exited since, and memory may read "[N/A]"
+        if cgroup.exists() and mib.isdigit():
+            used[cgroup.read_text().strip().removeprefix("0::")] += int(mib) * 2**20
+
+    return used
+
+
 def display_name(unit: str, containers: dict[str, str]) -> str:
     if unit.startswith("user-"):
         uid = int(unit.removeprefix("user-").removesuffix(".slice"))
@@ -118,6 +147,7 @@ def sample(ts: datetime) -> pl.DataFrame:
         "user-*.slice"
     )
     containers = container_names()
+    vram = gpu_memory()
 
     def row(props: dict[str, str]) -> dict:
         unit = props.pop("Id")
@@ -132,6 +162,11 @@ def sample(ts: datetime) -> pl.DataFrame:
             "unit": unit,
             "name": display_name(unit, containers),
             INACTIVE_FILE: inactive_file(cgroup),
+            GPU_MEMORY: sum(
+                used
+                for path, used in vram.items()
+                if path == cgroup or path.startswith(f"{cgroup}/")
+            ),
         } | values
 
     # a user's slice holds their user@ service and login sessions, so skip the former
@@ -143,7 +178,13 @@ def sample(ts: datetime) -> pl.DataFrame:
 
 def read_live() -> pl.DataFrame:
     with lock:
-        return pl.read_csv(LIVE, schema=SCHEMA) if LIVE.exists() else SCHEMA.to_frame()
+        if not LIVE.exists():
+            return SCHEMA.to_frame()
+
+        live = pl.read_csv(LIVE, schema_overrides=SCHEMA)
+
+    # a csv from before a column was added lacks it, until archive() rewrites the file
+    return pl.concat([SCHEMA.to_frame(), live], how="diagonal_relaxed")
 
 
 def archive(today: date) -> None:
@@ -170,7 +211,9 @@ def usage(hours: float) -> str:
     since = datetime.now(UTC) - timedelta(hours=hours)
     every = max(INTERVAL, int(hours * 3600 / 300))
     stored = (
-        [pl.scan_parquet(DATA / "*.parquet")] if any(DATA.glob("*.parquet")) else []
+        [pl.scan_parquet(DATA / "*.parquet", schema=SCHEMA, missing_columns="insert")]
+        if any(DATA.glob("*.parquet"))
+        else []
     )
 
     return (
@@ -181,6 +224,7 @@ def usage(hours: float) -> str:
             "name",
             *rates,
             *GAUGES,
+            GPU_MEMORY,
             (pl.col("MemoryCurrent") - pl.col(INACTIVE_FILE)).alias("MemoryWorkingSet"),
         )
         .sort("ts")

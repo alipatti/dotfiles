@@ -31,6 +31,7 @@ const METRICS = {
   "Disk write (/s)": ["IOWriteBytes", bytes],
   "Network in (/s)": ["IPIngressBytes", bytes],
   "Network out (/s)": ["IPEgressBytes", bytes],
+  "GPU memory": ["GPUMemoryUsed", bytes],
 };
 
 let hours = 6;
@@ -49,7 +50,7 @@ function topUnits() {
   const rankings = Object.values(METRICS).map(([key]) => {
     const totals = new Map();
     for (const d of rows) totals.set(d.name, (totals.get(d.name) ?? 0) + (d[key] ?? 0));
-    return [...totals].sort((a, b) => b[1] - a[1]).map(([name]) => name);
+    return [...totals].filter(([, total]) => total > 0).sort((a, b) => b[1] - a[1]).map(([name]) => name);
   });
   const units = new Set();
   for (let rank = 0; units.size < PALETTE.length && rankings.some((r) => rank < r.length); rank++) {

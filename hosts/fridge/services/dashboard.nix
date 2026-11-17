@@ -23,7 +23,10 @@ in
   systemd.services.dashboard = {
     wantedBy = [ "multi-user.target" ];
     after = [ "docker.service" ];
-    path = [ config.systemd.package ];
+    path = [
+      config.systemd.package
+      config.hardware.nvidia.package.bin # nvidia-smi
+    ];
     environment.PORT = toString port;
     serviceConfig = {
       ExecStart = "${python.interpreter} ${app}/dashboard.py";
