@@ -93,10 +93,10 @@ function draw() {
           y: { value: key, label: title },
           stroke: { value: "name", label: "Unit" },
           strokeWidth: 1.5,
-          // a raised card, like the panels
+          // set apart from the card it floats over
           tip: {
-            fill: "var(--color-card)",
-            stroke: "none",
+            fill: "var(--color-canvas)",
+            stroke: "var(--color-line)",
             format: { x: (t) => t.toLocaleString(), y: format },
           },
         }),
