@@ -26,7 +26,7 @@ const bytes = (x) => {
 };
 const METRICS = {
   "CPU (cores)": ["CPUUsageNSec", (x) => +(x / 1e9).toPrecision(2)],
-  "Memory": ["MemoryCurrent", bytes],
+  "Memory": ["MemoryWorkingSet", bytes],
   "Disk read (/s)": ["IOReadBytes", bytes],
   "Disk write (/s)": ["IOWriteBytes", bytes],
   "Network in (/s)": ["IPIngressBytes", bytes],

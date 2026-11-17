@@ -37,9 +37,12 @@ COUNTERS = [
     "IPEgressBytes",
 ]
 GAUGES = ["MemoryCurrent", "TasksCurrent"]
+# from the unit's memory.stat, not systemd: page cache it hasn't used lately, which the
+# kernel frees first. MemoryCurrent minus this is the working set, as in docker stats
+INACTIVE_FILE = "MemoryInactiveFile"
 SCHEMA = pl.Schema(
     {"ts": pl.Datetime("ms", "UTC"), "unit": pl.String, "name": pl.String}
-    | dict.fromkeys(COUNTERS + GAUGES, pl.Int64)
+    | dict.fromkeys([*COUNTERS, *GAUGES, INACTIVE_FILE], pl.Int64)
 )
 
 # held while appending to or reading the live csv
@@ -71,7 +74,7 @@ def show(*units: str) -> list[dict[str, str]]:
             "show",
             *units,
             "--property",
-            ",".join(["Id", *COUNTERS, *GAUGES]),
+            ",".join(["Id", "ControlGroup", *COUNTERS, *GAUGES]),
         ],
         capture_output=True,
         text=True,
@@ -82,6 +85,19 @@ def show(*units: str) -> list[dict[str, str]]:
         for block in shown.split("\n\n")
         if block.strip()
     ]
+
+
+def inactive_file(cgroup: str) -> int | None:
+    try:
+        stat = Path(f"/sys/fs/cgroup{cgroup}/memory.stat").read_text()
+    except OSError:
+        return None
+
+    return next(
+        int(line.split()[1])
+        for line in stat.splitlines()
+        if line.startswith("inactive_file ")
+    )
 
 
 def display_name(unit: str, containers: dict[str, str]) -> str:
@@ -105,12 +121,18 @@ def sample(ts: datetime) -> pl.DataFrame:
 
     def row(props: dict[str, str]) -> dict:
         unit = props.pop("Id")
+        cgroup = props.pop("ControlGroup")
         # systemd prints "[not set]" and the like for missing values
         values = {
             k: int(v) if v.isdigit() and int(v) < 2**63 else None
             for k, v in props.items()
         }
-        return {"ts": ts, "unit": unit, "name": display_name(unit, containers)} | values
+        return {
+            "ts": ts,
+            "unit": unit,
+            "name": display_name(unit, containers),
+            INACTIVE_FILE: inactive_file(cgroup),
+        } | values
 
     # a user's slice holds their user@ service and login sessions, so skip the former
     return pl.DataFrame(
@@ -154,7 +176,13 @@ def usage(hours: float) -> str:
     return (
         pl.concat([*stored, read_live().lazy()])
         .filter(pl.col("ts") >= since)
-        .select("ts", "name", *rates, *GAUGES)
+        .select(
+            "ts",
+            "name",
+            *rates,
+            *GAUGES,
+            (pl.col("MemoryCurrent") - pl.col(INACTIVE_FILE)).alias("MemoryWorkingSet"),
+        )
         .sort("ts")
         # by name rather than unit, so a recreated container stays one series
         .group_by_dynamic("ts", every=f"{every}s", group_by="name")
