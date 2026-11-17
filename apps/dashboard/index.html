@@ -9,6 +9,8 @@
   <div class="panel flex items-center gap-3 py-1 pr-1 pl-3.5">
     <strong>fridge</strong>
     <div id="ranges" class="flex rounded-lg bg-fill p-0.5" role="radiogroup" aria-label="Range"></div>
+    <span class="text-muted">smooth</span>
+    <div id="smoothing" class="flex rounded-lg bg-fill p-0.5" role="radiogroup" aria-label="Smoothing"></div>
   </div>
   <ul id="legend" class="panel flex flex-wrap items-center gap-x-4 gap-y-1 px-3.5 py-2 text-muted"></ul>
 </header>
@@ -20,6 +22,8 @@ import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
 const style = getComputedStyle(document.documentElement);
 const PALETTE = [1, 2, 3, 4, 5, 6].map((i) => style.getPropertyValue(`--color-palette-${i}`).trim());
 const RANGES = { "1h": 1, "6h": 6, "24h": 24, "7d": 168, "30d": 720 };
+// trailing mean, in minutes
+const SMOOTHING = { off: 0, "5m": 5, "30m": 30, "2h": 120 };
 const bytes = (x) => {
   const i = Math.max(0, Math.min(4, Math.floor(Math.log10(Math.abs(x)) / 3)));
   return `${+(x / 1000 ** i).toPrecision(3)} ${["B", "KB", "MB", "GB", "TB"][i]}`;
@@ -35,14 +39,21 @@ const METRICS = {
 };
 
 let hours = 6;
+let smooth = 0;
 let rows = [];
 
 const cards = Object.entries(METRICS).map(([title, [key, format]]) => {
   const card = document.createElement("section");
   card.className = "panel p-3.5";
-  card.innerHTML = `<h2 class="mb-2 font-semibold">${title}</h2><div class="[&_[aria-label=tip]]:drop-shadow-[0_1px_4px_rgb(0_0_0/0.25)]"></div>`;
+  // the tooltip is html over the plot, styled like transit-maps' station tooltip
+  card.innerHTML = `<h2 class="mb-2 font-semibold">${title}</h2>
+    <div class="relative">
+      <div></div>
+      <div class="pointer-events-none absolute z-10 hidden w-max rounded-lg bg-card/95 px-2.5 py-1.5 shadow-(--shadow-menu) backdrop-blur-xl"></div>
+    </div>`;
   charts.append(card);
-  return { title, key, format, plot: card.lastChild };
+  const [plot, tip] = card.lastElementChild.children;
+  return { key, format, plot, tip };
 });
 
 /** the units shown in every chart: each metric's top unit, then each's second, ... */
@@ -73,9 +84,9 @@ function draw() {
     return item;
   }));
 
-  for (const { title, key, format, plot } of cards) {
+  for (const { key, format, plot, tip } of cards) {
     // like theme_classic: axis lines, no grid
-    plot.replaceChildren(Plot.plot({
+    const svg = Plot.plot({
       width: plot.clientWidth,
       height: 200,
       marginLeft: 56,
@@ -87,43 +98,66 @@ function draw() {
       marks: [
         Plot.frame({ anchor: "left" }),
         Plot.frame({ anchor: "bottom" }),
-        Plot.lineY(shown, {
-          // labels for the tooltip
-          x: { value: "ts", label: "Time" },
-          y: { value: key, label: title },
-          stroke: { value: "name", label: "Unit" },
-          strokeWidth: 1.5,
-          // set apart from the card it floats over
-          tip: {
-            fill: "var(--color-canvas)",
-            stroke: "var(--color-line)",
-            format: { x: (t) => t.toLocaleString(), y: format },
-          },
-        }),
+        Plot.lineY(shown, { x: "ts", y: key, stroke: "name", strokeWidth: 1.5 }),
+        // the point nearest the pointer, which svg.value holds
+        Plot.dot(shown, Plot.pointerX({ x: "ts", y: key, fill: "name", r: 4, stroke: "var(--color-card)" })),
       ],
-    }));
+    });
+    svg.addEventListener("input", () => showTip(tip, svg, svg.value, key, format, top));
+    plot.replaceChildren(svg);
+    tip.classList.add("hidden");
   }
 }
 
+function showTip(tip, svg, d, key, format, top) {
+  if (!d) return tip.classList.add("hidden");
+
+  const swatch = document.createElement("span");
+  swatch.className = "h-1.5 w-4 rounded-full";
+  swatch.style.background = PALETTE[top.indexOf(d.name)];
+  const name = document.createElement("div");
+  name.className = "flex items-center gap-2 font-semibold";
+  name.append(swatch, d.name);
+  const value = document.createElement("div");
+  value.textContent = format(d[key]);
+  const time = document.createElement("div");
+  time.className = "text-muted";
+  time.textContent = d.ts.toLocaleString();
+  tip.replaceChildren(name, value, time);
+
+  // beside the point, on whichever side has more room
+  const x = svg.scale("x").apply(d.ts);
+  const y = svg.scale("y").apply(d[key]);
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+  tip.style.transform = `translate(${x > svg.clientWidth / 2 ? "calc(-100% - 12px)" : "12px"}, -50%)`;
+  tip.classList.remove("hidden");
+}
+
 async function load() {
-  const response = await fetch(`api/usage?hours=${hours}`);
+  const response = await fetch(`api/usage?hours=${hours}&smooth=${smooth}`);
   rows = (await response.json()).map((d) => ({ ...d, ts: new Date(d.ts) }));
   draw();
 }
 
-ranges.replaceChildren(...Object.entries(RANGES).map(([label, h]) => {
-  const button = document.createElement("button");
-  button.className = "cursor-pointer rounded-md px-2.5 py-1 text-muted hover:text-ink aria-checked:segment-on";
-  button.textContent = label;
-  button.role = "radio";
-  button.ariaChecked = h === hours;
-  button.onclick = () => {
-    hours = h;
-    for (const b of ranges.children) b.ariaChecked = b === button;
-    load();
-  };
-  return button;
-}));
+/** fill a segmented control with `options` (label -> value), calling `choose` on a click */
+function segmented(control, options, chosen, choose) {
+  control.replaceChildren(...Object.entries(options).map(([label, value]) => {
+    const button = document.createElement("button");
+    button.className = "cursor-pointer rounded-md px-2.5 py-1 text-muted hover:text-ink aria-checked:segment-on";
+    button.textContent = label;
+    button.role = "radio";
+    button.ariaChecked = value === chosen;
+    button.onclick = () => {
+      for (const b of control.children) b.ariaChecked = b === button;
+      choose(value);
+    };
+    return button;
+  }));
+}
+
+segmented(ranges, RANGES, hours, (h) => { hours = h; load(); });
+segmented(smoothing, SMOOTHING, smooth, (m) => { smooth = m; load(); });
 
 let resizing;
 addEventListener("resize", () => {

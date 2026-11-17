@@ -198,11 +198,15 @@ def archive(today: date) -> None:
         live.filter(day >= today).write_csv(LIVE)
 
 
-def usage(hours: float) -> str:
-    """Per-second rates of the counters and the gauges, in about 300 buckets per unit."""
+def usage(hours: float, smooth: int) -> str:
+    """
+    Per-second rates of the counters and the gauges, in about 300 buckets per unit,
+    each averaged with those of the `smooth` minutes before it.
+    """
     seconds = pl.col("ts").diff().dt.total_milliseconds() / 1000
     rates = [
-        pl.when(pl.col(c).diff() >= 0)
+        # a counter that went down was reset, by a restart of its unit
+        pl.when((pl.col(c).diff() >= 0) & (seconds > 0))
         .then(pl.col(c).diff() / seconds)
         .over("unit", order_by="ts")
         .alias(c)
@@ -216,7 +220,7 @@ def usage(hours: float) -> str:
         else []
     )
 
-    return (
+    buckets = (
         pl.concat([*stored, read_live().lazy()])
         .filter(pl.col("ts") >= since)
         .select(
@@ -231,10 +235,16 @@ def usage(hours: float) -> str:
         # by name rather than unit, so a recreated container stays one series
         .group_by_dynamic("ts", every=f"{every}s", group_by="name")
         .agg(pl.all().mean())
-        .with_columns(pl.col("ts").dt.epoch("ms"))
-        .collect()
-        .write_json()
     )
+
+    if smooth:
+        buckets = buckets.with_columns(
+            pl.exclude("ts", "name")
+            .rolling_mean_by("ts", window_size=f"{smooth}m")
+            .over("name")
+        )
+
+    return buckets.with_columns(pl.col("ts").dt.epoch("ms")).collect().write_json()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -242,7 +252,8 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
 
         if url.path == "/api/usage":
-            body = usage(float(parse_qs(url.query)["hours"][0])).encode()
+            query = parse_qs(url.query)
+            body = usage(float(query["hours"][0]), int(query["smooth"][0])).encode()
             kind = "application/json"
         elif page := PAGES.get(url.path):
             body, kind = page.read_bytes(), mimetypes.guess_type(page)[0]
