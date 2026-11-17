@@ -81,6 +81,8 @@
 
       # sudo nixos-rebuild switch --flake ~/.dotfiles
       nixosConfigurations.fridge = nixpkgs.lib.nixosSystem {
+        # lets modules reference files by path from the repo root
+        specialArgs.root = ./.;
         modules = [
           ./hosts/fridge
           home-manager.nixosModules.home-manager

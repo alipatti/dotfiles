@@ -29,6 +29,8 @@ type Target = Literal["typst", "terminal"]
 
 FONT = "NewComputerModern10"  # the 10pt cut of typst's default text font
 
+# also in libraries/web/theme.css, copied by hand. eventually the colours should be
+# defined in one place, but not yet
 PALETTE = [
     "#eb6834",
     "#2a78d6",

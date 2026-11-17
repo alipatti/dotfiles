@@ -1,0 +1,63 @@
+/* shared tailwind theme
+
+     @import "tailwindcss";
+     @import "./theme.css";
+*/
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+  /* surfaces */
+  --color-canvas: #f5f5f7; /* the window */
+  --color-card: #fff; /* panels */
+  --color-control: #fff; /* a raised control, e.g. the chosen segment */
+  --color-fill: #f0f0f0; /* fields and segmented controls */
+  /* text, strongest first */
+  --color-ink: #171717;
+  --color-muted: #737373;
+}
+
+/* static, so the variables are emitted even when no class uses them (e.g. a script reads
+   them for a plot) */
+@theme static {
+  /* discrete colours for plots: alipatti.plot.PALETTE
+     (libraries/python/src/alipatti/plot.py), copied by hand. eventually the colours
+     should be defined in one place, but not yet */
+  --color-palette-1: #eb6834;
+  --color-palette-2: #2a78d6;
+  --color-palette-3: #1baf7a;
+  --color-palette-4: #eda100;
+  --color-palette-5: #e87ba4;
+  --color-palette-6: #008300;
+}
+
+/* shadows, used as shadow-(--shadow-panel) etc. (theme shadows would be inlined into
+   the utilities, out of the dark scheme's reach) */
+:root {
+  color-scheme: light dark;
+  --shadow-panel: 0 0 0 0.5px rgb(0 0 0 / 0.1), 0 2px 8px rgb(0 0 0 / 0.08);
+  --shadow-control: 0 0 0 0.5px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+/* raised surfaces get lighter rather than shadowed, as in macos's dark appearance */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-canvas: #1e1e1e;
+    --color-card: #2c2c2e;
+    --color-control: #5a5a5e;
+    --color-fill: rgb(255 255 255 / 0.08);
+    --color-ink: #e8e8ea;
+    --color-muted: #98989d;
+    --shadow-panel: 0 0 0 0.5px rgb(255 255 255 / 0.12), 0 2px 10px rgb(0 0 0 / 0.35);
+    --shadow-control: 0 0 0 0.5px rgb(255 255 255 / 0.08), 0 1px 2px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* raised card */
+@utility panel {
+  @apply rounded-xl bg-card shadow-(--shadow-panel);
+}
+
+/* selected segment in segmented control */
+@utility segment-on {
+  @apply bg-control text-ink shadow-(--shadow-control);
+}

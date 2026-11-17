@@ -1,0 +1,134 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Fridge Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<body class="bg-canvas p-4 font-sans text-sm text-ink antialiased">
+<header class="sticky top-4 z-10 mb-4 flex flex-wrap justify-between gap-4">
+  <div class="panel flex items-center gap-3 py-1 pr-1 pl-3.5">
+    <strong>fridge</strong>
+    <div id="ranges" class="flex rounded-lg bg-fill p-0.5" role="radiogroup" aria-label="Range"></div>
+  </div>
+  <ul id="legend" class="panel flex flex-wrap items-center gap-x-4 gap-y-1 px-3.5 py-2 text-muted"></ul>
+</header>
+<main id="charts" class="grid grid-cols-[repeat(auto-fill,minmax(min(600px,100%),1fr))] gap-4"></main>
+<script type="module">
+import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+// one colour per unit shown
+const style = getComputedStyle(document.documentElement);
+const PALETTE = [1, 2, 3, 4, 5, 6].map((i) => style.getPropertyValue(`--color-palette-${i}`).trim());
+const RANGES = { "1h": 1, "6h": 6, "24h": 24, "7d": 168, "30d": 720 };
+const bytes = (x) => {
+  const i = Math.max(0, Math.min(4, Math.floor(Math.log10(Math.abs(x)) / 3)));
+  return `${+(x / 1000 ** i).toPrecision(3)} ${["B", "KB", "MB", "GB", "TB"][i]}`;
+};
+const METRICS = {
+  "CPU (cores)": ["CPUUsageNSec", (x) => +(x / 1e9).toPrecision(2)],
+  "Memory": ["MemoryCurrent", bytes],
+  "Disk read (/s)": ["IOReadBytes", bytes],
+  "Disk write (/s)": ["IOWriteBytes", bytes],
+  "Network in (/s)": ["IPIngressBytes", bytes],
+  "Network out (/s)": ["IPEgressBytes", bytes],
+};
+
+let hours = 6;
+let rows = [];
+
+const cards = Object.entries(METRICS).map(([title, [key, format]]) => {
+  const card = document.createElement("section");
+  card.className = "panel p-3.5";
+  card.innerHTML = `<h2 class="mb-2 font-semibold">${title}</h2><div class="[&_[aria-label=tip]]:drop-shadow-[0_1px_4px_rgb(0_0_0/0.25)]"></div>`;
+  charts.append(card);
+  return { title, key, format, plot: card.lastChild };
+});
+
+/** the units shown in every chart: each metric's top unit, then each's second, ... */
+function topUnits() {
+  const rankings = Object.values(METRICS).map(([key]) => {
+    const totals = new Map();
+    for (const d of rows) totals.set(d.name, (totals.get(d.name) ?? 0) + (d[key] ?? 0));
+    return [...totals].sort((a, b) => b[1] - a[1]).map(([name]) => name);
+  });
+  const units = new Set();
+  for (let rank = 0; units.size < PALETTE.length && rankings.some((r) => rank < r.length); rank++) {
+    for (const r of rankings) if (units.size < PALETTE.length && r[rank]) units.add(r[rank]);
+  }
+  return [...units];
+}
+
+function draw() {
+  const top = topUnits();
+  const shown = rows.filter((d) => top.includes(d.name));
+
+  legend.replaceChildren(...top.map((name, i) => {
+    const item = document.createElement("li");
+    item.className = "flex items-center gap-2";
+    const swatch = document.createElement("span");
+    swatch.className = "h-1.5 w-5 rounded-full";
+    swatch.style.background = PALETTE[i];
+    item.append(swatch, name);
+    return item;
+  }));
+
+  for (const { title, key, format, plot } of cards) {
+    // like theme_classic: axis lines, no grid
+    plot.replaceChildren(Plot.plot({
+      width: plot.clientWidth,
+      height: 200,
+      marginLeft: 56,
+      style: { fontFamily: "inherit", fontSize: "11px" },
+      color: { domain: top, range: PALETTE },
+      // the browser's time zone (plot defaults to utc)
+      x: { type: "time", label: null },
+      y: { label: null, zero: true, ticks: 5, tickFormat: format },
+      marks: [
+        Plot.frame({ anchor: "left" }),
+        Plot.frame({ anchor: "bottom" }),
+        Plot.lineY(shown, {
+          // labels for the tooltip
+          x: { value: "ts", label: "Time" },
+          y: { value: key, label: title },
+          stroke: { value: "name", label: "Unit" },
+          strokeWidth: 1.5,
+          // a raised card, like the panels
+          tip: {
+            fill: "var(--color-card)",
+            stroke: "none",
+            format: { x: (t) => t.toLocaleString(), y: format },
+          },
+        }),
+      ],
+    }));
+  }
+}
+
+async function load() {
+  const response = await fetch(`api/usage?hours=${hours}`);
+  rows = (await response.json()).map((d) => ({ ...d, ts: new Date(d.ts) }));
+  draw();
+}
+
+ranges.replaceChildren(...Object.entries(RANGES).map(([label, h]) => {
+  const button = document.createElement("button");
+  button.className = "cursor-pointer rounded-md px-2.5 py-1 text-muted hover:text-ink aria-checked:segment-on";
+  button.textContent = label;
+  button.role = "radio";
+  button.ariaChecked = h === hours;
+  button.onclick = () => {
+    hours = h;
+    for (const b of ranges.children) b.ariaChecked = b === button;
+    load();
+  };
+  return button;
+}));
+
+let resizing;
+addEventListener("resize", () => {
+  clearTimeout(resizing);
+  resizing = setTimeout(draw, 100);
+});
+setInterval(load, 60_000);
+load();
+</script>
