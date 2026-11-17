@@ -244,6 +244,12 @@ def usage(hours: float, smooth: int) -> str:
             .over("name")
         )
 
+    # an empty point before each gap of over an hour (e.g. while the service was down),
+    # so plots break the line there instead of drawing across it
+    gap = pl.col("ts").diff().over("name", order_by="ts") > timedelta(hours=1)
+    breaks = buckets.filter(gap).select("name", pl.col("ts") - timedelta(seconds=every))
+    buckets = pl.concat([buckets, breaks], how="diagonal").sort("name", "ts")
+
     return buckets.with_columns(pl.col("ts").dt.epoch("ms")).collect().write_json()
 
 
