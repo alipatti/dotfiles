@@ -112,12 +112,14 @@ in
         ];
         # uv keeps managed pythons and tools in ~/.local/share/uv and writes
         # temp files there even for `uv run`. pnpm keeps its content-addressable
-        # store in ~/.local/share/pnpm and otherwise falls back to a stray .pnpm-store in the project root
+        # store in ~/.local/share/pnpm and otherwise falls back to a stray .pnpm-store in the project root.
+        # `trash` moves files into ~/.Trash
         filesystem.allowWrite = [
           "~/.cache/"
           "~/.local/share/uv/"
           "~/.local/share/pnpm/"
           "~/Downloads/"
+          "~/.Trash/"
         ];
       };
 
