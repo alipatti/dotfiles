@@ -1,7 +1,9 @@
 /* shared tailwind theme, macos-like, following the system's light or dark appearance
 
+     pnpm add -D "alipatti@github:alipatti/dotfiles#path:/libraries/web"
+
      @import "tailwindcss";
-     @import "./theme.css";
+     @import "alipatti/theme.css";
 
    colours are by role (bg-canvas, bg-card, text-ink, text-muted, border-line, ...).
    utilities: panel (a raised card), popover (a floating menu or tooltip), and segmented

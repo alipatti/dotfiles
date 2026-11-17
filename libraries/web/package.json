@@ -1,0 +1,9 @@
+{
+	"name": "alipatti",
+	"version": "0.1.0",
+	"description": "Shared web styles",
+	"private": true,
+	"exports": {
+		"./theme.css": "./theme.css"
+	}
+}
