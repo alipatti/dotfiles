@@ -9,8 +9,8 @@
   <div class="panel flex items-center gap-3 py-1 pr-1 pl-3.5">
     <strong>fridge</strong>
     <div id="ranges" class="segmented" role="radiogroup" aria-label="Range"></div>
-    <span class="text-muted">smooth</span>
-    <div id="smoothing" class="segmented" role="radiogroup" aria-label="Smoothing"></div>
+    <span class="text-muted">average</span>
+    <div id="averages" class="segmented" role="radiogroup" aria-label="Average over"></div>
   </div>
   <ul id="legend" class="panel flex flex-wrap items-center gap-x-4 gap-y-1 px-3.5 py-2 text-muted"></ul>
 </header>
@@ -22,8 +22,12 @@ import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
 const style = getComputedStyle(document.documentElement);
 const PALETTE = [1, 2, 3, 4, 5, 6].map((i) => style.getPropertyValue(`--color-chart-${i}`).trim());
 const RANGES = { "1h": 1, "6h": 6, "24h": 24, "7d": 168, "30d": 720 };
-// trailing mean, in minutes
-const SMOOTHING = { off: 0, "5m": 5, "30m": 30 };
+// each point is the mean over this many minutes; 1m is every sample
+const AVERAGES = { "1m": 1, "5m": 5, "30m": 30 };
+// averages giving more points per line than this are disabled: it's about one per pixel
+// of a wide chart, and keeps the data quick to send and hover
+const MAX_POINTS = 2100;
+const allowed = (h, m) => (h * 60) / m <= MAX_POINTS;
 const bytes = (x) => {
   const i = Math.max(0, Math.min(4, Math.floor(Math.log10(Math.abs(x)) / 3)));
   return `${+(x / 1000 ** i).toPrecision(3)} ${["B", "KB", "MB", "GB", "TB"][i]}`;
@@ -39,7 +43,9 @@ const METRICS = {
 };
 
 let hours = 6;
-let smooth = 0;
+let every = 1;
+// the units shown, picked by the server, and their points
+let units = [];
 let rows = [];
 
 const cards = Object.entries(METRICS).map(([title, [key, format]]) => {
@@ -56,25 +62,8 @@ const cards = Object.entries(METRICS).map(([title, [key, format]]) => {
   return { key, format, plot, tip };
 });
 
-/** the units shown in every chart: each metric's top unit, then each's second, ... */
-function topUnits() {
-  const rankings = Object.values(METRICS).map(([key]) => {
-    const totals = new Map();
-    for (const d of rows) totals.set(d.name, (totals.get(d.name) ?? 0) + (d[key] ?? 0));
-    return [...totals].filter(([, total]) => total > 0).sort((a, b) => b[1] - a[1]).map(([name]) => name);
-  });
-  const units = new Set();
-  for (let rank = 0; units.size < PALETTE.length && rankings.some((r) => rank < r.length); rank++) {
-    for (const r of rankings) if (units.size < PALETTE.length && r[rank]) units.add(r[rank]);
-  }
-  return [...units];
-}
-
 function draw() {
-  const top = topUnits();
-  const shown = rows.filter((d) => top.includes(d.name));
-
-  legend.replaceChildren(...top.map((name, i) => {
+  legend.replaceChildren(...units.map((name, i) => {
     const item = document.createElement("li");
     item.className = "flex items-center gap-2";
     const swatch = document.createElement("span");
@@ -91,7 +80,7 @@ function draw() {
       height: 200,
       marginLeft: 56,
       style: { fontFamily: "inherit", fontSize: "11px" },
-      color: { domain: top, range: PALETTE },
+      color: { domain: units, range: PALETTE },
       // the browser's time zone (plot defaults to utc)
       x: { type: "time", label: null },
       y: { label: null, zero: true, ticks: 5, tickFormat: format },
@@ -99,23 +88,23 @@ function draw() {
         Plot.frame({ anchor: "left" }),
         Plot.frame({ anchor: "bottom" }),
         // monotone-x passes through each point without overshooting it
-        Plot.lineY(shown, { x: "ts", y: key, stroke: "name", strokeWidth: 1.5, curve: "monotone-x" }),
+        Plot.lineY(rows, { x: "ts", y: key, stroke: "name", strokeWidth: 1.5, curve: "monotone-x" }),
         // the point nearest the pointer, which svg.value holds
-        Plot.dot(shown, Plot.pointerX({ x: "ts", y: key, fill: "name", r: 4, stroke: "var(--color-card)" })),
+        Plot.dot(rows, Plot.pointerX({ x: "ts", y: key, fill: "name", r: 4, stroke: "var(--color-card)" })),
       ],
     });
-    svg.addEventListener("input", () => showTip(tip, svg, svg.value, key, format, top));
+    svg.addEventListener("input", () => showTip(tip, svg, svg.value, key, format));
     plot.replaceChildren(svg);
     tip.classList.add("hidden");
   }
 }
 
-function showTip(tip, svg, d, key, format, top) {
+function showTip(tip, svg, d, key, format) {
   if (!d) return tip.classList.add("hidden");
 
   const swatch = document.createElement("span");
   swatch.className = "h-1.5 w-4 rounded-full";
-  swatch.style.background = PALETTE[top.indexOf(d.name)];
+  swatch.style.background = PALETTE[units.indexOf(d.name)];
   const name = document.createElement("div");
   name.className = "flex items-center gap-2 font-semibold";
   name.append(swatch, d.name);
@@ -136,8 +125,10 @@ function showTip(tip, svg, d, key, format, top) {
 }
 
 async function load() {
-  const response = await fetch(`api/usage?hours=${hours}&smooth=${smooth}`);
-  rows = (await response.json()).map((d) => ({ ...d, ts: new Date(d.ts) }));
+  const response = await fetch(`api/usage?hours=${hours}&every=${every}&top=${PALETTE.length}`);
+  const data = await response.json();
+  units = data.units;
+  rows = data.rows.map((d) => ({ ...d, ts: new Date(d.ts) }));
   draw();
 }
 
@@ -157,8 +148,19 @@ function segmented(control, options, chosen, choose) {
   }));
 }
 
-segmented(ranges, RANGES, hours, (h) => { hours = h; load(); });
-segmented(smoothing, SMOOTHING, smooth, (m) => { smooth = m; load(); });
+/** disable the averages too fine for the range, moving off one if it's chosen */
+function fitAverages() {
+  if (!allowed(hours, every)) every = Object.values(AVERAGES).find((m) => allowed(hours, m));
+
+  for (const button of averages.children) {
+    button.disabled = !allowed(hours, AVERAGES[button.textContent]);
+    button.ariaChecked = AVERAGES[button.textContent] === every;
+  }
+}
+
+segmented(ranges, RANGES, hours, (h) => { hours = h; fitAverages(); load(); });
+segmented(averages, AVERAGES, every, (m) => { every = m; load(); });
+fitAverages();
 
 let resizing;
 addEventListener("resize", () => {

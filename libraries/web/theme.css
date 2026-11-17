@@ -87,7 +87,7 @@
 }
 
 @utility segment {
-  @apply cursor-pointer rounded-md px-2.5 py-1 text-muted hover:text-ink;
+  @apply cursor-pointer rounded-md px-2.5 py-1 text-muted enabled:hover:text-ink disabled:cursor-default disabled:opacity-40;
 
   &[aria-checked="true"] {
     @apply bg-control text-ink shadow-(--shadow-control);

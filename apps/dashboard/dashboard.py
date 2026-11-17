@@ -16,6 +16,7 @@ import time
 from collections import Counter
 from datetime import UTC, date, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from itertools import zip_longest
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -47,6 +48,9 @@ SCHEMA = pl.Schema(
     {"ts": pl.Datetime("ms", "UTC"), "unit": pl.String, "name": pl.String}
     | dict.fromkeys([*COUNTERS, *GAUGES, INACTIVE_FILE, GPU_MEMORY], pl.Int64)
 )
+
+# the metrics the page charts, which also pick the units shown
+CHARTED = [*COUNTERS, "MemoryWorkingSet", GPU_MEMORY]
 
 # held while appending to or reading the live csv
 lock = threading.Lock()
@@ -198,10 +202,10 @@ def archive(today: date) -> None:
         live.filter(day >= today).write_csv(LIVE)
 
 
-def usage(hours: float, smooth: int) -> str:
+def usage(hours: float, every: int, top: int) -> str:
     """
-    Per-second rates of the counters and the gauges, in about 300 buckets per unit,
-    each averaged with those of the `smooth` minutes before it.
+    The charted metrics (counters as per-second rates) averaged over every `every`
+    minutes, for `top` units: each metric's highest, then each's second highest, ...
     """
     seconds = pl.col("ts").diff().dt.total_milliseconds() / 1000
     rates = [
@@ -212,8 +216,8 @@ def usage(hours: float, smooth: int) -> str:
         .alias(c)
         for c in COUNTERS
     ]
+    working_set = pl.col("MemoryCurrent") - pl.col(INACTIVE_FILE)
     since = datetime.now(UTC) - timedelta(hours=hours)
-    every = max(INTERVAL, int(hours * 3600 / 300))
     stored = (
         [pl.scan_parquet(DATA / "*.parquet", schema=SCHEMA, missing_columns="insert")]
         if any(DATA.glob("*.parquet"))
@@ -223,34 +227,30 @@ def usage(hours: float, smooth: int) -> str:
     buckets = (
         pl.concat([*stored, read_live().lazy()])
         .filter(pl.col("ts") >= since)
-        .select(
-            "ts",
-            "name",
-            *rates,
-            *GAUGES,
-            GPU_MEMORY,
-            (pl.col("MemoryCurrent") - pl.col(INACTIVE_FILE)).alias("MemoryWorkingSet"),
-        )
+        .select("ts", "name", *rates, working_set.alias("MemoryWorkingSet"), GPU_MEMORY)
         .sort("ts")
         # by name rather than unit, so a recreated container stays one series
-        .group_by_dynamic("ts", every=f"{every}s", group_by="name")
+        .group_by_dynamic("ts", every=f"{every}m", group_by="name")
         .agg(pl.all().mean())
+        .collect()
     )
 
-    if smooth:
-        buckets = buckets.with_columns(
-            pl.exclude("ts", "name")
-            .rolling_mean_by("ts", window_size=f"{smooth}m")
-            .over("name")
-        )
+    totals = buckets.group_by("name").agg(pl.col(CHARTED).sum())
+    rankings = [
+        totals.filter(pl.col(m) > 0).sort(m, descending=True)["name"] for m in CHARTED
+    ]
+    ranked = (name for names in zip_longest(*rankings) for name in names if name)
+    units = list(dict.fromkeys(ranked))[:top]
+    shown = buckets.filter(pl.col("name").is_in(units))
 
     # an empty point before each gap of over an hour (e.g. while the service was down),
     # so plots break the line there instead of drawing across it
     gap = pl.col("ts").diff().over("name", order_by="ts") > timedelta(hours=1)
-    breaks = buckets.filter(gap).select("name", pl.col("ts") - timedelta(seconds=every))
-    buckets = pl.concat([buckets, breaks], how="diagonal").sort("name", "ts")
+    breaks = shown.filter(gap).select("name", pl.col("ts") - timedelta(minutes=every))
+    shown = pl.concat([shown, breaks], how="diagonal").sort("name", "ts")
 
-    return buckets.with_columns(pl.col("ts").dt.epoch("ms")).collect().write_json()
+    rows = shown.with_columns(pl.col("ts").dt.epoch("ms")).to_dicts()
+    return json.dumps({"units": units, "rows": rows})
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -258,8 +258,8 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
 
         if url.path == "/api/usage":
-            query = parse_qs(url.query)
-            body = usage(float(query["hours"][0]), int(query["smooth"][0])).encode()
+            query = {k: int(v[0]) for k, v in parse_qs(url.query).items()}
+            body = usage(query["hours"], query["every"], query["top"]).encode()
             kind = "application/json"
         elif page := PAGES.get(url.path):
             body, kind = page.read_bytes(), mimetypes.guess_type(page)[0]
