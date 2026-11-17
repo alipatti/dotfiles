@@ -8,6 +8,7 @@ import http.client
 import json
 import mimetypes
 import os
+import pwd
 import socket
 import subprocess
 import threading
@@ -62,31 +63,60 @@ def container_names() -> dict[str, str]:
     return {f"docker-{c['Id']}.scope": c["Names"][0][1:] for c in containers}
 
 
-def sample(ts: datetime) -> pl.DataFrame:
+def show(*units: str) -> list[dict[str, str]]:
+    """The counters systemd keeps for `units`, which can be patterns."""
     shown = subprocess.run(
-        ["systemctl", "show", "--state=running", "*.service", "docker-*.scope"]
-        + ["--property", ",".join(["Id", *COUNTERS, *GAUGES])],
+        [
+            "systemctl",
+            "show",
+            *units,
+            "--property",
+            ",".join(["Id", *COUNTERS, *GAUGES]),
+        ],
         capture_output=True,
         text=True,
         check=True,
     ).stdout
-    names = container_names()
+    return [
+        dict(line.split("=", 1) for line in block.splitlines())
+        for block in shown.split("\n\n")
+        if block.strip()
+    ]
 
-    def row(block: str) -> dict:
-        props = dict(line.split("=", 1) for line in block.splitlines())
+
+def display_name(unit: str, containers: dict[str, str]) -> str:
+    if unit.startswith("user-"):
+        uid = int(unit.removeprefix("user-").removesuffix(".slice"))
+
+        try:
+            return pwd.getpwuid(uid).pw_name
+        except KeyError:
+            return unit
+
+    return containers.get(unit, unit.removesuffix(".service"))
+
+
+def sample(ts: datetime) -> pl.DataFrame:
+    # slices aren't "running", so they're asked for separately
+    units = show("--state=running", "*.service", "docker-*.scope") + show(
+        "user-*.slice"
+    )
+    containers = container_names()
+
+    def row(props: dict[str, str]) -> dict:
         unit = props.pop("Id")
         # systemd prints "[not set]" and the like for missing values
         values = {
             k: int(v) if v.isdigit() and int(v) < 2**63 else None
             for k, v in props.items()
         }
-        return {
-            "ts": ts,
-            "unit": unit,
-            "name": names.get(unit, unit.removesuffix(".service")),
-        } | values
+        return {"ts": ts, "unit": unit, "name": display_name(unit, containers)} | values
 
-    return pl.DataFrame([row(b) for b in shown.strip().split("\n\n")], schema=SCHEMA)
+    # a user's slice holds their user@ service and login sessions, so skip the former
+    return pl.DataFrame(
+        [row(u) for u in units if not u["Id"].startswith("user@")],
+        schema=SCHEMA,
+    )
 
 
 def read_live() -> pl.DataFrame:
