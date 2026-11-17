@@ -28,7 +28,7 @@ PAGES = {
     "/": Path(__file__).with_name("index.html"),
     "/style.css": Path(__file__).with_name("style.css"),
 }
-INTERVAL = 15
+INTERVAL = 60
 
 COUNTERS = [
     "CPUUsageNSec",

@@ -98,7 +98,8 @@ function draw() {
       marks: [
         Plot.frame({ anchor: "left" }),
         Plot.frame({ anchor: "bottom" }),
-        Plot.lineY(shown, { x: "ts", y: key, stroke: "name", strokeWidth: 1.5 }),
+        // monotone-x passes through each point without overshooting it
+        Plot.lineY(shown, { x: "ts", y: key, stroke: "name", strokeWidth: 1.5, curve: "monotone-x" }),
         // the point nearest the pointer, which svg.value holds
         Plot.dot(shown, Plot.pointerX({ x: "ts", y: key, fill: "name", r: 4, stroke: "var(--color-card)" })),
       ],
